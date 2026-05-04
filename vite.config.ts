@@ -11,7 +11,7 @@ export default defineConfig({
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
         name: 'Togo Connect',
-        short_name: 'TogoConnect',
+        short_name: 'EDOTEAM',
         description: 'Plateforme de mise en relation entre clients et prestataires au Togo',
         theme_color: '#0f172a',
         background_color: '#f8fafc',
