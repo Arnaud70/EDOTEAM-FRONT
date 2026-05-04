@@ -35,5 +35,18 @@
     "typescript": "^5.2.2",
     "vite": "^5.3.1",
     "vite-plugin-pwa": "^1.2.0"
-  }
+  },
+  "description": "��#\u0000 \u0000E\u0000D\u0000O\u0000T\u0000E\u0000A\u0000M\u0000-\u0000F\u0000R\u0000O\u0000N\u0000T\u0000\r\u0000 \u0000",
+  "main": "postcss.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Arnaud70/EDOTEAM-FRONT.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Arnaud70/EDOTEAM-FRONT/issues"
+  },
+  "homepage": "https://github.com/Arnaud70/EDOTEAM-FRONT#readme"
 }
