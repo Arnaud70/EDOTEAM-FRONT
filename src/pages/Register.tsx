@@ -15,8 +15,11 @@ const Register = () => {
   const [nom, setNom] = useState('');
   const [prenom, setPrenom] = useState('');
   const [email, setEmail] = useState('');
+  const [telephone, setTelephone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [region, setRegion] = useState('');
+  const [specialite, setSpecialite] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,8 +36,11 @@ const Register = () => {
         email,
         nom,
         prenom,
+        telephone,
         motDePasse: password,
         role,
+        region: role === 'PRESTATAIRE' ? region : undefined,
+        specialite: role === 'PRESTATAIRE' ? specialite : undefined,
       });
       navigate('/');
     } catch (err: any) {
@@ -120,7 +126,13 @@ const Register = () => {
                 <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Mobile Elite</label>
                 <div className="relative group">
                   <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-emerald transition-colors" size={20} />
-                  <input type="tel" className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300" placeholder="+228 90 00 00 00" />
+                  <input 
+                    type="tel" 
+                    value={telephone}
+                    onChange={(e) => setTelephone(e.target.value)}
+                    className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300" 
+                    placeholder="+228 90 00 00 00" 
+                  />
                 </div>
               </div>
             </div>
@@ -180,20 +192,23 @@ const Register = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="relative group">
                     <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-gold transition-colors" size={18} />
-                    <select className="w-full pl-14 pr-5 py-4 bg-white border-none rounded-2xl focus:ring-2 focus:ring-elite-gold appearance-none font-bold text-slate-700 text-sm outline-none">
-                      <option>Région d'Expertise</option>
-                      <option>Lomé & Environs</option>
-                      <option>Kara - Maritime</option>
-                    </select>
+                    <input 
+                      type="text"
+                      value={region}
+                      onChange={(e) => setRegion(e.target.value)}
+                      className="w-full pl-14 pr-5 py-4 bg-white border-none rounded-2xl focus:ring-2 focus:ring-elite-gold font-bold text-slate-700 text-sm outline-none placeholder:text-slate-300" 
+                      placeholder="Région d'Expertise"
+                    />
                   </div>
                   <div className="relative group">
                     <Briefcase className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-gold transition-colors" size={18} />
-                    <select className="w-full pl-14 pr-5 py-4 bg-white border-none rounded-2xl focus:ring-2 focus:ring-elite-gold appearance-none font-bold text-slate-700 text-sm outline-none">
-                      <option>Domaine de Spécialité</option>
-                      <option>Expert Électricien</option>
-                      <option>Plomberie de Luxe</option>
-                      <option>Design d'Intérieur</option>
-                    </select>
+                    <input 
+                      type="text"
+                      value={specialite}
+                      onChange={(e) => setSpecialite(e.target.value)}
+                      className="w-full pl-14 pr-5 py-4 bg-white border-none rounded-2xl focus:ring-2 focus:ring-elite-gold font-bold text-slate-700 text-sm outline-none placeholder:text-slate-300" 
+                      placeholder="Domaine de Spécialité"
+                    />
                   </div>
                 </div>
               </div>
