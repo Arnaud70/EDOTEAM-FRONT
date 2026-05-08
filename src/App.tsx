@@ -75,7 +75,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="mt-20 pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6 text-slate-400 text-xs font-bold uppercase tracking-widest">
-          <p>© 2024 EDOTEAM. Signature de Qualité.</p>
+          <p>© 2026 EDOTEAM. Signature de Qualité.</p>
           <div className="flex gap-8">
             <a href="#" className="hover:text-elite-emerald transition-colors">Confidentialité</a>
             <a href="#" className="hover:text-elite-emerald transition-colors">Conditions</a>

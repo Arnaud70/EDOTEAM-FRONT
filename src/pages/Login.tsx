@@ -20,7 +20,7 @@ const Login = () => {
 
     try {
       await login({ email, motDePasse: password });
-      navigate('/dashboard');
+      navigate('/');
     } catch (err: any) {
       console.error('Login error:', err);
       // Extraire le message d'erreur de la réponse NestJS standard
@@ -29,6 +29,12 @@ const Login = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    // Rediriger vers l'endpoint Google du backend
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    window.location.href = `${backendUrl}/auth/google`;
   };
 
   return (
@@ -148,7 +154,11 @@ const Login = () => {
             </div>
 
             <div className="mt-8">
-              <button className="w-full flex justify-center items-center py-4 px-6 border-2 border-slate-50 rounded-2xl bg-white hover:bg-slate-50 transition-all font-black text-slate-700 text-xs uppercase tracking-widest shadow-sm">
+              <button 
+                type="button"
+                onClick={handleGoogleLogin}
+                className="w-full flex justify-center items-center py-4 px-6 border-2 border-slate-50 rounded-2xl bg-white hover:bg-slate-50 transition-all font-black text-slate-700 text-xs uppercase tracking-widest shadow-sm"
+              >
                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5 mr-4" alt="Google" />
                 Via Google Elite
               </button>

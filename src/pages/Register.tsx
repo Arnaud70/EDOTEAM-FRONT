@@ -36,7 +36,7 @@ const Register = () => {
         motDePasse: password,
         role,
       });
-      navigate('/dashboard');
+      navigate('/');
     } catch (err: any) {
       console.error('Register error:', err);
       const errorMsg = err.response?.data?.message || "Une erreur est survenue lors de l'inscription.";

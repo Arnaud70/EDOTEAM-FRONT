@@ -20,13 +20,14 @@ import {
   Menu,
   X,
 } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from './Logo';
 import { useAuth } from '../context/AuthContext';
 import { useSidebar } from '../context/SidebarContext';
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { isCollapsed, toggle, isMobileOpen, closeMobile } = useSidebar();
   const navRef = useRef<HTMLElement>(null);
@@ -47,6 +48,10 @@ const Sidebar = () => {
       activeRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
   }, [location.pathname]);
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   const getMenuItems = () => {
     const role = user.role?.toUpperCase() || 'CLIENT';
@@ -179,7 +184,7 @@ const Sidebar = () => {
           </div>
         )}
         <button
-          onClick={logout}
+          onClick={handleLogout}
           title={!mobile && isCollapsed ? 'Déconnexion' : undefined}
           className={`flex items-center gap-4 px-3 py-3 text-white/50 hover:text-red-400 font-semibold transition-all rounded-2xl hover:bg-white/5 w-full ${
             !mobile && isCollapsed ? 'justify-center' : ''

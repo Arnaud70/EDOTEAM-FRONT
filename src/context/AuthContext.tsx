@@ -53,7 +53,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   useEffect(() => {
-    loadUser();
+    const handleAuthCallback = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+
+      if (token) {
+        localStorage.setItem('access_token', token);
+        // Nettoyer l'URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        try {
+          const userData = await authService.getProfile();
+          setUser(userData);
+        } catch (error) {
+          console.error("Erreur lors de la récupération du profil après Google Login", error);
+          authService.logout();
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        loadUser();
+      }
+    };
+
+    handleAuthCallback();
   }, []);
 
   const login = async (credentials: any) => {

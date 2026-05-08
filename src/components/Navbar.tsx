@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Menu, X, Globe, Search, ArrowRight, MessageSquare } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Logo from './Logo';
 import { useAuth } from '../context/AuthContext';
 import NotificationDropdown from './NotificationDropdown';
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,6 +18,12 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleLogout = () => {
+    logout();
+    setIsMenuOpen(false);
+    navigate('/');
+  };
 
   return (
     <nav 
@@ -54,8 +61,14 @@ const Navbar = () => {
                   </Link>
                   <NotificationDropdown />
                 </div>
+                <Link 
+                  to="/dashboard"
+                  className="px-6 py-3 bg-elite-emerald/10 text-elite-emerald font-bold rounded-xl hover:bg-elite-emerald hover:text-white transition-all"
+                >
+                  Dashboard
+                </Link>
                 <button 
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="px-8 py-3 bg-slate-900 text-white font-bold rounded-xl shadow-premium hover:bg-red-600 transition-all"
                 >
                   Déconnexion
@@ -100,6 +113,11 @@ const Navbar = () => {
               <Link to="/messages" onClick={() => setIsMenuOpen(false)} className="block text-3xl font-black text-elite-emerald flex items-center gap-4">
                 <MessageSquare size={32} />
                 Messages
+              </Link>
+            )}
+            {isAuthenticated && (
+              <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="block text-3xl font-black text-slate-900">
+                Dashboard
               </Link>
             )}
             

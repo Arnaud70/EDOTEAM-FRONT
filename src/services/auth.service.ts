@@ -48,6 +48,13 @@ class AuthService {
     return result;
   }
 
+  async getProfile(): Promise<User> {
+    const response = await api.get<any>('/auth/profile');
+    const user = response.data.data;
+    localStorage.setItem('user', JSON.stringify(user));
+    return user;
+  }
+
   async logout() {
     try {
       await api.post('/auth/logout');
