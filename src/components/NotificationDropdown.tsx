@@ -26,10 +26,16 @@ const NotificationDropdown = () => {
         api.get('/notifications'),
         api.get('/notifications/unread-count')
       ]);
-      setNotifications(notifsRes.data.data || notifsRes.data);
-      setUnreadCount(countRes.data.data || countRes.data);
+      
+      const notifsData = notifsRes.data?.data ?? notifsRes.data ?? [];
+      const countData = countRes.data?.data ?? countRes.data ?? 0;
+      
+      setNotifications(Array.isArray(notifsData) ? notifsData : []);
+      setUnreadCount(typeof countData === 'number' ? countData : 0);
     } catch (error) {
       console.error('Error fetching notifications:', error);
+      setNotifications([]);
+      setUnreadCount(0);
     }
   };
 
@@ -105,7 +111,7 @@ const NotificationDropdown = () => {
               </div>
 
               <div className="max-h-[400px] overflow-y-auto">
-                {notifications.length === 0 ? (
+                {(!Array.isArray(notifications) || notifications.length === 0) ? (
                   <div className="p-12 text-center">
                     <div className="w-16 h-16 bg-slate-50 rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 text-slate-200">
                       <Bell size={24} />
