@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { User, Mail, Lock, Phone, MapPin, Briefcase, ArrowRight, CheckCircle2, Shield, Zap, Loader2, ShieldCheck } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User, Mail, Lock, Phone, MapPin, Briefcase, ArrowRight, CheckCircle2, Shield, Zap, Loader2, ShieldCheck, ListPlus, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -20,6 +21,21 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [region, setRegion] = useState('');
   const [specialite, setSpecialite] = useState('');
+  const [services, setServices] = useState<any[]>([]);
+  const [isOtherSpecialite, setIsOtherSpecialite] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await api.get('/services');
+        setServices(response.data.data || response.data);
+      } catch (err) {
+        console.error('Error fetching services:', err);
+      }
+    };
+    fetchServices();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,14 +55,15 @@ const Register = () => {
         telephone,
         motDePasse: password,
         role,
-        region: role === 'PRESTATAIRE' ? region : undefined,
+        region,
         specialite: role === 'PRESTATAIRE' ? specialite : undefined,
       });
       navigate('/');
     } catch (err: any) {
       console.error('Register error:', err);
-      const errorMsg = err.response?.data?.message || "Une erreur est survenue lors de l'inscription.";
-      setError(Array.isArray(errorMsg) ? errorMsg[0] : errorMsg);
+      // Le backend utilise AllExceptionsFilter ou class-validator standard
+      const backendError = err.response?.data?.error?.message || err.response?.data?.message || "Une erreur est survenue lors de l'inscription.";
+      setError(Array.isArray(backendError) ? backendError[0] : backendError);
     } finally {
       setIsLoading(false);
     }
@@ -137,18 +154,34 @@ const Register = () => {
               </div>
             </div>
 
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Identifiant Email</label>
-              <div className="relative group">
-                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-emerald transition-colors" size={20} />
-                <input 
-                  type="email" 
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300" 
-                  placeholder="jean@excellence.tg" 
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Identifiant Email</label>
+                <div className="relative group">
+                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-emerald transition-colors" size={20} />
+                  <input 
+                    type="email" 
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300" 
+                    placeholder="jean@excellence.tg" 
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Localisation (Région)</label>
+                <div className="relative group">
+                  <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-emerald transition-colors" size={20} />
+                  <input 
+                    type="text" 
+                    required
+                    value={region}
+                    onChange={(e) => setRegion(e.target.value)}
+                    className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300" 
+                    placeholder="Lomé, Maritime..." 
+                  />
+                </div>
               </div>
             </div>
 
@@ -189,27 +222,77 @@ const Register = () => {
                   <Zap size={18} className="text-elite-gold" />
                   Profil d'Expertise
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="relative group">
-                    <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-gold transition-colors" size={18} />
-                    <input 
-                      type="text"
-                      value={region}
-                      onChange={(e) => setRegion(e.target.value)}
-                      className="w-full pl-14 pr-5 py-4 bg-white border-none rounded-2xl focus:ring-2 focus:ring-elite-gold font-bold text-slate-700 text-sm outline-none placeholder:text-slate-300" 
-                      placeholder="Région d'Expertise"
-                    />
+                <div className="space-y-4">
+                  <div className="relative z-20">
+                    <Briefcase className={`absolute left-5 top-1/2 -translate-y-1/2 transition-colors z-40 pointer-events-none ${isDropdownOpen ? 'text-elite-gold' : 'text-slate-400'}`} size={18} />
+                    
+                    {/* Overlay to close dropdown */}
+                    {isDropdownOpen && (
+                      <div 
+                        className="fixed inset-0 z-30" 
+                        onClick={() => setIsDropdownOpen(false)}
+                      />
+                    )}
+
+                    <div 
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className={`w-full pl-14 pr-5 py-4 bg-white border-2 rounded-2xl cursor-pointer font-bold text-sm outline-none transition-all flex justify-between items-center relative z-40 ${isDropdownOpen ? 'border-elite-gold shadow-lg shadow-elite-gold/10' : 'border-transparent text-slate-700 hover:shadow-md'}`}
+                    >
+                      <span className={specialite || isOtherSpecialite ? "text-slate-900" : "text-slate-400 font-normal truncate"}>
+                        {isOtherSpecialite ? "Autre (nouveau domaine)" : specialite || "Sélectionnez un domaine d'expertise"}
+                      </span>
+                      <ChevronDown size={20} className={`text-slate-400 transition-transform duration-300 flex-shrink-0 ${isDropdownOpen ? 'rotate-180 text-elite-gold' : ''}`} />
+                    </div>
+
+                    {/* Dropdown Menu */}
+                    {isDropdownOpen && (
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 origin-top">
+                        <div className="max-h-64 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-slate-200">
+                          {services.map(s => (
+                            <div 
+                              key={s.id} 
+                              onClick={() => {
+                                setIsOtherSpecialite(false);
+                                setSpecialite(s.nom);
+                                setIsDropdownOpen(false);
+                              }}
+                              className={`px-4 py-3 rounded-xl cursor-pointer font-medium text-sm transition-all flex items-center ${!isOtherSpecialite && specialite === s.nom ? 'bg-elite-gold/10 text-elite-gold font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                            >
+                              {s.nom}
+                            </div>
+                          ))}
+                          <div className="h-px bg-slate-100 my-2 mx-2"></div>
+                          <div 
+                            onClick={() => {
+                              setIsOtherSpecialite(true);
+                              setSpecialite('');
+                              setIsDropdownOpen(false);
+                            }}
+                            className={`px-4 py-3 rounded-xl cursor-pointer font-medium text-sm transition-all flex items-center gap-3 ${isOtherSpecialite ? 'bg-elite-gold/10 text-elite-gold font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                          >
+                            <div className={`p-1.5 rounded-lg ${isOtherSpecialite ? 'bg-elite-gold/20' : 'bg-slate-100'}`}>
+                              <ListPlus size={16} className={isOtherSpecialite ? 'text-elite-gold' : 'text-slate-400'} />
+                            </div>
+                            Autre (préciser un nouveau domaine)
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="relative group">
-                    <Briefcase className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-gold transition-colors" size={18} />
-                    <input 
-                      type="text"
-                      value={specialite}
-                      onChange={(e) => setSpecialite(e.target.value)}
-                      className="w-full pl-14 pr-5 py-4 bg-white border-none rounded-2xl focus:ring-2 focus:ring-elite-gold font-bold text-slate-700 text-sm outline-none placeholder:text-slate-300" 
-                      placeholder="Domaine de Spécialité"
-                    />
-                  </div>
+                  
+                  {isOtherSpecialite && (
+                    <div className="relative group animate-in fade-in slide-in-from-top-2">
+                      <ListPlus className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-gold transition-colors" size={18} />
+                      <input 
+                        type="text"
+                        required={role === 'PRESTATAIRE' && isOtherSpecialite}
+                        value={specialite}
+                        onChange={(e) => setSpecialite(e.target.value)}
+                        className="w-full pl-14 pr-5 py-4 bg-white border-none rounded-2xl focus:ring-2 focus:ring-elite-gold font-bold text-slate-700 text-sm outline-none placeholder:text-slate-300" 
+                        placeholder="Veuillez préciser votre domaine..."
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             )}

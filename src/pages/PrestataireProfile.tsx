@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapPin, Star, ShieldCheck, Clock, MessageSquare, Calendar, Phone, Share2, Heart, CheckCircle2, Award, Zap, Shield, Loader2, Flag } from 'lucide-react';
+import { MapPin, Star, ShieldCheck, Clock, MessageSquare, Calendar, Phone, Share2, Heart, CheckCircle2, Award, Zap, Shield, Loader2, Flag, X } from 'lucide-react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../services/api';
 import BookingModal from '../components/BookingModal';
@@ -52,6 +52,7 @@ const PrestataireProfile = () => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
   const [isAvisModalOpen, setIsAvisModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProvider = async () => {
@@ -210,6 +211,32 @@ const PrestataireProfile = () => {
           </div>
         </div>
 
+        {/* Image Lightbox Overlay */}
+        {selectedImage && (
+          <div 
+            className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-300"
+            onClick={() => setSelectedImage(null)}
+          >
+            <button 
+              className="absolute top-8 right-8 p-4 bg-white/10 text-white rounded-2xl hover:bg-white hover:text-slate-900 transition-all shadow-2xl z-[110]"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedImage(null);
+              }}
+            >
+              <X size={32} />
+            </button>
+            <div className="relative max-w-5xl w-full h-full flex items-center justify-center">
+              <img 
+                src={selectedImage} 
+                alt="Agrandissement" 
+                className="max-w-full max-h-full object-contain rounded-3xl shadow-2xl animate-in zoom-in-95 duration-500"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </div>
+        )}
+
         <BookingModal 
           isOpen={isBookingModalOpen} 
           onClose={() => setIsBookingModalOpen(false)} 
@@ -261,9 +288,18 @@ const PrestataireProfile = () => {
               <h2 className="text-3xl font-black text-slate-900 tracking-tight px-4">Portfolio</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {profileImages.map((img, i) => (
-                  <div key={i} className="h-80 rounded-[3rem] overflow-hidden shadow-premium group relative border-4 border-white">
+                  <div 
+                    key={i} 
+                    className="h-80 rounded-[3rem] overflow-hidden shadow-premium group relative border-4 border-white cursor-pointer"
+                    onClick={() => setSelectedImage(img)}
+                  >
                     <img src={img} alt="réalisation" loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent group-hover:from-black/40 transition-all" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="px-6 py-3 bg-white/20 backdrop-blur-md text-white font-black text-[10px] uppercase tracking-widest rounded-full border border-white/30">
+                        Agrandir l'image
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>

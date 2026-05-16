@@ -23,9 +23,10 @@ const Login = () => {
       navigate('/');
     } catch (err: any) {
       console.error('Login error:', err);
-      // Extraire le message d'erreur de la réponse NestJS standard
-      const errorMsg = err.response?.data?.message || 'Identifiants invalides ou erreur serveur.';
-      setError(Array.isArray(errorMsg) ? errorMsg[0] : errorMsg);
+      // Extraire le message d'erreur de la réponse NestJS standard (avec ou sans AllExceptionsFilter)
+      const backendError = err.response?.data?.error?.message || err.response?.data?.message;
+      const errorMsg = Array.isArray(backendError) ? backendError[0] : (backendError || 'Identifiants invalides ou erreur serveur.');
+      setError(errorMsg);
     } finally {
       setIsLoading(false);
     }

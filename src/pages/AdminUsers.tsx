@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
-import { Search, Filter, MoreVertical, CheckCircle2, XCircle, Clock, Mail, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { Search, Filter, MoreVertical, CheckCircle2, XCircle, Clock, Mail, ShieldAlert, ShieldCheck, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import api from '../services/api';
+import { TableRowSkeleton } from '../components/Skeleton';
 
 interface UserData {
   id: string;
@@ -57,6 +58,16 @@ const AdminUsers = () => {
       fetchUsers();
     } catch (error) {
       console.error('Error restoring user:', error);
+    }
+  };
+
+  const handleHardDelete = async (userId: string) => {
+    if (!window.confirm('ATTENTION: Voulez-vous vraiment SUPPRIMER DÉFINITIVEMENT cet utilisateur et TOUTES ses données ? Cette action est irréversible.')) return;
+    try {
+      await api.delete(`/admin/users/${userId}`);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
     }
   };
 
@@ -121,14 +132,13 @@ const AdminUsers = () => {
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {isLoading ? (
-                  <tr>
-                    <td colSpan={6} className="px-8 py-20 text-center">
-                      <div className="flex flex-col items-center gap-4">
-                        <div className="w-10 h-10 border-4 border-elite-gold/20 border-t-elite-gold rounded-full animate-spin" />
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Chargement des membres...</p>
-                      </div>
-                    </td>
-                  </tr>
+                  [1, 2, 3, 4, 5].map(i => (
+                    <tr key={i}>
+                      <td colSpan={6}>
+                        <TableRowSkeleton />
+                      </td>
+                    </tr>
+                  ))
                 ) : users.filter(u => 
                   u.nom.toLowerCase().includes(search.toLowerCase()) || 
                   u.email.toLowerCase().includes(search.toLowerCase())
@@ -192,6 +202,13 @@ const AdminUsers = () => {
                             <ShieldAlert size={18} />
                           </button>
                         )}
+                        <button 
+                          onClick={() => handleHardDelete(item.id)}
+                          className="p-2 text-red-600 hover:text-red-800 transition-colors rounded-lg hover:bg-red-50"
+                          title="Supprimer définitivement"
+                        >
+                          <Trash2 size={18} />
+                        </button>
                         <button className="p-2 text-slate-300 hover:text-slate-600 transition-colors rounded-lg hover:bg-slate-100">
                           <MoreVertical size={18} />
                         </button>

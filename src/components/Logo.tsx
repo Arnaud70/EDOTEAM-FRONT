@@ -17,7 +17,7 @@ const Logo: React.FC<LogoProps> = ({ className = '', variant = 'dark' }) => {
       <img 
         src="/assets/images/logo-elite.png" 
         alt="EDOTEAM Logo" 
-        className="h-12 w-auto object-contain"
+        className="h-16 md:h-20 w-auto object-contain"
       />
     </div>
   );

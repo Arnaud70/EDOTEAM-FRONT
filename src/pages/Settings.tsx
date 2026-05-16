@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '../components/Sidebar';
-import { User, Mail, Phone, MapPin, Camera, Save, Globe, Bell, Briefcase, FileText, Loader2, CheckCircle2, Trash2, Plus, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Camera, Save, Globe, Bell, Briefcase, FileText, Loader2, CheckCircle2, Trash2, Plus, Image as ImageIcon, AlertCircle, X, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -24,6 +24,7 @@ const Settings = () => {
     bio: '',
     photoUrl: '',
   });
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const fetchProfile = async () => {
     try {
@@ -209,6 +210,42 @@ const Settings = () => {
           </AnimatePresence>
         </header>
 
+        {/* Image Lightbox Overlay */}
+        <AnimatePresence>
+          {selectedImage && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-12"
+              onClick={() => setSelectedImage(null)}
+            >
+              <button 
+                className="absolute top-8 right-8 p-4 bg-white/10 text-white rounded-2xl hover:bg-white hover:text-slate-900 transition-all shadow-2xl z-[110]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedImage(null);
+                }}
+              >
+                <X size={32} />
+              </button>
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative max-w-5xl w-full h-full flex items-center justify-center"
+              >
+                <img 
+                  src={selectedImage} 
+                  alt="Agrandissement" 
+                  className="max-w-full max-h-full object-contain rounded-3xl shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -339,12 +376,25 @@ const Settings = () => {
 
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                         {user.media?.filter(m => m.type === 'WORK').map((media) => (
-                            <div key={media.id} className="relative group aspect-square rounded-[2rem] overflow-hidden border-4 border-slate-50 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
+                            <div 
+                              key={media.id} 
+                              className="relative group aspect-square rounded-[2rem] overflow-hidden border-4 border-slate-50 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+                              onClick={() => setSelectedImage(media.url)}
+                            >
                                 <img src={media.url} alt="Portfolio" className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <button onClick={() => handleDeleteMedia(media.id)} className="p-3 bg-red-500 text-white rounded-xl shadow-lg transform hover:scale-110 active:scale-95 transition-all">
+                                <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                                    <button 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteMedia(media.id);
+                                      }} 
+                                      className="p-3 bg-red-500 text-white rounded-xl shadow-lg transform hover:scale-110 active:scale-95 transition-all"
+                                    >
                                         <Trash2 size={18} />
                                     </button>
+                                    <div className="p-3 bg-white text-slate-900 rounded-xl shadow-lg transform hover:scale-110 active:scale-95 transition-all">
+                                        <Zap size={18} />
+                                    </div>
                                 </div>
                             </div>
                         ))}

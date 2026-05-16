@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../components/Sidebar';
+import Sidebar, { MobileMenuButton } from '../components/Sidebar';
 import { Search, Filter, Calendar, MapPin, Clock, MessageSquare, ChevronRight, MoreVertical, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
@@ -47,11 +47,10 @@ const Bookings = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            <h1 className="text-3xl lg:text-4xl font-black text-slate-900 mb-1">
+              <h1 className="text-3xl lg:text-4xl font-black text-slate-900 mb-1">
               {user.role === 'PRESTATAIRE' ? 'Mes Missions' : 'Mes Réservations'}
             </h1>
-            <p className="text-slate-500 font-medium">Gérez vos rendez-vous et le suivi des interventions</p>
-          </motion.div>
+            </motion.div>
           
           <div className="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
             <button className="px-6 py-3 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-elite-emerald transition-all shadow-lg shadow-slate-900/10 active:scale-95">Tout</button>

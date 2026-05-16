@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import FeaturedCategories from './components/FeaturedCategories';
@@ -12,6 +13,10 @@ import { SidebarProvider } from './context/SidebarContext';
 import { MobileMenuButton } from './components/Sidebar';
 import ProtectedRoute from './components/ProtectedRoute';
 import Logo from './components/Logo';
+import { MessageSquare } from 'lucide-react';
+import NotificationDropdown from './components/NotificationDropdown';
+import LoadingScreen from './components/LoadingScreen';
+import { useAuth } from './context/AuthContext';
 
 // Dashboard Pages
 import Dashboard from './pages/Dashboard';
@@ -27,10 +32,11 @@ import Settings from './pages/Settings';
 import Favorites from './pages/Favorites';
 import AdminLogs from './pages/AdminLogs';
 import ProviderAvailability from './pages/ProviderAvailability';
+import Reports from './pages/Reports';
 
 const DASHBOARD_PATHS = [
   '/dashboard', '/messages', '/admin', '/provider',
-  '/bookings', '/wallet', '/security', '/favorites', '/settings'
+  '/bookings', '/wallet', '/security', '/favorites', '/settings', '/reports'
 ];
 
 const Home = () => (
@@ -86,13 +92,20 @@ const Footer = () => {
   );
 };
 
-// Bouton hamburger flottant en bas à gauche — visible uniquement sur mobile dans les pages dashboard
-const FloatingMenuButton = () => {
+// Global Top Mobile Header for Dashboard
+const MobileDashboardHeader = () => {
   const location = useLocation();
   if (!DASHBOARD_PATHS.some(p => location.pathname.startsWith(p))) return null;
   return (
-    <div className="fixed bottom-6 left-6 z-40 lg:hidden">
+    <div className="lg:hidden fixed top-0 left-0 right-0 h-[72px] bg-white/90 backdrop-blur-md border-b border-slate-100 z-50 flex items-center justify-between px-4 shadow-sm">
       <MobileMenuButton />
+      <div className="flex items-center gap-3">
+        <NotificationDropdown />
+        <Link to="/messages" className="relative p-2 text-slate-400 hover:text-elite-emerald transition-colors">
+          <MessageSquare size={22} />
+          <span className="absolute top-1 right-1 w-2 h-2 bg-elite-gold rounded-full border-2 border-white" />
+        </Link>
+      </div>
     </div>
   );
 };
@@ -103,10 +116,68 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="min-h-screen bg-white">
       {!hideNavbar && <Navbar />}
+      <MobileDashboardHeader />
       <main>{children}</main>
       <Footer />
-      <FloatingMenuButton />
     </div>
+  );
+};
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    // Dans le dashboard, c'est l'élément .layout-main qui scrolle
+    const mainContent = document.querySelector('.layout-main');
+    if (mainContent) {
+      mainContent.scrollTo(0, 0);
+    }
+  }, [pathname]);
+  return null;
+};
+
+const AppContent = () => {
+  const { isLoading } = useAuth();
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  return (
+    <Router>
+      <ScrollToTop />
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/services" element={<ServiceList />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/profile/:id" element={<PrestataireProfile />} />
+
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/messages" element={<ProtectedRoute><Messaging /></ProtectedRoute>} />
+
+          {/* Admin Routes */}
+          <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminUsers /></ProtectedRoute>} />
+          <Route path="/admin/services" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminServices /></ProtectedRoute>} />
+          <Route path="/admin/alerts" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminAlerts /></ProtectedRoute>} />
+          <Route path="/admin/logs" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminLogs /></ProtectedRoute>} />
+          <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['ADMIN']}><Settings /></ProtectedRoute>} />
+
+          {/* Shared Routes */}
+          <Route path="/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
+          <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+          <Route path="/security" element={<ProtectedRoute><Security /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+
+          {/* Role Specific Routes */}
+          <Route path="/provider/services" element={<ProtectedRoute allowedRoles={['PRESTATAIRE']}><ProviderServices /></ProtectedRoute>} />
+          <Route path="/provider/availability" element={<ProtectedRoute allowedRoles={['PRESTATAIRE']}><ProviderAvailability /></ProtectedRoute>} />
+          <Route path="/favorites" element={<ProtectedRoute allowedRoles={['CLIENT']}><Favorites /></ProtectedRoute>} />
+        </Routes>
+      </Layout>
+    </Router>
   );
 };
 
@@ -114,38 +185,7 @@ function App() {
   return (
     <SidebarProvider>
       <AuthProvider>
-        <Router>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/services" element={<ServiceList />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/profile/:id" element={<PrestataireProfile />} />
-
-              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/messages" element={<ProtectedRoute><Messaging /></ProtectedRoute>} />
-
-              {/* Admin Routes */}
-              <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminUsers /></ProtectedRoute>} />
-              <Route path="/admin/services" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminServices /></ProtectedRoute>} />
-              <Route path="/admin/alerts" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminAlerts /></ProtectedRoute>} />
-              <Route path="/admin/logs" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminLogs /></ProtectedRoute>} />
-              <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['ADMIN']}><Settings /></ProtectedRoute>} />
-
-              {/* Shared Routes */}
-              <Route path="/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
-              <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
-              <Route path="/security" element={<ProtectedRoute><Security /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-
-              {/* Role Specific Routes */}
-              <Route path="/provider/services" element={<ProtectedRoute allowedRoles={['PRESTATAIRE']}><ProviderServices /></ProtectedRoute>} />
-              <Route path="/provider/availability" element={<ProtectedRoute allowedRoles={['PRESTATAIRE']}><ProviderAvailability /></ProtectedRoute>} />
-              <Route path="/favorites" element={<ProtectedRoute allowedRoles={['CLIENT']}><Favorites /></ProtectedRoute>} />
-            </Routes>
-          </Layout>
-        </Router>
+        <AppContent />
       </AuthProvider>
     </SidebarProvider>
   );

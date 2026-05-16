@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
-import { Search, Plus, MoreVertical, CheckCircle2, XCircle, Clock, Zap, Pipette, Brush, Flower, Computer, Wind, Loader2 } from 'lucide-react';
+import { Search, Plus, MoreVertical, CheckCircle2, XCircle, Clock, Zap, Pipette, Brush, Flower, Computer, Wind, Loader2, Settings, ShieldCheck, Scissors, Droplet, Hammer, Baby, Camera, Wrench, Book, ChefHat, Truck, Activity, PenTool, Code } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -89,7 +89,8 @@ const AdminServices = () => {
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Aucun service configuré</p>
             </div>
           ) : categories.map((cat, index) => {
-            const Icon = Zap; // Fallback or map based on cat.icon
+            const IconMap: any = { Zap, Pipette, Brush, Flower, Computer, Wind, Settings, ShieldCheck, Scissors, Droplet, Hammer, Baby, Camera, Wrench, Book, ChefHat, Truck, Activity, PenTool, Code };
+            const Icon = IconMap[cat.icon] || Zap;
             return (
               <motion.div 
                 key={cat.id}

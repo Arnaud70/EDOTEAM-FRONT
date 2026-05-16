@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
-import { Plus, Search, MoreVertical, CheckCircle2, Star, Clock, ToggleLeft as Toggle, Zap, Pipette, Brush, Trash2, Loader2, X, Save, AlertCircle } from 'lucide-react';
+import { Plus, Search, MoreVertical, CheckCircle2, Star, Clock, ToggleLeft as Toggle, Zap, Pipette, Brush, Trash2, Loader2, X, Save, AlertCircle, Settings, ShieldCheck, Scissors, Droplet, Hammer, Baby, Camera, Wrench, Book, ChefHat, Truck, Activity, PenTool, Code, Flower, Computer, Wind } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import api from '../services/api';
@@ -123,7 +123,10 @@ const ProviderServices = () => {
               <Zap className="mx-auto text-slate-200 mb-4" size={48} />
               <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Vous n'avez pas encore configuré de services</p>
             </div>
-          ) : myServices.map((item, index) => (
+          ) : myServices.map((item, index) => {
+            const IconMap: any = { Zap, Pipette, Brush, Flower, Computer, Wind, Settings, ShieldCheck, Scissors, Droplet, Hammer, Baby, Camera, Wrench, Book, ChefHat, Truck, Activity, PenTool, Code };
+            const Icon = IconMap[item.service.icon || 'Zap'] || Zap;
+            return (
             <motion.div 
               key={item.id}
               initial={{ opacity: 0, y: 20 }}
@@ -133,7 +136,7 @@ const ProviderServices = () => {
             >
               <div className="flex justify-between items-start mb-8">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center transition-all bg-elite-emerald/5 text-elite-emerald group-hover:bg-elite-emerald group-hover:text-white">
-                  <Zap size={24} />
+                  <Icon size={24} />
                 </div>
                 <div className="flex gap-2">
                    <button className="p-2 text-slate-300 hover:text-white hover:bg-elite-emerald rounded-lg transition-all"><Toggle size={20} /></button>
@@ -169,7 +172,7 @@ const ProviderServices = () => {
                 </div>
               </div>
             </motion.div>
-          ))}
+          )})}
         </div>
 
         {/* Add Service Modal */}

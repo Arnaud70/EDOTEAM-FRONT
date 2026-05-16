@@ -12,6 +12,7 @@ import {
   Briefcase,
   CreditCard,
   Heart,
+  PieChart,
   Terminal,
   Clock,
   Home,
@@ -60,6 +61,7 @@ const Sidebar = () => {
         return [
           { icon: Home, label: 'Voir le site public', path: '/' },
           { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+          { icon: PieChart, label: 'Rapports', path: '/reports' },
           { icon: Users, label: 'Utilisateurs', path: '/admin/users' },
           { icon: Star, label: 'Services', path: '/admin/services' },
           { icon: AlertCircle, label: 'Sécurité', path: '/admin/alerts' },
@@ -70,6 +72,7 @@ const Sidebar = () => {
         return [
           { icon: Home, label: 'Voir le site public', path: '/' },
           { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+          { icon: PieChart, label: 'Rapports', path: '/reports' },
           { icon: Briefcase, label: 'Mes Services', path: '/provider/services' },
           { icon: Clock, label: 'Disponibilités', path: '/provider/availability' },
           { icon: Calendar, label: 'Réservations', path: '/bookings' },
@@ -82,6 +85,7 @@ const Sidebar = () => {
         return [
           { icon: Home, label: 'Voir le site public', path: '/' },
           { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+          { icon: PieChart, label: 'Rapports', path: '/reports' },
           { icon: Calendar, label: 'Mes Réservations', path: '/bookings' },
           { icon: MessageSquare, label: 'Messages', path: '/messages' },
           { icon: Heart, label: 'Favoris', path: '/favorites' },

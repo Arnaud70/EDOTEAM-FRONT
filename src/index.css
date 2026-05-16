@@ -50,4 +50,9 @@
   .layout-main {
     margin-left: 0 !important;
   }
+  /* Padding for the top-left burger menu */
+  .layout-main > header,
+  .layout-main > div:first-child {
+    padding-left: 3.5rem;
+  }
 }

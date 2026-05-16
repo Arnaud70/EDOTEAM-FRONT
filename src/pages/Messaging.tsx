@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Sidebar from '../components/Sidebar';
+import Sidebar, { MobileMenuButton } from '../components/Sidebar';
 import { Search, Send, Paperclip, MoreVertical, Phone, Video, Info, User, Loader2, ArrowLeft, MessageSquare } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';

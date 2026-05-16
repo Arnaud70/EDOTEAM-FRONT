@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Star, ShieldCheck, Heart, Filter, ChevronRight, SlidersHorizontal, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 
 const ServiceList = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [prestataires, setPrestataires] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchParams.get('q') || '');
+
+  // Synchroniser l'URL avec la recherche si elle change
+  useEffect(() => {
+    if (search) {
+      setSearchParams({ q: search });
+    } else {
+      setSearchParams({});
+    }
+  }, [search, setSearchParams]);
 
   useEffect(() => {
     const fetchPrestataires = async () => {

@@ -1,6 +1,20 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Shield, Star, Award, Zap } from 'lucide-react';
 
 const Hero = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/services?q=${encodeURIComponent(searchQuery)}`);
+    } else {
+      navigate('/services');
+    }
+  };
+
   return (
     <section className="relative pt-32 pb-20 lg:pt-56 lg:pb-40 overflow-hidden bg-[#F8FAFC]">
       {/* Premium Background Elements */}
@@ -29,19 +43,21 @@ const Hero = () => {
             </p>
 
             {/* Premium Search Bar */}
-            <div className="max-w-2xl p-2 bg-white rounded-[2rem] shadow-premium border border-slate-100 flex flex-col md:flex-row items-center gap-2 group focus-within:ring-4 ring-elite-emerald/5 transition-all">
+            <form onSubmit={handleSearch} className="max-w-2xl p-2 bg-white rounded-[2rem] shadow-premium border border-slate-100 flex flex-col md:flex-row items-center gap-2 group focus-within:ring-4 ring-elite-emerald/5 transition-all">
               <div className="flex-1 w-full flex items-center px-6 py-4 gap-4 border-b md:border-b-0 md:border-r border-slate-100">
                 <Search className="text-slate-400 group-focus-within:text-elite-emerald transition-colors" size={20} />
                 <input 
                   type="text" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Quel service recherchez-vous ?" 
                   className="w-full bg-transparent border-none outline-none text-slate-900 placeholder:text-slate-400 font-semibold"
                 />
               </div>
-              <button className="w-full md:w-auto px-10 py-4 bg-elite-emerald text-white font-black rounded-2xl shadow-xl shadow-elite-emerald/20 hover:bg-elite-emerald/90 transition-all transform hover:scale-[1.02] active:scale-95">
+              <button type="submit" className="w-full md:w-auto px-10 py-4 bg-elite-emerald text-white font-black rounded-2xl shadow-xl shadow-elite-emerald/20 hover:bg-elite-emerald/90 transition-all transform hover:scale-[1.02] active:scale-95">
                 Trouver
               </button>
-            </div>
+            </form>
             
             <div className="mt-8 flex items-center justify-center lg:justify-start gap-6 text-slate-400 font-bold text-sm">
               <div className="flex items-center gap-2">

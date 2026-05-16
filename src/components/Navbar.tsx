@@ -104,26 +104,30 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white/95 backdrop-blur-xl border-t border-slate-100 h-screen animate-in slide-in-from-top duration-500">
-          <div className="px-6 pt-10 pb-20 space-y-6">
-            <Link to="/" onClick={() => setIsMenuOpen(false)} className="block text-3xl font-black text-slate-900">Accueil</Link>
-            <Link to="/services" onClick={() => setIsMenuOpen(false)} className="block text-3xl font-black text-slate-900">Explorer</Link>
-            <a href="#how" onClick={() => setIsMenuOpen(false)} className="block text-3xl font-black text-slate-900">Concept</a>
+        <div className="md:hidden bg-white/95 backdrop-blur-xl border-t border-slate-100 h-[calc(100vh-80px)] overflow-y-auto animate-in slide-in-from-top duration-500">
+          <div className="px-6 pt-8 pb-10 space-y-5">
+            <Link to="/" onClick={() => setIsMenuOpen(false)} className="block text-2xl font-bold text-slate-800 hover:text-elite-emerald transition-colors">Accueil</Link>
+            <Link to="/services" onClick={() => setIsMenuOpen(false)} className="block text-2xl font-bold text-slate-800 hover:text-elite-emerald transition-colors">Explorer</Link>
+            <a href="#how" onClick={() => setIsMenuOpen(false)} className="block text-2xl font-bold text-slate-800 hover:text-elite-emerald transition-colors">Concept</a>
             {isAuthenticated && (
-              <Link to="/messages" onClick={() => setIsMenuOpen(false)} className="block text-3xl font-black text-elite-emerald flex items-center gap-4">
-                <MessageSquare size={32} />
+              <Link to="/messages" onClick={() => setIsMenuOpen(false)} className="text-2xl font-bold text-elite-emerald flex items-center gap-3">
+                <MessageSquare size={24} />
                 Messages
               </Link>
             )}
-            {isAuthenticated && (
-              <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="block text-3xl font-black text-slate-900">
-                Dashboard
-              </Link>
-            )}
             
-            <div className="pt-10 flex flex-col gap-4">
-              <Link to="/login" onClick={() => setIsMenuOpen(false)} className="w-full py-5 text-center text-elite-emerald font-black text-xl border-2 border-elite-emerald rounded-2xl">Connexion</Link>
-              <Link to="/register" onClick={() => setIsMenuOpen(false)} className="w-full py-5 text-center bg-elite-emerald text-white font-black text-xl rounded-2xl shadow-premium">Commencer</Link>
+            <div className="pt-6 flex flex-col gap-3">
+              {isAuthenticated ? (
+                <>
+                  <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="w-full py-3.5 text-center bg-elite-emerald/10 text-elite-emerald font-bold text-lg rounded-xl hover:bg-elite-emerald hover:text-white transition-colors">Dashboard</Link>
+                  <button onClick={handleLogout} className="w-full py-3.5 text-center bg-slate-900 text-white font-bold text-lg rounded-xl shadow-premium hover:bg-red-600 transition-colors">Déconnexion</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" onClick={() => setIsMenuOpen(false)} className="w-full py-3.5 text-center text-elite-emerald font-bold text-lg border-2 border-elite-emerald rounded-xl hover:bg-elite-emerald/5 transition-colors">Connexion</Link>
+                  <Link to="/register" onClick={() => setIsMenuOpen(false)} className="w-full py-3.5 text-center bg-elite-emerald text-white font-bold text-lg rounded-xl shadow-premium hover:bg-elite-emerald/90 transition-colors">Commencer</Link>
+                </>
+              )}
             </div>
           </div>
         </div>

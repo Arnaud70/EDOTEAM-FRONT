@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Calendar, MessageSquare, Bell, Search, ChevronRight, ShieldCheck, CreditCard, Users, Star, TrendingUp, AlertCircle, Settings, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Sidebar, { MobileMenuButton } from '../components/Sidebar';
+import NotificationDropdown from '../components/NotificationDropdown';
+import LoadingScreen from '../components/LoadingScreen';
+import { CardSkeleton } from '../components/Skeleton';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
@@ -27,8 +30,8 @@ const AdminDashboard = () => {
   }, []);
 
   if (isLoading) return (
-    <div className="flex items-center justify-center py-20">
-      <Loader2 className="animate-spin text-elite-gold" size={40} />
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      {[1, 2, 3, 4].map(i => <CardSkeleton key={i} />)}
     </div>
   );
 
@@ -125,8 +128,8 @@ const ProviderDashboard = () => {
   }, []);
 
   if (isLoading) return (
-    <div className="flex items-center justify-center py-20">
-      <Loader2 className="animate-spin text-elite-gold" size={40} />
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {[1, 2, 3].map(i => <CardSkeleton key={i} />)}
     </div>
   );
 
@@ -221,8 +224,8 @@ const ClientDashboard = () => {
   }, []);
 
   if (isLoading) return (
-    <div className="flex items-center justify-center py-20">
-      <Loader2 className="animate-spin text-elite-gold" size={40} />
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {[1, 2, 3].map(i => <CardSkeleton key={i} />)}
     </div>
   );
 
@@ -297,7 +300,6 @@ const Dashboard = () => {
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
         <header className="flex items-center justify-between mb-12">
           <div className="flex items-center gap-4">
-            <MobileMenuButton />
             <div>
               <h1 className="text-3xl lg:text-4xl font-black text-slate-900 mb-1">
                 Bonjour, <span className="gold-accent">{user.prenom || user.nom}</span> 👋
@@ -310,16 +312,18 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center bg-white border border-slate-100 rounded-2xl px-4 py-2 shadow-sm focus-within:ring-2 ring-elite-emerald/10 transition-all">
+          <div className="hidden md:flex items-center gap-4">
+            <div className="flex items-center bg-white border border-slate-100 rounded-2xl px-4 py-2 shadow-sm focus-within:ring-2 ring-elite-emerald/10 transition-all">
               <Search size={18} className="text-slate-400 mr-2" />
               <input type="text" placeholder="Rechercher..." className="bg-transparent border-none outline-none text-sm w-48 font-medium" />
             </div>
 
-            <button className="relative p-3 bg-white border border-slate-100 rounded-xl text-slate-400 hover:text-elite-emerald hover:border-elite-emerald/30 transition-all shadow-sm group">
-              <Bell size={20} />
-              <span className="absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-            </button>
+            <NotificationDropdown />
+            
+            <Link to="/messages" className="relative p-3 bg-white border border-slate-100 rounded-xl text-slate-400 hover:text-elite-emerald hover:border-elite-emerald/30 transition-all shadow-sm group">
+              <MessageSquare size={20} />
+              <span className="absolute top-3 right-3 w-2 h-2 bg-elite-gold rounded-full border-2 border-white" />
+            </Link>
 
             <Link to="/settings" className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white shadow-premium bg-slate-100 flex items-center justify-center font-black text-slate-900 hover:scale-105 transition-all">
               {user.photoUrl ? <img src={user.photoUrl} alt="Profil" className="w-full h-full object-cover" /> : (user.nom?.[0] || 'U')}
