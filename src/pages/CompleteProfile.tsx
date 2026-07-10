@@ -10,7 +10,9 @@ const CompleteProfile = () => {
   const { user, updateUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [role, setRole] = useState<'CLIENT' | 'PRESTATAIRE'>(user?.role ?? 'CLIENT');
+  const [role, setRole] = useState<'CLIENT' | 'PRESTATAIRE'>(
+    user?.role === 'PRESTATAIRE' ? 'PRESTATAIRE' : 'CLIENT'
+  );
   const [telephone, setTelephone] = useState(user?.telephone ?? '');
   const [localisation, setLocalisation] = useState(user?.localisation ?? '');
   const [specialite, setSpecialite] = useState(user?.titreProfessionnel ?? '');

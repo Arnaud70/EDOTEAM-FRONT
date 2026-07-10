@@ -38,25 +38,27 @@ const Sidebar = () => {
   const activeRef = useRef<HTMLAnchorElement>(null);
 
   // Ferme le drawer mobile quand on change de page
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     closeMobile();
   }, [location.pathname]);
 
   // Auto-scroll vers le lien actif
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     if (activeRef.current && navRef.current) {
       activeRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
   }, [location.pathname]);
+
+  if (!user) return null;
+  const currentUser = user;
+
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
   const getMenuItems = () => {
-    const role = user.role?.toUpperCase() || 'CLIENT';
+    const role = currentUser.role?.toUpperCase() || 'CLIENT';
     switch (role) {
       case 'ADMIN':
         return [
@@ -172,20 +174,20 @@ const Sidebar = () => {
         {(mobile || !isCollapsed) && (
           <div className="flex items-center gap-3 px-2 py-3 mb-1">
             <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/30 flex items-center justify-center font-black text-white text-sm flex-shrink-0">
-              {user.nom?.[0] || 'A'}
+              {currentUser.nom?.[0] || 'A'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-black text-white truncate">{user.nom} {user.prenom}</p>
-              <p className="text-[9px] font-bold text-elite-gold uppercase tracking-widest">{user.role}</p>
+              <p className="text-[10px] font-black text-white truncate">{currentUser.nom} {currentUser.prenom}</p>
+              <p className="text-[9px] font-bold text-elite-gold uppercase tracking-widest">{currentUser.role}</p>
             </div>
           </div>
         )}
         {!mobile && isCollapsed && (
           <div
-            title={`${user.nom} ${user.prenom} • ${user.role}`}
+            title={`${currentUser.nom} ${currentUser.prenom} • ${currentUser.role}`}
             className="w-9 h-9 rounded-xl bg-white/10 border border-white/30 flex items-center justify-center font-black text-white text-sm"
           >
-            {user.nom?.[0] || 'A'}
+            {currentUser.nom?.[0] || 'A'}
           </div>
         )}
         <div className="flex items-center gap-2 mb-3">
@@ -195,7 +197,11 @@ const Sidebar = () => {
             className={`flex items-center gap-3 px-3 py-3 text-white/50 hover:text-white font-semibold transition-all rounded-2xl hover:bg-white/5 w-full ${!mobile && isCollapsed ? 'justify-center' : ''}`}
           >
             <Image size={18} className="flex-shrink-0" />
-            {(mobile || !isCollapsed) && <span className="text-sm">Changer le fond</span>}
+            {(mobile || !isCollapsed) && (
+              <span className="text-sm">
+                {theme === 'default' ? 'Thème: par défaut' : theme === 'light' ? 'Thème clair' : 'Thème sombre'}
+              </span>
+            )}
           </button>
         </div>
 

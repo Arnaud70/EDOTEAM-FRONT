@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'default' | 'alt';
+type Theme = 'default' | 'light' | 'dark';
 
 interface ThemeContextValue {
   theme: Theme;
@@ -27,7 +27,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     document.documentElement.setAttribute('data-site-theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => setThemeState((t) => (t === 'default' ? 'alt' : 'default'));
+  const toggleTheme = () => setThemeState((t) => {
+    if (t === 'default') return 'light';
+    if (t === 'light') return 'dark';
+    return 'default';
+  });
   const setTheme = (t: Theme) => setThemeState(t);
 
   return (
