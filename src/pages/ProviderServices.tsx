@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import { Plus, Search, MoreVertical, CheckCircle2, Star, Clock, ToggleLeft as Toggle, Zap, Pipette, Brush, Trash2, Loader2, X, Save, AlertCircle, Settings, ShieldCheck, Scissors, Droplet, Hammer, Baby, Camera, Wrench, Book, ChefHat, Truck, Activity, PenTool, Code, Flower, Computer, Wind } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
+import PageHeader from '../components/PageHeader';
 import api from '../services/api';
 
 interface ServiceData {
@@ -28,6 +29,7 @@ const ProviderServices = () => {
   
   const [newService, setNewService] = useState({
     serviceId: '',
+    customServiceName: '',
     prixIndicatif: '',
     experience: '',
   });
@@ -54,19 +56,33 @@ const ProviderServices = () => {
 
   const handleAddService = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newService.serviceId) return;
+    if (!newService.serviceId && !newService.customServiceName.trim()) return;
     
     try {
       setIsSubmitting(true);
       setError(null);
+
+      let serviceId = newService.serviceId;
+      if (newService.serviceId === 'custom') {
+        if (!newService.customServiceName.trim()) {
+          setError('Veuillez entrer le nom du service à ajouter.');
+          return;
+        }
+
+        const response = await api.post('/services', {
+          nom: newService.customServiceName.trim(),
+        });
+        serviceId = response.data.data?.id || response.data.id;
+      }
+
       await api.post('/services/me', {
-        serviceId: newService.serviceId,
+        serviceId,
         prixIndicatif: parseFloat(newService.prixIndicatif) || 0,
         experience: parseInt(newService.experience) || 0,
       });
       await fetchMyServices();
       setIsModalOpen(false);
-      setNewService({ serviceId: '', prixIndicatif: '', experience: '' });
+      setNewService({ serviceId: '', customServiceName: '', prixIndicatif: '', experience: '' });
     } catch (error: any) {
       console.error('Error adding service:', error);
       setError(error.response?.data?.message || 'Erreur lors de l\'ajout du service.');
@@ -92,25 +108,20 @@ const ProviderServices = () => {
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
-        <header className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <h1 className="text-3xl lg:text-4xl font-black text-slate-900 mb-1">
-              Mes <span className="gold-accent">Services</span>
-            </h1>
-            <p className="text-slate-500 font-medium">Gérez votre catalogue de prestations et vos tarifs</p>
-          </motion.div>
-          
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-3 px-6 py-4 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-elite-emerald hover:shadow-xl transition-all active:scale-95 group"
-          >
-            <Plus size={18} className="text-elite-gold group-hover:rotate-90 transition-transform" />
-            Ajouter une prestation
-          </button>
-        </header>
+        <PageHeader
+          title={<>Mes <span className="gold-accent">Services</span></>}
+          subtitle="Gérez votre catalogue de prestations et vos tarifs"
+          fixed
+          actions={(
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-3 px-6 py-4 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-elite-emerald hover:shadow-xl transition-all active:scale-95 group"
+            >
+              <Plus size={18} className="text-elite-gold group-hover:rotate-90 transition-transform" />
+              Ajouter une prestation
+            </button>
+          )}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {isLoading ? (
@@ -200,7 +211,7 @@ const ProviderServices = () => {
                     <select 
                       required
                       value={newService.serviceId}
-                      onChange={(e) => setNewService({...newService, serviceId: e.target.value})}
+                      onChange={(e) => setNewService({...newService, serviceId: e.target.value, customServiceName: e.target.value === 'custom' ? newService.customServiceName : ''})}
                       className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm appearance-none"
                     >
                       <option value="">Sélectionner un service</option>
@@ -210,7 +221,19 @@ const ProviderServices = () => {
                           <option key={s.id} value={s.id}>{s.nom}</option>
                         ))
                       }
+                      <option value="custom">Autre service...</option>
                     </select>
+
+                    {newService.serviceId === 'custom' && (
+                      <input
+                        type="text"
+                        required
+                        value={newService.customServiceName}
+                        onChange={(e) => setNewService({...newService, customServiceName: e.target.value})}
+                        placeholder="Ex: Création de mobilier sur mesure"
+                        className="w-full mt-3 px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
+                      />
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">

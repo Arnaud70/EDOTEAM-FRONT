@@ -100,17 +100,23 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                 <form onSubmit={(e) => { e.preventDefault(); setStep(2); }} className="space-y-6">
                   <div className="space-y-3">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Service souhaité</label>
-                    <select 
-                      required
-                      value={formData.serviceId}
-                      onChange={(e) => setFormData({...formData, serviceId: e.target.value})}
-                      className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm appearance-none"
-                    >
-                      <option value="">Sélectionner un service</option>
-                      {provider.services.map(s => (
-                        <option key={s.service.id} value={s.service.id}>{s.service.nom}</option>
-                      ))}
-                    </select>
+                    {provider.services.length === 0 ? (
+                      <div className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-slate-500 text-sm">
+                        Ce prestataire n'a pas encore ajouté de service. Vous ne pouvez pas réserver pour le moment.
+                      </div>
+                    ) : (
+                      <select 
+                        required
+                        value={formData.serviceId}
+                        onChange={(e) => setFormData({...formData, serviceId: e.target.value})}
+                        className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm appearance-none"
+                      >
+                        <option value="">Sélectionner un service</option>
+                        {provider.services.map(s => (
+                          <option key={s.service.id} value={s.service.id}>{s.service.nom}</option>
+                        ))}
+                      </select>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -143,7 +149,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                     </div>
                   </div>
 
-                  <button type="submit" className="w-full py-5 bg-slate-900 text-white font-black rounded-2xl hover:bg-elite-emerald transition-all shadow-xl shadow-slate-900/10 uppercase tracking-widest text-sm">
+                  <button
+                    type="submit"
+                    disabled={provider.services.length === 0}
+                    className="w-full py-5 bg-slate-900 text-white font-black rounded-2xl hover:bg-elite-emerald transition-all shadow-xl shadow-slate-900/10 uppercase tracking-widest text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                  >
                     Continuer vers l'adresse
                   </button>
                 </form>

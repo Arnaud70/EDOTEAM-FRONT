@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Globe, Search, ArrowRight, MessageSquare } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Menu, X, Globe, Search, ArrowRight, MessageSquare, ChevronDown } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import api from '../services/api';
 import Logo from './Logo';
 import { useAuth } from '../context/AuthContext';
 import NotificationDropdown from './NotificationDropdown';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [services, setServices] = useState<any[]>([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,10 +23,44 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await api.get('/services');
+        setServices(response.data.data || response.data);
+      } catch (error) {
+        console.error('Erreur lors du chargement des services:', error);
+      }
+    };
+
+    fetchServices();
+  }, []);
+
+  const handleConceptClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Si on est sur la page d'accueil, scroller vers la section
+    if (location.pathname === '/') {
+      const element = document.getElementById('how');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Sinon, aller à la page d'accueil et scroller après le chargement
+      navigate('/#how');
+    }
+    setIsMenuOpen(false);
+  };
+
   const handleLogout = () => {
     logout();
     setIsMenuOpen(false);
     navigate('/');
+  };
+
+  const handleCategoryClick = (serviceName: string) => {
+    navigate(`/services?q=${encodeURIComponent(serviceName)}`);
+    setIsMenuOpen(false);
+    setIsCategoriesOpen(false);
   };
 
   return (
@@ -44,7 +82,41 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-10">
             <Link to="/" className="text-slate-600 hover:text-elite-emerald font-semibold transition-colors text-sm uppercase tracking-wider">Accueil</Link>
             <Link to="/services" className="text-slate-600 hover:text-elite-emerald font-semibold transition-colors text-sm uppercase tracking-wider">Explorer</Link>
-            <a href="#how" className="text-slate-600 hover:text-elite-emerald font-semibold transition-colors text-sm uppercase tracking-wider whitespace-nowrap">Concept</a>
+            
+            {/* Categories Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
+                className="text-slate-600 hover:text-elite-emerald font-semibold transition-colors text-sm uppercase tracking-wider flex items-center gap-1"
+              >
+                Catégories
+                <ChevronDown size={16} className={`transition-transform ${isCategoriesOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {/* Dropdown Menu */}
+              <div className={`absolute left-0 mt-2 w-72 bg-white rounded-2xl shadow-premium border border-slate-100 transition-all duration-300 py-2 z-50 max-h-96 overflow-y-auto ${isCategoriesOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
+                {services.length === 0 ? (
+                  <div className="px-6 py-4 text-slate-500 text-sm">Chargement des catégories...</div>
+                ) : (
+                  services.map(service => (
+                    <button
+                      key={service.id}
+                      onClick={() => handleCategoryClick(service.nom)}
+                      className="w-full px-6 py-2.5 text-left text-slate-700 hover:bg-elite-emerald/10 hover:text-elite-emerald font-semibold transition-colors text-sm"
+                    >
+                      {service.nom}
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+            
+            <button 
+              onClick={handleConceptClick}
+              className="text-slate-600 hover:text-elite-emerald font-semibold transition-colors text-sm uppercase tracking-wider"
+            >
+              Concept
+            </button>
           </div>
 
           {/* Actions */}
@@ -108,7 +180,38 @@ const Navbar = () => {
           <div className="px-6 pt-8 pb-10 space-y-5">
             <Link to="/" onClick={() => setIsMenuOpen(false)} className="block text-2xl font-bold text-slate-800 hover:text-elite-emerald transition-colors">Accueil</Link>
             <Link to="/services" onClick={() => setIsMenuOpen(false)} className="block text-2xl font-bold text-slate-800 hover:text-elite-emerald transition-colors">Explorer</Link>
-            <a href="#how" onClick={() => setIsMenuOpen(false)} className="block text-2xl font-bold text-slate-800 hover:text-elite-emerald transition-colors">Concept</a>
+            
+            {/* Mobile Categories */}
+            <div>
+              <button 
+                onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
+                className="block text-2xl font-bold text-slate-800 hover:text-elite-emerald transition-colors flex items-center gap-2"
+              >
+                Catégories
+                <ChevronDown size={20} className={`transition-transform ${isCategoriesOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {isCategoriesOpen && (
+                <div className="mt-4 pl-4 space-y-3 border-l-2 border-elite-emerald">
+                  {services.map(service => (
+                    <button
+                      key={service.id}
+                      onClick={() => handleCategoryClick(service.nom)}
+                      className="block text-lg font-semibold text-slate-700 hover:text-elite-emerald transition-colors"
+                    >
+                      {service.nom}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <button 
+              onClick={handleConceptClick}
+              className="block text-2xl font-bold text-slate-800 hover:text-elite-emerald transition-colors"
+            >
+              Concept
+            </button>
+            
             {isAuthenticated && (
               <Link to="/messages" onClick={() => setIsMenuOpen(false)} className="text-2xl font-bold text-elite-emerald flex items-center gap-3">
                 <MessageSquare size={24} />

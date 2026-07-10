@@ -3,6 +3,7 @@ import Sidebar, { MobileMenuButton } from '../components/Sidebar';
 import { Search, Filter, Calendar, MapPin, Clock, MessageSquare, ChevronRight, MoreVertical, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
+import PageHeader from '../components/PageHeader';
 import api from '../services/api';
 
 const Bookings = () => {
@@ -42,22 +43,17 @@ const Bookings = () => {
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
-        <header className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-              <h1 className="text-3xl lg:text-4xl font-black text-slate-900 mb-1">
-              {user.role === 'PRESTATAIRE' ? 'Mes Missions' : 'Mes Réservations'}
-            </h1>
-            </motion.div>
-          
-          <div className="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
-            <button className="px-6 py-3 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-elite-emerald transition-all shadow-lg shadow-slate-900/10 active:scale-95">Tout</button>
-            <button className="px-6 py-3 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all">En cours</button>
-            <button className="px-6 py-3 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all">Terminé</button>
-          </div>
-        </header>
+        <PageHeader
+          title={user.role === 'PRESTATAIRE' ? 'Mes Missions' : 'Mes Réservations'}
+          fixed
+          actions={(
+            <div className="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+              <button className="px-6 py-3 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-elite-emerald transition-all shadow-lg shadow-slate-900/10 active:scale-95">Tout</button>
+              <button className="px-6 py-3 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all">En cours</button>
+              <button className="px-6 py-3 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all">Terminé</button>
+            </div>
+          )}
+        />
 
         <div className="space-y-6">
           {isLoading ? (

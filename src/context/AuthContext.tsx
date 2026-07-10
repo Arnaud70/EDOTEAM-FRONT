@@ -56,15 +56,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const handleAuthCallback = async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('token');
+      const onboarding = urlParams.get('onboarding');
+      const tempPassword = urlParams.get('tempPassword');
 
       if (token) {
         localStorage.setItem('access_token', token);
-        // Nettoyer l'URL
+        if (tempPassword) {
+          sessionStorage.setItem('tempPassword', tempPassword);
+        }
+        // Nettoyer l'URL pour éviter de garder le token dans la query
         window.history.replaceState({}, document.title, window.location.pathname);
-        
+
         try {
           const userData = await authService.getProfile();
           setUser(userData);
+
+          if (onboarding === '1') {
+            window.location.href = '/complete-profile';
+            return;
+          }
         } catch (error) {
           console.error("Erreur lors de la récupération du profil après Google Login", error);
           authService.logout();

@@ -4,6 +4,7 @@ import { Search, Plus, MoreVertical, CheckCircle2, XCircle, Clock, Zap, Pipette,
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
+import PageHeader from '../components/PageHeader';
 
 interface Category {
   id: string;
@@ -57,25 +58,20 @@ const AdminServices = () => {
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
-        <header className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <h1 className="text-3xl lg:text-4xl font-black text-slate-900 mb-1">
-              Catalogue des <span className="gold-accent">Services</span>
-            </h1>
-            <p className="text-slate-500 font-medium">Gerez les catégories de services disponibles sur EDOTEAM</p>
-          </motion.div>
-          
-          <button 
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-3 px-6 py-4 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-elite-emerald hover:shadow-xl transition-all active:scale-95 group"
-          >
-            <Plus size={18} className="text-elite-gold group-hover:rotate-90 transition-transform" />
-            Nouveau Service
-          </button>
-        </header>
+        <PageHeader
+          title={<>Catalogue des <span className="gold-accent">Services</span></>}
+          subtitle="Gerez les catégories de services disponibles sur EDOTEAM"
+          fixed
+          actions={(
+            <button 
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-3 px-6 py-4 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-elite-emerald hover:shadow-xl transition-all active:scale-95 group"
+            >
+              <Plus size={18} className="text-elite-gold group-hover:rotate-90 transition-transform" />
+              Nouveau Service
+            </button>
+          )}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {isLoading ? (

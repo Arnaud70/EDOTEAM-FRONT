@@ -33,6 +33,7 @@ import Favorites from './pages/Favorites';
 import AdminLogs from './pages/AdminLogs';
 import ProviderAvailability from './pages/ProviderAvailability';
 import Reports from './pages/Reports';
+import CompleteProfile from './pages/CompleteProfile';
 
 const DASHBOARD_PATHS = [
   '/dashboard', '/messages', '/admin', '/provider',
@@ -124,15 +125,28 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 };
 
 const ScrollToTop = () => {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
+  
   useEffect(() => {
-    window.scrollTo(0, 0);
-    // Dans le dashboard, c'est l'élément .layout-main qui scrolle
-    const mainContent = document.querySelector('.layout-main');
-    if (mainContent) {
-      mainContent.scrollTo(0, 0);
+    // Si y a un hash, scroll vers l'élément
+    if (hash) {
+      const id = hash.replace('#', '');
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    } else {
+      // Sinon, scroll vers le top
+      window.scrollTo(0, 0);
+      const mainContent = document.querySelector('.layout-main');
+      if (mainContent) {
+        mainContent.scrollTo(0, 0);
+      }
     }
-  }, [pathname]);
+  }, [pathname, hash]);
+  
   return null;
 };
 
@@ -152,6 +166,7 @@ const AppContent = () => {
           <Route path="/services" element={<ServiceList />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
           <Route path="/profile/:id" element={<PrestataireProfile />} />
 
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

@@ -6,17 +6,33 @@ import api from '../services/api';
 const ServiceList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [prestataires, setPrestataires] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState(searchParams.get('q') || '');
 
-  // Synchroniser l'URL avec la recherche si elle change
+  // Mettre à jour search quand l'URL change
   useEffect(() => {
-    if (search) {
-      setSearchParams({ q: search });
-    } else {
-      setSearchParams({});
-    }
-  }, [search, setSearchParams]);
+    const qParam = searchParams.get('q') || '';
+    setSearch(qParam);
+  }, [searchParams]);
+
+  // Mettre à jour l'URL quand l'utilisateur tape dans la search
+  useEffect(() => {
+    setSearchParams(search ? { q: search } : {});
+  }, [search]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get('/services');
+        setCategories(response.data.data || response.data);
+      } catch (error) {
+        console.error('Erreur lors du chargement des catégories :', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const fetchPrestataires = async () => {
@@ -67,6 +83,8 @@ const ServiceList = () => {
             </button>
           </div>
         </div>
+
+        {/* Categories removed from Explorer as requested */}
 
         {isLoading ? (
           <div className="col-span-full py-20 flex flex-col items-center justify-center">

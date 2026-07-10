@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from './Logo';
+import { Image } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useSidebar } from '../context/SidebarContext';
 
@@ -31,10 +33,9 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { isCollapsed, toggle, isMobileOpen, closeMobile } = useSidebar();
+  const { theme, toggleTheme } = useTheme();
   const navRef = useRef<HTMLElement>(null);
   const activeRef = useRef<HTMLAnchorElement>(null);
-
-  if (!user) return null;
 
   // Ferme le drawer mobile quand on change de page
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -187,6 +188,17 @@ const Sidebar = () => {
             {user.nom?.[0] || 'A'}
           </div>
         )}
+        <div className="flex items-center gap-2 mb-3">
+          <button
+            onClick={() => toggleTheme()}
+            title={!mobile && isCollapsed ? 'Changer le fond' : undefined}
+            className={`flex items-center gap-3 px-3 py-3 text-white/50 hover:text-white font-semibold transition-all rounded-2xl hover:bg-white/5 w-full ${!mobile && isCollapsed ? 'justify-center' : ''}`}
+          >
+            <Image size={18} className="flex-shrink-0" />
+            {(mobile || !isCollapsed) && <span className="text-sm">Changer le fond</span>}
+          </button>
+        </div>
+
         <button
           onClick={handleLogout}
           title={!mobile && isCollapsed ? 'Déconnexion' : undefined}

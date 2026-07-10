@@ -3,6 +3,30 @@ import { authService } from './auth.service';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+export const getApiErrorMessage = (error: any, fallback = 'Une erreur est survenue.') => {
+  const data = error?.response?.data;
+  if (typeof data?.message === 'string') return data.message;
+  if (typeof data?.error?.message === 'string') return data.error.message;
+  if (Array.isArray(data?.message)) return data.message[0];
+  if (typeof data?.error === 'string') return data.error;
+  if (typeof error?.message === 'string') return error.message;
+  return fallback;
+};
+
+export const unwrapApiData = <T = any>(payload: any): T => {
+  if (!payload || typeof payload !== 'object') return payload as T;
+
+  if ('data' in payload) {
+    const nested = payload.data;
+    if (nested && typeof nested === 'object' && 'data' in nested && nested.data !== undefined) {
+      return nested.data as T;
+    }
+    return nested as T;
+  }
+
+  return payload as T;
+};
+
 const api = axios.create({
   baseURL: API_URL,
   withCredentials: true,

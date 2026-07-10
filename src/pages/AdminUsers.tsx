@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import api from '../services/api';
 import { TableRowSkeleton } from '../components/Skeleton';
+import PageHeader from '../components/PageHeader';
 
 interface UserData {
   id: string;
@@ -78,39 +79,34 @@ const AdminUsers = () => {
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
-        <header className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <h1 className="text-3xl lg:text-4xl font-black text-slate-900 mb-1">
-              Gestion des <span className="gold-accent">Utilisateurs</span>
-            </h1>
-            <p className="text-slate-500 font-medium">Contrôlez et gérez tous les membres de la plateforme</p>
-          </motion.div>
-          
-          <div className="flex items-center gap-4">
-            <div className="flex-1 md:flex-none relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-emerald transition-colors" size={18} />
-              <input 
-                type="text" 
-                placeholder="Rechercher un membre..." 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full md:w-80 pl-12 pr-6 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-medium text-sm"
-              />
-            </div>
-            <select 
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="p-4 bg-white border border-slate-100 rounded-2xl text-slate-500 font-black text-[10px] uppercase tracking-widest outline-none shadow-sm cursor-pointer hover:border-elite-gold transition-colors"
-            >
-              <option value="">Tous les Rôles</option>
-              <option value="CLIENT">Clients</option>
-              <option value="PRESTATAIRE">Prestataires</option>
-            </select>
-          </div>
-        </header>
+        <PageHeader
+          title={<>Gestion des <span className="gold-accent">Utilisateurs</span></>}
+          subtitle="Contrôlez et gérez tous les membres de la plateforme"
+          fixed
+          actions={(
+            <>
+              <div className="flex-1 md:flex-none relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-emerald transition-colors" size={18} />
+                <input 
+                  type="text" 
+                  placeholder="Rechercher un membre..." 
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full md:w-80 pl-12 pr-6 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-medium text-sm"
+                />
+              </div>
+              <select 
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+                className="p-4 bg-white border border-slate-100 rounded-2xl text-slate-500 font-black text-[10px] uppercase tracking-widest outline-none shadow-sm cursor-pointer hover:border-elite-gold transition-colors"
+              >
+                <option value="">Tous les Rôles</option>
+                <option value="CLIENT">Clients</option>
+                <option value="PRESTATAIRE">Prestataires</option>
+              </select>
+            </>
+          )}
+        />
 
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

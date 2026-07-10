@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { X, Send, Loader2, CheckCircle2, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import api from '../services/api';
+import api, { getApiErrorMessage } from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface MessageModalProps {
   isOpen: boolean;
@@ -15,15 +16,23 @@ interface MessageModalProps {
 }
 
 const MessageModal: React.FC<MessageModalProps> = ({ isOpen, onClose, provider }) => {
+  const { user } = useAuth();
   const [content, setContent] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const isSelfMessage = user?.id === provider.id;
 
   const handleSend = async () => {
     if (!content.trim()) return;
+    if (isSelfMessage) {
+      setError('Vous ne pouvez pas vous envoyer un message à vous-même.');
+      return;
+    }
 
     try {
+      setError(null);
       setIsSending(true);
       await api.post('/messages', {
         receiverId: provider.id,
@@ -37,7 +46,7 @@ const MessageModal: React.FC<MessageModalProps> = ({ isOpen, onClose, provider }
       }, 2000);
     } catch (error) {
       console.error('Error sending message:', error);
-      alert('Impossible d\'envoyer le message pour le moment.');
+      setError(getApiErrorMessage(error, 'Impossible d\'envoyer le message pour le moment.'));
     } finally {
       setIsSending(false);
     }
@@ -111,10 +120,15 @@ const MessageModal: React.FC<MessageModalProps> = ({ isOpen, onClose, provider }
                     />
                   </div>
 
-                  <div className="flex flex-col gap-4 pt-4">
+                  {error && (
+                <div className="px-4 py-3 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-sm font-bold">
+                  {error}
+                </div>
+              )}
+              <div className="flex flex-col gap-4 pt-4">
                     <button
                       onClick={handleSend}
-                      disabled={!content.trim() || isSending}
+                      disabled={!content.trim() || isSending || isSelfMessage}
                       className="w-full py-6 bg-slate-900 text-white font-black text-xs uppercase tracking-widest rounded-[2rem] shadow-2xl hover:bg-elite-emerald transition-all transform hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:translate-y-0 disabled:scale-100 flex items-center justify-center gap-4 group"
                     >
                       {isSending ? (

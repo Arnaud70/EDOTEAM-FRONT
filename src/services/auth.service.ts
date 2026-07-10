@@ -1,4 +1,4 @@
-import api from './api';
+import api, { unwrapApiData } from './api';
 
 export interface User {
   id: string;
@@ -30,7 +30,7 @@ export interface RegisterDto {
 class AuthService {
   async login(dto: LoginDto): Promise<AuthResponse> {
     const response = await api.post<any>('/auth/login', dto);
-    const result = response.data.data; // Extraction de data car le backend utilise un ResponseInterceptor
+    const result = unwrapApiData<AuthResponse>(response);
     if (result && result.access_token) {
       localStorage.setItem('access_token', result.access_token);
       localStorage.setItem('user', JSON.stringify(result.user));
@@ -40,7 +40,7 @@ class AuthService {
 
   async register(dto: RegisterDto): Promise<AuthResponse> {
     const response = await api.post<any>('/auth/register', dto);
-    const result = response.data.data; // Extraction de data
+    const result = unwrapApiData<AuthResponse>(response);
     if (result && result.access_token) {
       localStorage.setItem('access_token', result.access_token);
       localStorage.setItem('user', JSON.stringify(result.user));
@@ -50,7 +50,7 @@ class AuthService {
 
   async getProfile(): Promise<User> {
     const response = await api.get<any>('/auth/profile');
-    const user = response.data.data;
+    const user = unwrapApiData<User>(response);
     localStorage.setItem('user', JSON.stringify(user));
     return user;
   }
@@ -68,7 +68,7 @@ class AuthService {
 
   async refresh(): Promise<AuthResponse> {
     const response = await api.post<any>('/auth/refresh');
-    const result = response.data.data || response.data;
+    const result = unwrapApiData<AuthResponse>(response);
     if (result && result.access_token) {
       localStorage.setItem('access_token', result.access_token);
       localStorage.setItem('user', JSON.stringify(result.user));

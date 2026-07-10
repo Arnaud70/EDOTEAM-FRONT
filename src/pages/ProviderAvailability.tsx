@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import { Clock, Calendar, Plus, Trash2, Save, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import PageHeader from '../components/PageHeader';
 import api from '../services/api';
 
 const ProviderAvailability = () => {
@@ -96,25 +97,20 @@ const ProviderAvailability = () => {
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
-        <header className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <h1 className="text-3xl lg:text-4xl font-black text-slate-900 mb-1">
-              Gestion des <span className="gold-accent">Disponibilités</span>
-            </h1>
-            <p className="text-slate-500 font-medium">Définissez vos créneaux horaires pour recevoir des réservations</p>
-          </motion.div>
-
-          <button
-            onClick={addSlot}
-            className="flex items-center gap-3 px-8 py-4 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-elite-emerald hover:shadow-xl transition-all shadow-lg active:scale-95 group"
-          >
-            <Plus size={18} className="text-elite-gold group-hover:rotate-90 transition-transform" />
-            Ajouter un créneau
-          </button>
-        </header>
+        <PageHeader
+          title={<>Gestion des <span className="gold-accent">Disponibilités</span></>}
+          subtitle="Définissez vos créneaux horaires pour recevoir des réservations"
+          fixed
+          actions={(
+            <button
+              onClick={addSlot}
+              className="flex items-center gap-3 px-8 py-4 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-elite-emerald hover:shadow-xl transition-all shadow-lg active:scale-95 group"
+            >
+              <Plus size={18} className="text-elite-gold group-hover:rotate-90 transition-transform" />
+              Ajouter un créneau
+            </button>
+          )}
+        />
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
           <div className="xl:col-span-2 space-y-6">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Star, X, Send, Loader2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import api from '../services/api';
+import api, { getApiErrorMessage } from '../services/api';
 
 interface AvisModalProps {
   isOpen: boolean;
@@ -32,7 +32,7 @@ const AvisModal = ({ isOpen, onClose, providerId, providerName, onSuccess }: Avi
       if (onSuccess) onSuccess();
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.message || "Une erreur est survenue lors de l'envoi de votre avis.");
+      setError(getApiErrorMessage(err, "Une erreur est survenue lors de l'envoi de votre avis."));
     } finally {
       setIsLoading(false);
     }

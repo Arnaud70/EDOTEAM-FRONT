@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import { AlertCircle, ShieldAlert, MessageSquare, User, CheckCircle2, MoreVertical, Flag, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
+import PageHeader from '../components/PageHeader';
 import api from '../services/api';
 
 interface ReportData {
@@ -55,17 +56,11 @@ const AdminAlerts = () => {
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
-        <header className="mb-12">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <h1 className="text-3xl lg:text-4xl font-black text-slate-900 mb-1">
-              Centre de <span className="gold-accent">Sécurité</span>
-            </h1>
-            <p className="text-slate-500 font-medium">Gérez les signalements et les alertes de la plateforme</p>
-          </motion.div>
-        </header>
+        <PageHeader
+          title={<>Centre de <span className="gold-accent">Sécurité</span></>}
+          subtitle="Gérez les signalements et les alertes de la plateforme"
+          fixed
+        />
 
         <div className="space-y-6">
           {isLoading ? (

@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import { Heart, Search, Star, MapPin, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
+import PageHeader from '../components/PageHeader';
 
 const Favorites = () => {
   const { user } = useAuth();
@@ -20,17 +21,11 @@ const Favorites = () => {
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
-        <header className="mb-12">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <h1 className="text-3xl lg:text-4xl font-black text-slate-900 mb-1">
-              Mes <span className="gold-accent">Favoris</span>
-            </h1>
-            <p className="text-slate-500 font-medium">Retrouvez rapidement vos prestataires préférés</p>
-          </motion.div>
-        </header>
+        <PageHeader
+          title={<>Mes <span className="gold-accent">Favoris</span></>}
+          subtitle="Retrouvez rapidement vos prestataires préférés"
+          fixed
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {favorites.map((fav, index) => (

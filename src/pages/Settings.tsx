@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import { User, Mail, Phone, MapPin, Camera, Save, Globe, Bell, Briefcase, FileText, Loader2, CheckCircle2, Trash2, Plus, Image as ImageIcon, AlertCircle, X, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import PageHeader from '../components/PageHeader';
 import api from '../services/api';
 
 const Settings = () => {
@@ -184,31 +185,26 @@ const Settings = () => {
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
-        <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <h1 className="text-3xl lg:text-4xl font-black text-slate-900 mb-1">
-              Profil & Paramètres
-            </h1>
-            <p className="text-slate-500 font-medium">Personnalisez votre expérience EDOTEAM</p>
-          </motion.div>
-
-          <AnimatePresence>
-            {message && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className={`px-6 py-4 rounded-2xl flex items-center gap-3 font-black text-[10px] shadow-sm uppercase tracking-widest ${message.type === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}
-              >
-                {message.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
-                {message.text}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </header>
+        <PageHeader
+          title={<>Profil & Paramètres</>}
+          subtitle="Personnalisez votre expérience EDOTEAM"
+          fixed
+          actions={(
+            <AnimatePresence>
+              {message && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className={`px-6 py-4 rounded-2xl flex items-center gap-3 font-black text-[10px] shadow-sm uppercase tracking-widest ${message.type === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}
+                >
+                  {message.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                  {message.text}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
+        />
 
         {/* Image Lightbox Overlay */}
         <AnimatePresence>

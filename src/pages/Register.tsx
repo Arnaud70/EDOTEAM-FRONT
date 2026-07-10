@@ -58,7 +58,7 @@ const Register = () => {
         region,
         specialite: role === 'PRESTATAIRE' ? specialite : undefined,
       });
-      navigate('/');
+      navigate('/complete-profile');
     } catch (err: any) {
       console.error('Register error:', err);
       // Le backend utilise AllExceptionsFilter ou class-validator standard
@@ -67,6 +67,11 @@ const Register = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    window.location.href = `${backendUrl}/auth/google`;
   };
 
   return (
@@ -319,6 +324,15 @@ const Register = () => {
                   <ArrowRight size={20} className="text-elite-gold" />
                 </>
               )}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              className="w-full mt-4 py-4 text-sm font-black rounded-3xl border border-slate-200 bg-white text-slate-700 flex items-center justify-center gap-4 hover:bg-slate-50 transition-all"
+            >
+              <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
+              S'inscrire avec Google
             </button>
           </form>
         </div>

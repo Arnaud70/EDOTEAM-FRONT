@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import { CreditCard, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownLeft, Wallet as WalletIcon, MoreVertical, Plus, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
+import PageHeader from '../components/PageHeader';
 import api from '../services/api';
 
 const Wallet = () => {
@@ -33,29 +34,24 @@ const Wallet = () => {
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
-        <header className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <h1 className="text-3xl lg:text-4xl font-black text-slate-900 mb-1">
-              Mon <span className="gold-accent">Portefeuille</span>
-            </h1>
-            <p className="text-slate-500 font-medium">Gérez vos fonds et suivez vos transactions financières</p>
-          </motion.div>
-          
-          <div className="flex items-center gap-4">
-            <button className="flex items-center gap-3 px-6 py-4 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-elite-emerald hover:shadow-xl transition-all shadow-lg active:scale-95 group">
-              <Plus size={18} className="text-elite-gold group-hover:rotate-90 transition-transform" />
-              Alimenter
-            </button>
-            {user.role === 'PRESTATAIRE' && (
-              <button className="px-6 py-4 border-2 border-slate-100 bg-white text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:border-elite-gold/30 transition-all shadow-sm">
-                Demander un retrait
+        <PageHeader
+          title={<>Mon <span className="gold-accent">Portefeuille</span></>}
+          subtitle="Gérez vos fonds et suivez vos transactions financières"
+          fixed
+          actions={(
+            <>
+              <button className="flex items-center gap-3 px-6 py-4 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-elite-emerald hover:shadow-xl transition-all shadow-lg active:scale-95 group">
+                <Plus size={18} className="text-elite-gold group-hover:rotate-90 transition-transform" />
+                Alimenter
               </button>
-            )}
-          </div>
-        </header>
+              {user.role === 'PRESTATAIRE' && (
+                <button className="px-6 py-4 border-2 border-slate-100 bg-white text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:border-elite-gold/30 transition-all shadow-sm">
+                  Demander un retrait
+                </button>
+              )}
+            </>
+          )}
+        />
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
           {isLoading ? (

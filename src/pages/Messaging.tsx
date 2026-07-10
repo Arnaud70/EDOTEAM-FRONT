@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import Sidebar, { MobileMenuButton } from '../components/Sidebar';
-import { Search, Send, Paperclip, MoreVertical, Phone, Video, Info, User, Loader2, ArrowLeft, MessageSquare } from 'lucide-react';
+import Sidebar from '../components/Sidebar';
+import { Search, Send, Paperclip, MoreVertical, Phone, Video, Loader2, ArrowLeft, MessageSquare } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
-import api from '../services/api';
+import api, { getApiErrorMessage, unwrapApiData } from '../services/api';
 
 const Messaging = () => {
   const { user } = useAuth();
@@ -17,7 +16,7 @@ const Messaging = () => {
     try {
       setIsLoading(true);
       const response = await api.get('/messages/conversations');
-      setConversations(response.data.data || response.data);
+      setConversations(unwrapApiData<any[]>(response) || []);
     } catch (error) {
       console.error('Error fetching conversations:', error);
     } finally {
@@ -32,7 +31,7 @@ const Messaging = () => {
   const fetchMessages = async (conversationId: string) => {
     try {
       const response = await api.get(`/messages/${conversationId}`);
-      setMessages(response.data.data || response.data);
+      setMessages(unwrapApiData<any[]>(response) || []);
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
@@ -54,15 +53,18 @@ const Messaging = () => {
     try {
       const partner = activeChat.partner || activeChat.participants?.find((p: any) => p.user.id !== user?.id)?.user;
       if (!partner) return;
-      
+
       const response = await api.post('/messages', {
         receiverId: partner.id,
-        content: newMessage
+        content: newMessage.trim()
       });
-      setMessages([...messages, response.data.data || response.data]);
+      const sentMessage = unwrapApiData<any>(response);
+      setMessages((prev) => [...prev, sentMessage]);
       setNewMessage('');
+      await fetchConversations();
     } catch (error) {
       console.error('Error sending message:', error);
+      alert(getApiErrorMessage(error, 'Impossible d\'envoyer le message pour le moment.'));
     }
   };
 
@@ -71,14 +73,14 @@ const Messaging = () => {
   return (
     <div className="flex min-h-screen bg-[#F8FAFC]">
       <Sidebar />
-      
-      <main className="flex-1 flex overflow-hidden h-screen layout-main transition-all duration-300">
-        <div className="flex-1 flex bg-white overflow-hidden m-4 rounded-[2.5rem] shadow-premium border border-slate-100">
+
+      <main className="flex-1 flex overflow-hidden h-screen layout-main transition-all duration-300 px-2 py-2 sm:px-4 sm:py-4">
+        <div className="flex-1 flex flex-col md:flex-row bg-white overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] shadow-premium border border-slate-100 min-h-0">
           
           {/* Conversations List */}
-          <aside className={`w-full md:w-96 border-r border-slate-50 flex flex-col ${activeChat ? 'hidden md:flex' : 'flex'}`}>
-            <div className="p-8 border-b border-slate-50">
-              <h1 className="text-3xl font-black text-slate-900 mb-8">Messages</h1>
+          <aside className={`w-full md:w-96 border-b md:border-b-0 md:border-r border-slate-50 flex flex-col ${activeChat ? 'hidden md:flex' : 'flex'}`}>
+            <div className="p-4 sm:p-8 border-b border-slate-50">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mb-4 sm:mb-8">Messages</h1>
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
@@ -125,7 +127,7 @@ const Messaging = () => {
           <section className={`flex-1 flex flex-col min-w-0 bg-slate-50/30 ${!activeChat ? 'hidden md:flex items-center justify-center' : 'flex'}`}>
             {activeChat ? (
               <>
-                <header className="p-6 bg-white border-b border-slate-50 flex items-center justify-between">
+                <header className="p-4 sm:p-6 bg-white border-b border-slate-50 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <button onClick={() => setActiveChat(null)} className="md:hidden p-2 text-slate-400">
                       <ArrowLeft size={20} />
@@ -148,10 +150,10 @@ const Messaging = () => {
                   </div>
                 </header>
 
-                <div className="flex-1 overflow-y-auto p-8 space-y-6">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-4 sm:space-y-6">
                   {messages.map((msg) => (
                     <div key={msg.id} className={`flex ${msg.senderId === user.id ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[70%] p-6 rounded-[2rem] shadow-sm ${
+                      <div className={`max-w-[85%] sm:max-w-[70%] p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] shadow-sm ${
                         msg.senderId === user.id 
                           ? 'bg-slate-900 text-white rounded-tr-none' 
                           : 'bg-white text-slate-900 rounded-tl-none border border-slate-50'
@@ -165,8 +167,8 @@ const Messaging = () => {
                   ))}
                 </div>
 
-                <div className="p-8 bg-white border-t border-slate-50">
-                  <form onSubmit={handleSendMessage} className="flex items-center gap-4 bg-slate-50 p-2 rounded-3xl">
+                <div className="p-4 sm:p-8 bg-white border-t border-slate-50">
+                  <form onSubmit={handleSendMessage} className="flex items-center gap-2 sm:gap-4 bg-slate-50 p-2 rounded-2xl sm:rounded-3xl">
                     <button type="button" className="p-4 text-slate-400 hover:text-elite-emerald transition-all">
                       <Paperclip size={20} />
                     </button>
