@@ -18,6 +18,8 @@ interface User {
   bio?: string;
   localisation?: string;
   telephone?: string;
+  verificationStatus?: 'PENDING' | 'VERIFIED' | 'REJECTED';
+  rejectionReason?: string;
   media?: Media[];
 }
 

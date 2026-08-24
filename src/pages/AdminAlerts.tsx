@@ -10,6 +10,7 @@ interface ReportData {
   id: string;
   type: string;
   reason: string;
+  description?: string;
   status: string;
   createdAt: string;
   reporter: {
@@ -99,6 +100,9 @@ const AdminAlerts = () => {
                     <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{alert.type} • #{alert.id.slice(0, 8)}</span>
                   </div>
                   <h3 className="text-xl font-black text-slate-900">{alert.reason}</h3>
+                  {alert.description && (
+                    <p className="text-sm text-slate-600 bg-slate-50 rounded-2xl p-4 border border-slate-100">{alert.description}</p>
+                  )}
                   <div className="flex items-center gap-6 text-[10px] font-black uppercase text-slate-400 tracking-widest">
                     <span className="flex items-center gap-2 italic"><User size={12} /> Par: {alert.reporter.nom} {alert.reporter.prenom}</span>
                     <span className="flex items-center gap-2 italic"><AlertCircle size={12} /> Cible ID: {alert.targetId.slice(0, 8)}</span>

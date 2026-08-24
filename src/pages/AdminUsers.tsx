@@ -15,6 +15,8 @@ interface UserData {
   role: string;
   createdAt: string;
   emailVerified: boolean;
+  verificationStatus?: 'PENDING' | 'VERIFIED' | 'REJECTED';
+  rejectionReason?: string | null;
   deletedAt: string | null;
 }
 
@@ -59,6 +61,26 @@ const AdminUsers = () => {
       fetchUsers();
     } catch (error) {
       console.error('Error restoring user:', error);
+    }
+  };
+
+  const handleVerify = async (userId: string) => {
+    try {
+      await api.patch(`/admin/users/${userId}/verify`);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error verifying user:', error);
+    }
+  };
+
+  const handleReject = async (userId: string) => {
+    const reason = window.prompt('Raison du refus du profil ?', 'Profil non conforme aux exigences de la plateforme.');
+    if (!reason) return;
+    try {
+      await api.patch(`/admin/users/${userId}/reject`, { reason });
+      fetchUsers();
+    } catch (error) {
+      console.error('Error rejecting user:', error);
     }
   };
 
@@ -122,6 +144,7 @@ const AdminUsers = () => {
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Utilisateur</th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Rôle</th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Statut</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Validation</th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Inscription</th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right px-12">Actions</th>
                 </tr>
@@ -176,11 +199,41 @@ const AdminUsers = () => {
                         )}
                       </div>
                     </td>
+                    <td className="px-8 py-6 text-center">
+                      {item.role === 'PRESTATAIRE' ? (
+                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                          item.verificationStatus === 'VERIFIED' ? 'bg-emerald-100 text-emerald-700' :
+                          item.verificationStatus === 'REJECTED' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                        }`}>
+                          {item.verificationStatus || 'PENDING'}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest">N/A</span>
+                      )}
+                    </td>
                     <td className="px-8 py-6 text-xs text-slate-500 font-bold">
                       {new Date(item.createdAt).toLocaleDateString('fr-FR')}
                     </td>
                     <td className="px-8 py-6 text-right px-12">
                       <div className="flex items-center justify-end gap-2">
+                        {item.role === 'PRESTATAIRE' && item.verificationStatus !== 'VERIFIED' && !item.deletedAt && (
+                          <>
+                            <button 
+                              onClick={() => handleVerify(item.id)}
+                              className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                              title="Valider le profil"
+                            >
+                              <CheckCircle2 size={18} />
+                            </button>
+                            <button 
+                              onClick={() => handleReject(item.id)}
+                              className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                              title="Refuser le profil"
+                            >
+                              <XCircle size={18} />
+                            </button>
+                          </>
+                        )}
                         {item.deletedAt ? (
                           <button 
                             onClick={() => handleRestore(item.id)}

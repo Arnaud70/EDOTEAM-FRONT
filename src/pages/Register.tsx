@@ -24,6 +24,8 @@ const Register = () => {
   const [services, setServices] = useState<any[]>([]);
   const [isOtherSpecialite, setIsOtherSpecialite] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationMessage, setLocationMessage] = useState('');
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -57,6 +59,7 @@ const Register = () => {
         role,
         region,
         specialite: role === 'PRESTATAIRE' ? specialite : undefined,
+        ...coordinates,
       });
       navigate('/complete-profile');
     } catch (err: any) {
@@ -67,6 +70,21 @@ const Register = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationMessage('La géolocalisation n’est pas disponible.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setCoordinates({ latitude: coords.latitude, longitude: coords.longitude });
+        setLocationMessage('Position enregistrée pour la recherche de proximité.');
+      },
+      () => setLocationMessage('Autorisez la localisation pour activer la géolocalisation.'),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   const handleGoogleLogin = () => {
@@ -187,6 +205,10 @@ const Register = () => {
                     placeholder="Lomé, Maritime..." 
                   />
                 </div>
+                <button type="button" onClick={useCurrentLocation} className="mt-3 flex items-center gap-2 text-xs font-black text-elite-emerald hover:underline">
+                  <MapPin size={16} /> Utiliser ma position actuelle
+                </button>
+                {locationMessage && <p className="mt-2 text-xs font-bold text-slate-500">{locationMessage}</p>}
               </div>
             </div>
 

@@ -1,18 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { Heart, Search, Star, MapPin, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import PageHeader from '../components/PageHeader';
 
 const Favorites = () => {
   const { user } = useAuth();
 
-  // Mock favorites
-  const favorites = [
-    { id: 1, name: "Koffi Mensah", service: "Électricien Expert", rating: 4.8, reviews: 124, price: "5000 F/h", location: "Lomé" },
-    { id: 2, name: "Afiwa Dogbe", service: "Nettoyage Premium", rating: 4.9, reviews: 89, price: "8000 F/h", location: "Kpalimé" },
-  ];
+  const [favorites, setFavorites] = useState<any[]>([]);
+
+  useEffect(() => {
+    api.get('/users/favorites').then((response) => setFavorites(response.data?.data || response.data || [])).catch(() => setFavorites([]));
+  }, []);
 
   if (!user) return null;
 
@@ -28,9 +30,12 @@ const Favorites = () => {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {favorites.map((fav, index) => (
+          {favorites.map((favorite, index) => {
+            const fav = favorite.provider;
+            const rating = fav.receivedReviews?.length ? (fav.receivedReviews.reduce((sum: number, review: any) => sum + review.note, 0) / fav.receivedReviews.length).toFixed(1) : '5.0';
+            return (
             <motion.div 
-              key={fav.id}
+              key={favorite.id}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.1 }}
@@ -41,31 +46,33 @@ const Favorites = () => {
               </div>
 
               <div className="w-16 h-16 bg-slate-100 rounded-3xl flex items-center justify-center font-black text-slate-300 text-xl mb-6">
-                {fav.name[0]}
+                {(fav.prenom || fav.nom || '?')[0]}
               </div>
 
-              <h3 className="text-xl font-black text-slate-900 mb-1">{fav.name}</h3>
-              <p className="text-elite-emerald font-bold text-sm mb-6">{fav.service}</p>
+              <h3 className="text-xl font-black text-slate-900 mb-1">{fav.prenom} {fav.nom}</h3>
+              <p className="text-elite-emerald font-bold text-sm mb-6">{fav.titreProfessionnel || 'Expert Prestataire'}</p>
 
               <div className="flex items-center gap-6 mb-8">
                 <div className="flex items-center gap-1">
                     <Star size={14} className="text-elite-gold fill-elite-gold" />
-                    <span className="text-xs font-black text-slate-900">{fav.rating}</span>
+                    <span className="text-xs font-black text-slate-900">{rating}</span>
                 </div>
                 <div className="flex items-center gap-1 text-slate-400">
                     <MapPin size={14} />
-                    <span className="text-xs font-bold">{fav.location}</span>
+                    <span className="text-xs font-bold">{fav.localisation || 'Lomé'}</span>
                 </div>
               </div>
 
               <div className="flex items-center justify-between pt-6 border-t border-slate-50">
                 <p className="font-black text-slate-950 uppercase text-sm">{fav.price}</p>
-                <button className="flex items-center gap-2 text-[10px] font-black uppercase text-elite-emerald hover:gap-4 transition-all">
+                <Link to={`/profile/${fav.id}`} className="flex items-center gap-2 text-[10px] font-black uppercase text-elite-emerald hover:gap-4 transition-all">
                     Réserver <ArrowRight size={14} />
-                </button>
+                </Link>
               </div>
             </motion.div>
-          ))}
+            );
+          })}
+          {favorites.length === 0 && <p className="col-span-full py-20 text-center font-bold text-slate-400">Aucun prestataire dans vos favoris.</p>}
         </div>
       </main>
     </div>

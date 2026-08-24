@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Phone, MapPin, Briefcase, ArrowRight, ShieldCheck, ChevronDown, Zap, ListPlus } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Briefcase, ArrowRight, ShieldCheck, ChevronDown, Zap, ListPlus, Lock } from 'lucide-react';
 import Logo from '../components/Logo';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -16,9 +16,13 @@ const CompleteProfile = () => {
   const [telephone, setTelephone] = useState(user?.telephone ?? '');
   const [localisation, setLocalisation] = useState(user?.localisation ?? '');
   const [specialite, setSpecialite] = useState(user?.titreProfessionnel ?? '');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isOtherSpecialite, setIsOtherSpecialite] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [services, setServices] = useState<any[]>([]);
+  const [locationMessage, setLocationMessage] = useState('');
+  const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -42,13 +46,28 @@ const CompleteProfile = () => {
     e.preventDefault();
     setError(null);
 
+    if (password && password.length < 6) {
+      setError('Le mot de passe doit contenir au moins 6 caractères.');
+      return;
+    }
+
+    if (password && password !== confirmPassword) {
+      setError('Les mots de passe ne correspondent pas.');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const payload: any = {
         role,
         telephone,
         localisation,
+        ...coordinates,
       };
+
+      if (password) {
+        payload.motDePasse = password;
+      }
 
       if (role === 'PRESTATAIRE') {
         payload.titreProfessionnel = specialite;
@@ -57,7 +76,7 @@ const CompleteProfile = () => {
       const response = await api.patch('/users/profile', payload);
       const updatedUser = response.data?.data ?? response.data;
       updateUser(updatedUser);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err: any) {
       console.error('Error completing profile:', err);
       const backendError = err.response?.data?.error?.message || err.response?.data?.message || 'Erreur lors de la mise à jour du profil.';
@@ -65,6 +84,21 @@ const CompleteProfile = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationMessage('La géolocalisation n’est pas disponible.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setCoordinates({ latitude: coords.latitude, longitude: coords.longitude });
+        setLocationMessage('Position enregistrée.');
+      },
+      () => setLocationMessage('Autorisez la localisation pour enregistrer votre zone d’intervention.'),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   return (
@@ -82,6 +116,11 @@ const CompleteProfile = () => {
         <p className="text-slate-500 font-medium text-lg max-w-md mx-auto">
           Même page que l'inscription, avec les champs client / prestataire adaptés.
         </p>
+        {role === 'PRESTATAIRE' && (
+          <p className="mt-4 text-sm font-bold text-elite-gold uppercase tracking-[0.18em]">
+            Votre profil sera validé par le super admin avant publication.
+          </p>
+        )}
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-xl relative z-10">
@@ -189,8 +228,38 @@ const CompleteProfile = () => {
                     placeholder="Lomé, Maritime..."
                   />
                 </div>
+                <button type="button" onClick={useCurrentLocation} className="mt-3 flex items-center gap-2 text-xs font-black text-elite-emerald hover:underline">
+                  <MapPin size={16} /> Utiliser ma position actuelle
+                </button>
+                {locationMessage && <p className="mt-2 text-xs font-bold text-slate-500">{locationMessage}</p>}
               </div>
-              <div />
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.3em]">Mot de passe</label>
+                <div className="relative group">
+                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.3em]">Valider le mot de passe</label>
+              <div className="relative group">
+                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300"
+                  placeholder="Répétez le mot de passe"
+                />
+              </div>
             </div>
 
             {role === 'PRESTATAIRE' && (

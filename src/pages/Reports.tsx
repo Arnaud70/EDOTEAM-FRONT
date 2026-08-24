@@ -3,21 +3,8 @@ import Sidebar, { MobileMenuButton } from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { motion } from 'framer-motion';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-} from 'recharts';
+import { Suspense, lazy } from 'react';
+const ReportsCharts = lazy(() => import('./ReportsCharts'));
 import { Download, Filter, TrendingUp, Calendar, ArrowUpRight, Loader2 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
@@ -43,22 +30,6 @@ const groupByMonth = (items: any[], dateKey: string, valueKey: string) => {
 };
 
 const unwrapResponse = (response: any) => response?.data?.data ?? response?.data ?? response;
-
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-white p-4 rounded-xl shadow-xl border border-slate-100">
-        <p className="font-black text-slate-900 mb-2">{label}</p>
-        {payload.map((entry: any, index: number) => (
-          <p key={index} className="text-sm font-bold" style={{ color: entry.color }}>
-            {entry.name}: {Number(entry.value ?? 0).toLocaleString('fr-FR')} F
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
 
 const Reports = () => {
   const { user } = useAuth();
@@ -257,89 +228,11 @@ const Reports = () => {
           </div>
         </div>
 
-        {/* Charts Section */}
+        {/* Charts Section (lazy-loaded to reduce initial bundle) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 glass-card p-8 rounded-[2.5rem] bg-white">
-            <h3 className="text-lg font-black text-slate-900 mb-8">{chartTitle}</h3>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                {role === 'ADMIN' ? (
-                  <AreaChart data={filteredChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#064e3b" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#064e3b" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 'bold' }} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 'bold' }} />
-                    <RechartsTooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="revenue" name="Revenus" stroke="#064e3b" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
-                  </AreaChart>
-                ) : role === 'PRESTATAIRE' ? (
-                  <BarChart data={filteredChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 'bold' }} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 'bold' }} />
-                    <RechartsTooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
-                    <Bar dataKey="revenue" name="Gains (F)" fill="#064e3b" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                ) : (
-                  <AreaChart data={filteredChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorDep" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2} />
-                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 'bold' }} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8', fontWeight: 'bold' }} />
-                    <RechartsTooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="value" name="Dépenses" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorDep)" />
-                  </AreaChart>
-                )}
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="glass-card p-8 rounded-[2.5rem] bg-white flex flex-col">
-            <h3 className="text-lg font-black text-slate-900 mb-8">Répartition des Services</h3>
-            <div className="flex-1 flex flex-col justify-center items-center">
-              {serviceDistribution.length > 0 ? (
-                <>
-                  <div className="h-[220px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={serviceDistribution} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value" stroke="none">
-                          {serviceDistribution.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <RechartsTooltip content={<CustomTooltip />} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="w-full mt-4 space-y-3">
-                    {serviceDistribution.map((entry, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                          <span className="text-xs font-bold text-slate-600">{entry.name}</span>
-                        </div>
-                        <span className="text-xs font-black text-slate-900">{entry.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="py-10 text-center text-slate-400">
-                  <p className="text-sm font-semibold">Pas encore assez de données pour afficher la répartition des services.</p>
-                </div>
-              )}
-            </div>
-          </div>
+          <Suspense fallback={<div className="lg:col-span-2 col-span-1 flex items-center justify-center h-48"><Loader2 className="animate-spin text-emerald-600" size={28} /></div>}>
+            <ReportsCharts role={role} filteredChartData={filteredChartData} chartTitle={chartTitle} serviceDistribution={serviceDistribution} />
+          </Suspense>
         </div>
       </main>
     </div>

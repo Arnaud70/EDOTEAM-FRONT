@@ -9,6 +9,23 @@ const ServiceList = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState(searchParams.get('q') || '');
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationError, setLocationError] = useState('');
+
+  const findNearbyProviders = () => {
+    if (!navigator.geolocation) {
+      setLocationError('La géolocalisation n’est pas disponible sur cet appareil.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setUserLocation({ latitude: coords.latitude, longitude: coords.longitude });
+        setLocationError('');
+      },
+      () => setLocationError('Autorisez la localisation pour afficher les prestataires proches.'),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   // Mettre à jour search quand l'URL change
   useEffect(() => {
@@ -39,7 +56,7 @@ const ServiceList = () => {
       setIsLoading(true);
       try {
         const response = await api.get('/users/search', {
-          params: { q: search }
+          params: { q: search, ...userLocation }
         });
         setPrestataires(response.data.data || response.data);
       } catch (error) {
@@ -54,7 +71,7 @@ const ServiceList = () => {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [search]);
+  }, [search, userLocation]);
 
   return (
     <div className="pt-32 pb-24 bg-[#F8FAFC]">
@@ -81,10 +98,39 @@ const ServiceList = () => {
             <button className="p-4 bg-slate-900 text-white rounded-2xl hover:bg-elite-emerald transition-all shadow-xl group">
               <SlidersHorizontal size={22} className="group-hover:text-elite-gold" />
             </button>
+            <button onClick={findNearbyProviders} title="Afficher les prestataires proches" className={`p-4 rounded-2xl transition-all shadow-xl ${userLocation ? 'bg-elite-emerald text-white' : 'bg-white text-slate-900 border border-slate-200 hover:border-elite-emerald'}`}>
+              <MapPin size={22} />
+            </button>
           </div>
         </div>
+        {locationError && <p className="mb-8 text-sm font-bold text-amber-700">{locationError}</p>}
 
-        {/* Categories removed from Explorer as requested */}
+        {/* Categories Section */}
+        <div className="mb-12 flex flex-wrap gap-3">
+          <button
+            onClick={() => setSearch('')}
+            className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all ${
+              search === ''
+                ? 'bg-elite-emerald text-white'
+                : 'bg-white border border-slate-200 text-slate-600 hover:border-elite-emerald hover:text-elite-emerald'
+            }`}
+          >
+            Tous les services
+          </button>
+          {categories.map(category => (
+            <button
+              key={category.id}
+              onClick={() => setSearch(category.nom)}
+              className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all ${
+                search === category.nom
+                  ? 'bg-elite-emerald text-white'
+                  : 'bg-white border border-slate-200 text-slate-600 hover:border-elite-emerald hover:text-elite-emerald'
+              }`}
+            >
+              {category.nom}
+            </button>
+          ))}
+        </div>
 
         {isLoading ? (
           <div className="col-span-full py-20 flex flex-col items-center justify-center">
@@ -143,6 +189,7 @@ const ServiceList = () => {
                       <div className="flex items-center gap-3 text-slate-400 text-sm font-bold uppercase tracking-widest">
                         <MapPin size={18} className="text-elite-gold" />
                         <span>{p.localisation || "Lomé"}</span>
+                        {p.distanceKm != null && <span className="text-elite-emerald">· {p.distanceKm.toFixed(1)} km</span>}
                       </div>
                       <div className="text-xl font-black text-slate-900 tracking-tight">
                         {priceDisplay}

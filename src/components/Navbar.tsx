@@ -60,7 +60,6 @@ const Navbar = () => {
   const handleCategoryClick = (serviceName: string) => {
     navigate(`/services?q=${encodeURIComponent(serviceName)}`);
     setIsMenuOpen(false);
-    setIsCategoriesOpen(false);
   };
 
   return (
@@ -82,34 +81,6 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-10">
             <Link to="/" className="text-slate-600 hover:text-elite-emerald font-semibold transition-colors text-sm uppercase tracking-wider">Accueil</Link>
             <Link to="/services" className="text-slate-600 hover:text-elite-emerald font-semibold transition-colors text-sm uppercase tracking-wider">Explorer</Link>
-            
-            {/* Categories Dropdown */}
-            <div className="relative">
-              <button 
-                onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
-                className="text-slate-600 hover:text-elite-emerald font-semibold transition-colors text-sm uppercase tracking-wider flex items-center gap-1"
-              >
-                Catégories
-                <ChevronDown size={16} className={`transition-transform ${isCategoriesOpen ? 'rotate-180' : ''}`} />
-              </button>
-              
-              {/* Dropdown Menu */}
-              <div className={`absolute left-0 mt-2 w-72 bg-white rounded-2xl shadow-premium border border-slate-100 transition-all duration-300 py-2 z-50 max-h-96 overflow-y-auto ${isCategoriesOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
-                {services.length === 0 ? (
-                  <div className="px-6 py-4 text-slate-500 text-sm">Chargement des catégories...</div>
-                ) : (
-                  services.map(service => (
-                    <button
-                      key={service.id}
-                      onClick={() => handleCategoryClick(service.nom)}
-                      className="w-full px-6 py-2.5 text-left text-slate-700 hover:bg-elite-emerald/10 hover:text-elite-emerald font-semibold transition-colors text-sm"
-                    >
-                      {service.nom}
-                    </button>
-                  ))
-                )}
-              </div>
-            </div>
             
             <button 
               onClick={handleConceptClick}

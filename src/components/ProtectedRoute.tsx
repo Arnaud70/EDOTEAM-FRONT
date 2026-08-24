@@ -8,6 +8,18 @@ interface ProtectedRouteProps {
   allowedRoles?: ('CLIENT' | 'PRESTATAIRE' | 'ADMIN')[];
 }
 
+const isUserProfileComplete = (user: any) => {
+  if (!user || user.role === 'ADMIN') {
+    return true;
+  }
+
+  const hasPhone = !!user.telephone && user.telephone.trim().length > 0;
+  const hasLocation = !!user.localisation && user.localisation.trim().length > 0;
+  const hasProfessionalTitle = user.role !== 'PRESTATAIRE' || (!!user.titreProfessionnel && user.titreProfessionnel.trim().length > 0);
+
+  return hasPhone && hasLocation && hasProfessionalTitle;
+};
+
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
   const { isAuthenticated, user, isLoading } = useAuth();
   const location = useLocation();
@@ -22,6 +34,26 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  const requiresProfileCompletion = !!user &&
+    location.pathname !== '/complete-profile' &&
+    !isUserProfileComplete(user) &&
+    (
+      location.pathname.startsWith('/dashboard') ||
+      location.pathname.startsWith('/messages') ||
+      location.pathname.startsWith('/admin') ||
+      location.pathname.startsWith('/provider') ||
+      location.pathname.startsWith('/bookings') ||
+      location.pathname.startsWith('/wallet') ||
+      location.pathname.startsWith('/security') ||
+      location.pathname.startsWith('/favorites') ||
+      location.pathname.startsWith('/settings') ||
+      location.pathname.startsWith('/reports')
+    );
+
+  if (requiresProfileCompletion) {
+    return <Navigate to="/complete-profile" replace />;
   }
 
   if (allowedRoles && user && !allowedRoles.some(role => role.toUpperCase() === (user.role?.toUpperCase() || ''))) {

@@ -76,9 +76,11 @@ const Settings = () => {
 
     // Filter out empty optional fields to avoid validation errors
     const cleanedData = Object.entries(formData).reduce((acc, [key, value]) => {
-      if (key === 'photoUrl' && value === '') return acc;
+      if (key === 'photoUrl' && value === '') {
+        return { ...acc, photoUrl: null };
+      }
       return { ...acc, [key]: value };
-    }, {});
+    }, {} as Record<string, any>);
 
     try {
       const response = await api.patch('/users/profile', cleanedData);

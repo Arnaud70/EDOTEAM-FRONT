@@ -116,9 +116,10 @@ const Sidebar = () => {
         {mobile ? (
           <button
             onClick={closeMobile}
+            title="Réduire le menu"
             className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all flex-shrink-0"
           >
-            <X size={18} />
+            <ChevronLeft size={18} />
           </button>
         ) : (
           <button
@@ -256,10 +257,10 @@ export const MobileMenuButton = () => {
   return (
     <button
       onClick={toggleMobile}
-      className="lg:hidden p-3 bg-elite-emerald text-white rounded-xl shadow-lg hover:bg-elite-emerald/90 transition-all active:scale-95"
-      title="Ouvrir le menu"
+      className="lg:hidden w-10 h-10 flex items-center justify-center bg-elite-emerald text-white rounded-xl shadow-lg hover:bg-elite-emerald/90 transition-all active:scale-95"
+      title="Afficher le menu"
     >
-      <Menu size={22} />
+      <span className="text-xl font-black leading-none">›</span>
     </button>
   );
 };

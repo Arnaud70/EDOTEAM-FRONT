@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapPin, Star, ShieldCheck, Clock, MessageSquare, Calendar, Phone, Share2, Heart, CheckCircle2, Award, Zap, Shield, Loader2, Flag, X } from 'lucide-react';
+import { MapPin, Star, ShieldCheck, Clock, MessageSquare, Calendar, Phone, Share2, Heart, CheckCircle2, Award, Zap, Shield, Loader2, Flag, X, ArrowLeft } from 'lucide-react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../services/api';
 import BookingModal from '../components/BookingModal';
@@ -52,7 +52,19 @@ const PrestataireProfile = () => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
   const [isAvisModalOpen, setIsAvisModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportTarget, setReportTarget] = useState<{ avisId?: string; targetUserId?: string }>({});
+  const [isFavorite, setIsFavorite] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [reportReason, setReportReason] = useState('Profil suspect');
+  const [reportDetails, setReportDetails] = useState('');
+  const reportReasons = [
+    'Profil suspect',
+    'Frauduleux / arnaque',
+    'Comportement abusif',
+    'Contenu inapproprié',
+    'Autre',
+  ];
 
   useEffect(() => {
     const fetchProvider = async () => {
@@ -70,6 +82,32 @@ const PrestataireProfile = () => {
 
     if (id) fetchProvider();
   }, [id]);
+
+  useEffect(() => {
+    if (!user || !id) return;
+    api.get('/users/favorites').then((response) => {
+      const favorites = response.data?.data || response.data || [];
+      setIsFavorite(favorites.some((favorite: any) => (favorite.providerId || favorite.provider?.id) === id));
+    }).catch(() => undefined);
+  }, [id, user]);
+
+  const toggleFavorite = async () => {
+    if (!provider) return;
+    if (!user) {
+      navigate('/login', { state: { from: `/profile/${id}` } });
+      return;
+    }
+    try {
+      if (isFavorite) {
+        await api.delete(`/users/favorites/${provider.id}`);
+      } else {
+        await api.post(`/users/favorites/${provider.id}`);
+      }
+      setIsFavorite(!isFavorite);
+    } catch (err) {
+      alert('Impossible de modifier vos favoris.');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -105,6 +143,31 @@ const PrestataireProfile = () => {
     ? Math.min(...provider.services.map(s => parseFloat(s.prixIndicatif) || 0))
     : 0;
 
+  const handleReport = async (target: { avisId?: string; messageId?: string; targetUserId?: string }, fallbackMessage: string) => {
+    if (!user) {
+      navigate('/login', { state: { from: `/profile/${id}` } });
+      return;
+    }
+
+    const finalReason = reportReason === 'Autre' ? (reportDetails || 'Autre motif') : reportReason;
+    const finalDescription = reportReason === 'Autre' ? reportDetails : (reportDetails || fallbackMessage);
+
+    if (!window.confirm('Voulez-vous vraiment signaler ce contenu à l\'administration ?')) return;
+
+    try {
+      await api.post('/reports', {
+        motif: finalReason,
+        description: finalDescription,
+        ...target,
+      });
+      alert('Signalement envoyé à l\'administration avec succès.');
+      setReportDetails('');
+      setReportReason('Profil suspect');
+    } catch (err) {
+      alert('Erreur lors du signalement.');
+    }
+  };
+
   const gallery = provider.media.filter(m => m.type === 'WORK').map(m => m.url);
   const defaultGallery = [
     "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=1200&auto=format&fit=crop",
@@ -118,6 +181,15 @@ const PrestataireProfile = () => {
     <div className="pt-32 pb-24 bg-[#F8FAFC] min-h-screen">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         
+        {/* Back Button */}
+        <button
+          onClick={() => navigate('/services')}
+          className="mb-8 flex items-center gap-2 px-4 py-2.5 bg-white text-slate-600 rounded-lg border border-slate-200 hover:border-elite-emerald hover:text-elite-emerald transition-all font-bold text-sm uppercase tracking-wider"
+        >
+          <ArrowLeft size={18} />
+          Retour à l'explorer
+        </button>
+        
         {/* Elite Profile Header */}
         <div className="bg-white rounded-[4rem] border border-slate-100 overflow-hidden shadow-premium mb-12 relative group">
           <div className="h-80 bg-elite-emerald relative overflow-hidden">
@@ -129,28 +201,11 @@ const PrestataireProfile = () => {
               <button className="p-4 bg-white/10 backdrop-blur-xl text-white rounded-2xl hover:bg-white hover:text-elite-emerald transition-all shadow-xl">
                 <Share2 size={20} />
               </button>
-              <button className="p-4 bg-white/10 backdrop-blur-xl text-white rounded-2xl hover:bg-white hover:text-red-500 transition-all shadow-xl">
-                <Heart size={20} />
+              <button onClick={toggleFavorite} className="p-4 bg-white/10 backdrop-blur-xl text-white rounded-2xl hover:bg-white hover:text-red-500 transition-all shadow-xl" title="Ajouter aux favoris">
+                <Heart size={20} fill={isFavorite ? 'currentColor' : 'none'} />
               </button>
               <button 
-                onClick={async () => {
-                  if (!user) {
-                    navigate('/login', { state: { from: `/profile/${id}` } });
-                    return;
-                  }
-                  if (window.confirm('Voulez-vous vraiment signaler ce profil à l\'administration ?')) {
-                    try {
-                      await api.post('/reports', {
-                        motif: 'Profil suspect',
-                        description: 'Signalement direct du profil prestataire',
-                        targetUserId: provider.id
-                      });
-                      alert('Profil signalé avec succès. Merci de votre vigilance.');
-                    } catch (err) {
-                      alert('Erreur lors du signalement du profil.');
-                    }
-                  }
-                }}
+                onClick={() => { setReportTarget({ targetUserId: provider.id }); setIsReportModalOpen(true); }}
                 className="p-4 bg-white/10 backdrop-blur-xl text-white rounded-2xl hover:bg-white hover:text-red-500 transition-all shadow-xl"
                 title="Signaler ce profil"
               >
@@ -237,6 +292,41 @@ const PrestataireProfile = () => {
           </div>
         )}
 
+        {isReportModalOpen && <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4" onClick={() => setIsReportModalOpen(false)}>
+          <div className="pointer-events-auto w-full max-w-2xl rounded-[2rem] border border-slate-200 bg-white/95 p-5 shadow-2xl backdrop-blur-xl" onClick={(event) => event.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-black text-slate-900">Signaler ce profil</h2>
+              <button onClick={() => setIsReportModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-900"><X size={20} /></button>
+            </div>
+            <div className="flex flex-col md:flex-row gap-4 md:items-end">
+              <div className="flex-1">
+                <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Motif du signalement</label>
+                <select
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:border-elite-emerald"
+                >
+                  {reportReasons.map((reason) => (
+                    <option key={reason} value={reason}>{reason}</option>
+                  ))}
+                </select>
+              </div>
+              {reportReason === 'Autre' && (
+                <div className="flex-1">
+                  <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Précisez le motif</label>
+                  <input
+                    value={reportDetails}
+                    onChange={(e) => setReportDetails(e.target.value)}
+                    placeholder="Expliquez brièvement le problème"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:border-elite-emerald"
+                  />
+                </div>
+              )}
+            </div>
+            <button onClick={async () => { await handleReport(reportTarget, reportTarget.avisId ? 'Signalement depuis le profil prestataire' : 'Signalement direct du profil prestataire'); setIsReportModalOpen(false); }} className="mt-5 w-full rounded-2xl bg-slate-900 px-5 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-elite-emerald">Envoyer le signalement</button>
+          </div>
+        </div>}
+
         <BookingModal 
           isOpen={isBookingModalOpen} 
           onClose={() => setIsBookingModalOpen(false)} 
@@ -321,6 +411,12 @@ const PrestataireProfile = () => {
                   >
                     Laisser un avis
                   </button>
+                  <button
+                    onClick={() => { setReportTarget({ targetUserId: provider.id }); setIsReportModalOpen(true); }}
+                    className="px-6 py-3 border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-red-50 transition-all"
+                  >
+                    Signaler
+                  </button>
                   <div className="flex items-center gap-3 px-6 py-3 bg-elite-gold/10 rounded-2xl font-black text-elite-emerald">
                     <Star size={24} className="text-elite-gold" fill="currentColor" />
                     {averageRating}
@@ -353,22 +449,7 @@ const PrestataireProfile = () => {
                     <div className="flex justify-between items-end">
                       <p className="text-slate-600 font-medium italic text-lg leading-relaxed flex-1">"{rev.commentaire}"</p>
                       <button 
-                        onClick={async () => {
-                          if (!user) {
-                            navigate('/login', { state: { from: `/profile/${id}` } });
-                            return;
-                          }
-                          try {
-                            await api.post('/reports', {
-                              motif: 'Contenu inapproprié',
-                              description: 'Signalement depuis le profil prestataire',
-                              avisId: rev.id
-                            });
-                            alert('Signalement envoyé à l\'administration pour analyse avec succès.');
-                          } catch (err) {
-                            alert('Une erreur est survenue lors de l\'envoi du signalement.');
-                          }
-                        }}
+                        onClick={() => { setReportTarget({ avisId: rev.id }); setIsReportModalOpen(true); }}
                         className="text-[10px] font-black uppercase tracking-widest text-slate-300 hover:text-red-500 transition-colors ml-4"
                       >
                         Signaler

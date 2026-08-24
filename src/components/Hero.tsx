@@ -38,8 +38,8 @@ const Hero = () => {
             </h1>
             
             <p className="text-lg lg:text-xl text-slate-500 mb-12 leading-relaxed max-w-2xl font-medium">
-              Accédez à un réseau exclusif de professionnels vérifiés. 
-              De Lomé à Kara, l'assurance d'un service irréprochable pour votre domicile et bureau.
+              Accédez à un réseau exclusif de professionnels vérifiés.
+              De Lomé à Cékenssé, l'assurance d'un service irréprochable pour votre domicile et bureau.
             </p>
 
             {/* Premium Search Bar */}

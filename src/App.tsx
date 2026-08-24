@@ -1,13 +1,9 @@
-import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
+import React, { useEffect, Suspense, lazy, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, Link, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import FeaturedCategories from './components/FeaturedCategories';
 import HowItWorks from './components/HowItWorks';
-import ServiceList from './pages/ServiceList';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import PrestataireProfile from './pages/PrestataireProfile';
 import { AuthProvider } from './context/AuthContext';
 import { SidebarProvider } from './context/SidebarContext';
 import { MobileMenuButton } from './components/Sidebar';
@@ -16,29 +12,45 @@ import Logo from './components/Logo';
 import { MessageSquare } from 'lucide-react';
 import NotificationDropdown from './components/NotificationDropdown';
 import LoadingScreen from './components/LoadingScreen';
+import InstallationBanner from './components/InstallationBanner';
 import { useAuth } from './context/AuthContext';
 
-// Dashboard Pages
-import Dashboard from './pages/Dashboard';
-import Messaging from './pages/Messaging';
-import AdminUsers from './pages/AdminUsers';
-import AdminServices from './pages/AdminServices';
-import AdminAlerts from './pages/AdminAlerts';
-import Bookings from './pages/Bookings';
-import ProviderServices from './pages/ProviderServices';
-import Wallet from './pages/Wallet';
-import Security from './pages/Security';
-import Settings from './pages/Settings';
-import Favorites from './pages/Favorites';
-import AdminLogs from './pages/AdminLogs';
-import ProviderAvailability from './pages/ProviderAvailability';
-import Reports from './pages/Reports';
-import CompleteProfile from './pages/CompleteProfile';
+const ServiceList = lazy(() => import('./pages/ServiceList'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const PrestataireProfile = lazy(() => import('./pages/PrestataireProfile'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Messaging = lazy(() => import('./pages/Messaging'));
+const AdminUsers = lazy(() => import('./pages/AdminUsers'));
+const AdminServices = lazy(() => import('./pages/AdminServices'));
+const AdminAlerts = lazy(() => import('./pages/AdminAlerts'));
+const Bookings = lazy(() => import('./pages/Bookings'));
+const ProviderServices = lazy(() => import('./pages/ProviderServices'));
+const Wallet = lazy(() => import('./pages/Wallet'));
+const Security = lazy(() => import('./pages/Security'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Favorites = lazy(() => import('./pages/Favorites'));
+const AdminLogs = lazy(() => import('./pages/AdminLogs'));
+const ProviderAvailability = lazy(() => import('./pages/ProviderAvailability'));
+const Reports = lazy(() => import('./pages/Reports'));
+const CompleteProfile = lazy(() => import('./pages/CompleteProfile'));
 
 const DASHBOARD_PATHS = [
   '/dashboard', '/messages', '/admin', '/provider',
   '/bookings', '/wallet', '/security', '/favorites', '/settings', '/reports'
 ];
+
+const isUserProfileComplete = (user: any) => {
+  if (!user || user.role === 'ADMIN') {
+    return true;
+  }
+
+  const hasPhone = !!user.telephone && user.telephone.trim().length > 0;
+  const hasLocation = !!user.localisation && user.localisation.trim().length > 0;
+  const hasProfessionalTitle = user.role !== 'PRESTATAIRE' || (!!user.titreProfessionnel && user.titreProfessionnel.trim().length > 0);
+
+  return hasPhone && hasLocation && hasProfessionalTitle;
+};
 
 const Home = () => (
   <>
@@ -50,7 +62,9 @@ const Home = () => (
 
 const Footer = () => {
   const location = useLocation();
-  if (DASHBOARD_PATHS.some(p => location.pathname.startsWith(p))) return null;
+  const { user } = useAuth();
+  const shouldHideFooter = DASHBOARD_PATHS.some(p => location.pathname.startsWith(p)) || (!!user && !isUserProfileComplete(user));
+  if (shouldHideFooter) return null;
   return (
     <footer className="bg-white border-t border-slate-100 py-24 text-slate-900">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -111,15 +125,23 @@ const MobileDashboardHeader = () => {
   );
 };
 
+const PwaInstallPrompt = () => {
+  return null;
+};
+
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
-  const hideNavbar = DASHBOARD_PATHS.some(p => location.pathname.startsWith(p));
+  const { user } = useAuth();
+  const isProfileIncomplete = !!user && !isUserProfileComplete(user);
+  const hideNavbar = DASHBOARD_PATHS.some(p => location.pathname.startsWith(p)) || isProfileIncomplete;
+
   return (
     <div className="min-h-screen bg-white">
       {!hideNavbar && <Navbar />}
       <MobileDashboardHeader />
       <main>{children}</main>
       <Footer />
+      <InstallationBanner />
     </div>
   );
 };
@@ -151,7 +173,7 @@ const ScrollToTop = () => {
 };
 
 const AppContent = () => {
-  const { isLoading } = useAuth();
+  const { isLoading, user } = useAuth();
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -159,40 +181,57 @@ const AppContent = () => {
 
   return (
     <Router>
+      <AppRouter user={user} />
+    </Router>
+  );
+};
+
+const AppRouter = ({ user }: { user: any }) => {
+  const location = useLocation();
+  const isProfileIncomplete = !!user && !isUserProfileComplete(user);
+
+  if (isProfileIncomplete && location.pathname !== '/complete-profile') {
+    return <Navigate to="/complete-profile" replace />;
+  }
+
+  return (
+    <>
       <ScrollToTop />
       <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/services" element={<ServiceList />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
-          <Route path="/profile/:id" element={<PrestataireProfile />} />
+        <Suspense fallback={<LoadingScreen />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/services" element={<ServiceList />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
+            <Route path="/profile/:id" element={<PrestataireProfile />} />
 
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/messages" element={<ProtectedRoute><Messaging /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/messages" element={<ProtectedRoute><Messaging /></ProtectedRoute>} />
 
-          {/* Admin Routes */}
-          <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminUsers /></ProtectedRoute>} />
-          <Route path="/admin/services" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminServices /></ProtectedRoute>} />
-          <Route path="/admin/alerts" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminAlerts /></ProtectedRoute>} />
-          <Route path="/admin/logs" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminLogs /></ProtectedRoute>} />
-          <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['ADMIN']}><Settings /></ProtectedRoute>} />
+            {/* Admin Routes */}
+            <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminUsers /></ProtectedRoute>} />
+            <Route path="/admin/services" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminServices /></ProtectedRoute>} />
+            <Route path="/admin/alerts" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminAlerts /></ProtectedRoute>} />
+            <Route path="/admin/logs" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminLogs /></ProtectedRoute>} />
+            <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['ADMIN']}><Settings /></ProtectedRoute>} />
 
-          {/* Shared Routes */}
-          <Route path="/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
-          <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
-          <Route path="/security" element={<ProtectedRoute><Security /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-          <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+            {/* Shared Routes */}
+            <Route path="/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
+            <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+            <Route path="/security" element={<ProtectedRoute><Security /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
 
-          {/* Role Specific Routes */}
-          <Route path="/provider/services" element={<ProtectedRoute allowedRoles={['PRESTATAIRE']}><ProviderServices /></ProtectedRoute>} />
-          <Route path="/provider/availability" element={<ProtectedRoute allowedRoles={['PRESTATAIRE']}><ProviderAvailability /></ProtectedRoute>} />
-          <Route path="/favorites" element={<ProtectedRoute allowedRoles={['CLIENT']}><Favorites /></ProtectedRoute>} />
-        </Routes>
+            {/* Role Specific Routes */}
+            <Route path="/provider/services" element={<ProtectedRoute allowedRoles={['PRESTATAIRE']}><ProviderServices /></ProtectedRoute>} />
+            <Route path="/provider/availability" element={<ProtectedRoute allowedRoles={['PRESTATAIRE']}><ProviderAvailability /></ProtectedRoute>} />
+            <Route path="/favorites" element={<ProtectedRoute allowedRoles={['CLIENT']}><Favorites /></ProtectedRoute>} />
+          </Routes>
+        </Suspense>
       </Layout>
-    </Router>
+    </>
   );
 };
 

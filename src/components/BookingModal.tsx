@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, Calendar, Clock, MapPin, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -25,6 +25,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [busySlots, setBusySlots] = useState<Array<{ startTime: string; endTime: string; status: string }>>([]);
+  const [interventionLocation, setInterventionLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationError, setLocationError] = useState('');
   
   const [formData, setFormData] = useState({
     serviceId: '',
@@ -33,6 +36,76 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
     duration: '1', // in hours
     address: '',
   });
+
+  useEffect(() => {
+    if (!isOpen || !provider?.id || !formData.date) return;
+
+    const fetchBusySlots = async () => {
+      try {
+        const response = await api.get(`/bookings/provider/${provider.id}?date=${formData.date}`);
+        const data = response.data?.data || response.data || [];
+        setBusySlots(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Erreur lors du chargement des créneaux occupés:', err);
+      }
+    };
+
+    fetchBusySlots();
+  }, [isOpen, provider?.id, formData.date]);
+
+  const isSlotTaken = (startIso: string, endIso: string) => {
+    return busySlots.some((slot) => {
+      const slotStart = new Date(slot.startTime).getTime();
+      const slotEnd = new Date(slot.endTime).getTime();
+      const requestedStart = new Date(startIso).getTime();
+      const requestedEnd = new Date(endIso).getTime();
+      return requestedStart < slotEnd && requestedEnd > slotStart;
+    });
+  };
+
+  const timeSlots = React.useMemo(() => {
+    if (!formData.date) return [];
+
+    const slots: Array<{ label: string; value: string; busy: boolean }> = [];
+    const dayStartHour = 8;
+    const dayEndHour = 20;
+
+    for (let hour = dayStartHour; hour < dayEndHour; hour += 1) {
+      const start = `${String(hour).padStart(2, '0')}:00`;
+      const end = `${String(hour + 1).padStart(2, '0')}:00`;
+      const startIso = new Date(`${formData.date}T${start}:00`).toISOString();
+      const endIso = new Date(`${formData.date}T${end}:00`).toISOString();
+      const busy = isSlotTaken(startIso, endIso);
+
+      slots.push({
+        label: `${start} - ${end}`,
+        value: start,
+        busy,
+      });
+    }
+
+    return slots;
+  }, [formData.date, busySlots]);
+
+  const handleSlotSelect = (selectedTime: string) => {
+    setFormData((prev) => ({ ...prev, startTime: selectedTime }));
+    setError(null);
+  };
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError('La géolocalisation n’est pas disponible sur cet appareil.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setInterventionLocation({ latitude: coords.latitude, longitude: coords.longitude });
+        setLocationError('');
+      },
+      () => setLocationError('Autorisez la localisation pour préciser le lieu d’intervention.'),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   if (!isOpen) return null;
 
@@ -45,9 +118,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
       const selectedService = provider.services.find(s => s.service.id === formData.serviceId);
       const basePrice = parseFloat(selectedService?.prixIndicatif || '0');
       
-      // Calculate times
       const startDateTime = new Date(`${formData.date}T${formData.startTime}`);
       const endDateTime = new Date(startDateTime.getTime() + parseInt(formData.duration) * 60 * 60 * 1000);
+
+      if (isSlotTaken(startDateTime.toISOString(), endDateTime.toISOString())) {
+        setError('Ce prestataire est déjà pris sur ce créneau. Veuillez choisir une autre heure.');
+        return;
+      }
 
       await api.post('/bookings', {
         prestataireId: provider.id,
@@ -55,8 +132,10 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
         date: startDateTime.toISOString(),
         startTime: startDateTime.toISOString(),
         endTime: endDateTime.toISOString(),
-        totalAmount: basePrice, // Simple logic for now
+        totalAmount: basePrice,
         address: formData.address,
+        interventionLatitude: interventionLocation?.latitude,
+        interventionLongitude: interventionLocation?.longitude,
       });
 
       setStep(3);
@@ -83,13 +162,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-xl bg-white rounded-[3rem] shadow-2xl overflow-hidden"
+          className="relative w-full max-w-xl max-h-[90vh] bg-white rounded-[3rem] shadow-2xl overflow-hidden"
         >
           <button onClick={onClose} className="absolute top-8 right-8 p-3 hover:bg-slate-50 rounded-2xl transition-all text-slate-400 hover:text-slate-900 z-10">
             <X size={24} />
           </button>
 
-          <div className="p-12">
+          <div className="p-6 sm:p-12 max-h-[90vh] overflow-y-auto custom-scrollbar">
             {step === 1 && (
               <div className="space-y-8">
                 <div>
@@ -118,6 +197,12 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                       </select>
                     )}
                   </div>
+
+                  <button type="button" onClick={useCurrentLocation} className="flex items-center gap-2 text-sm font-black text-elite-emerald hover:underline">
+                    <MapPin size={18} /> Utiliser ma position actuelle
+                  </button>
+                  {interventionLocation && <p className="text-xs font-bold text-green-600">Position du lieu enregistrée.</p>}
+                  {locationError && <p className="text-xs font-bold text-amber-700">{locationError}</p>}
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-3">
@@ -149,9 +234,52 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                     </div>
                   </div>
 
+                  {formData.date && (
+                    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">Disponibilités du jour</p>
+                      <div className="max-h-64 overflow-y-auto pr-1 custom-scrollbar">
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                          {timeSlots.map((slot) => {
+                            const isSelected = formData.startTime === slot.value;
+                            return (
+                              <button
+                                key={slot.label}
+                                type="button"
+                                onClick={() => !slot.busy && handleSlotSelect(slot.value)}
+                                disabled={slot.busy}
+                                className={`rounded-2xl border px-3 py-2 text-xs font-black transition-all ${
+                                  slot.busy
+                                    ? 'bg-red-100 text-red-600 border-red-200 cursor-not-allowed'
+                                    : isSelected
+                                      ? 'bg-elite-emerald text-white border-elite-emerald shadow-md'
+                                      : 'bg-white text-slate-700 border-slate-200 hover:border-elite-emerald/30 hover:text-elite-emerald'
+                                }`}
+                              >
+                                {slot.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {busySlots.length > 0 && (
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-amber-700 mb-2">Créneaux déjà réservés</p>
+                      <div className="flex flex-wrap gap-2">
+                        {busySlots.map((slot, index) => (
+                          <span key={`${slot.startTime}-${index}`} className="bg-white text-amber-700 border border-amber-200 rounded-full px-3 py-1 text-xs font-bold">
+                            {new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(slot.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <button
                     type="submit"
-                    disabled={provider.services.length === 0}
+                    disabled={provider.services.length === 0 || !formData.startTime}
                     className="w-full py-5 bg-slate-900 text-white font-black rounded-2xl hover:bg-elite-emerald transition-all shadow-xl shadow-slate-900/10 uppercase tracking-widest text-sm disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Continuer vers l'adresse
