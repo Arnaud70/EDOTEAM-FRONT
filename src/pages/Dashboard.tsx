@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Calendar, MessageSquare, Bell, Search, ChevronRight, ShieldCheck, CreditCard, Users, Star, TrendingUp, AlertCircle, Settings, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Sidebar, { MobileMenuButton } from '../components/Sidebar';
+import DefaultAvatar from '../components/DefaultAvatar';
 import NotificationDropdown from '../components/NotificationDropdown';
 import LoadingScreen from '../components/LoadingScreen';
 import { CardSkeleton } from '../components/Skeleton';
@@ -319,8 +320,8 @@ const Dashboard = () => {
                   <span className="absolute top-3 right-3 w-2 h-2 bg-elite-gold rounded-full border-2 border-white" />
                 </Link>
 
-                <Link to="/settings" className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white shadow-premium bg-slate-100 flex items-center justify-center font-black text-slate-900 hover:scale-105 transition-all">
-                  {user.photoUrl ? <img src={user.photoUrl} alt="Profil" className="w-full h-full object-cover" /> : (user.nom?.[0] || 'U')}
+                <Link to="/settings" className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white shadow-premium bg-slate-100 hover:scale-105 transition-all">
+                  <DefaultAvatar photoUrl={user.photoUrl} genre={user.genre} />
                 </Link>
               </div>
             </>

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Phone, MapPin, Briefcase, ArrowRight, ShieldCheck, ChevronDown, Zap, ListPlus, Lock } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Briefcase, ArrowRight, ShieldCheck, ChevronDown, Zap, ListPlus, Lock, LocateFixed, Loader2, FileText, UploadCloud, CheckCircle2 } from 'lucide-react';
 import Logo from '../components/Logo';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { validateName, validatePhone } from '../utils/validation';
+import { reverseGeocode, getCurrentPosition } from '../utils/geocode';
 
 const CompleteProfile = () => {
   const navigate = useNavigate();
@@ -16,13 +18,17 @@ const CompleteProfile = () => {
   const [telephone, setTelephone] = useState(user?.telephone ?? '');
   const [localisation, setLocalisation] = useState(user?.localisation ?? '');
   const [specialite, setSpecialite] = useState(user?.titreProfessionnel ?? '');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isOtherSpecialite, setIsOtherSpecialite] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [services, setServices] = useState<any[]>([]);
   const [locationMessage, setLocationMessage] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
   const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [genre, setGenre] = useState<'HOMME' | 'FEMME' | null>(user?.genre ?? null);
+  const existingDocument = user?.media?.find((m) => m.type === 'DOCUMENT');
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const [documentUploaded, setDocumentUploaded] = useState(!!existingDocument);
+  const [isUploadingDocument, setIsUploadingDocument] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -46,31 +52,53 @@ const CompleteProfile = () => {
     e.preventDefault();
     setError(null);
 
-    if (password && password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères.');
+    const phoneError = validatePhone(telephone);
+    if (phoneError) { setError(phoneError); return; }
+
+    if (!telephone.trim() || !localisation.trim()) {
+      setError('Le téléphone et la localisation sont obligatoires.');
       return;
     }
 
-    if (password && password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas.');
-      return;
+    if (role === 'PRESTATAIRE') {
+      if (!specialite.trim()) {
+        setError('La spécialité est obligatoire pour les prestataires.');
+        return;
+      }
+      const specError = validateName(specialite, 'La spécialité');
+      if (isOtherSpecialite && specError) { setError(specError); return; }
+
+      if (!documentUploaded && !documentFile) {
+        setError('Un document justificatif (attestation, carte professionnelle...) est obligatoire pour vous inscrire comme prestataire.');
+        return;
+      }
     }
 
     setIsLoading(true);
     try {
-      const payload: any = {
-        role,
-        telephone,
-        localisation,
-        ...coordinates,
-      };
-
-      if (password) {
-        payload.motDePasse = password;
+      if (role === 'PRESTATAIRE' && documentFile) {
+        setIsUploadingDocument(true);
+        const formData = new FormData();
+        formData.append('file', documentFile);
+        const uploadRes = await api.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        const fileUrl = uploadRes.data?.url;
+        await api.post('/users/media', { url: fileUrl, type: 'DOCUMENT' });
+        setDocumentUploaded(true);
+        setIsUploadingDocument(false);
       }
 
+      const payload: any = {
+        role,
+        telephone: telephone.trim(),
+        localisation: localisation.trim(),
+        ...coordinates,
+      };
+      if (genre) payload.genre = genre;
+
       if (role === 'PRESTATAIRE') {
-        payload.titreProfessionnel = specialite;
+        payload.titreProfessionnel = specialite.trim();
       }
 
       const response = await api.patch('/users/profile', payload);
@@ -83,26 +111,32 @@ const CompleteProfile = () => {
       setError(Array.isArray(backendError) ? backendError[0] : backendError);
     } finally {
       setIsLoading(false);
+      setIsUploadingDocument(false);
     }
   };
 
-  const useCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationMessage('La géolocalisation n’est pas disponible.');
-      return;
+  const useCurrentLocation = async () => {
+    setIsLocating(true);
+    setLocationMessage('Récupération de votre position...');
+    try {
+      const { coords } = await getCurrentPosition();
+      setCoordinates({ latitude: coords.latitude, longitude: coords.longitude });
+      try {
+        const geo = await reverseGeocode(coords.latitude, coords.longitude);
+        setLocalisation(geo.label);
+        setLocationMessage('Adresse détectée automatiquement (modifiable).');
+      } catch {
+        setLocationMessage('Position enregistrée. Saisissez l’adresse manuellement si besoin.');
+      }
+    } catch (err: any) {
+      setLocationMessage(err?.message || 'Autorisez la localisation ou saisissez votre adresse manuellement.');
+    } finally {
+      setIsLocating(false);
     }
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setCoordinates({ latitude: coords.latitude, longitude: coords.longitude });
-        setLocationMessage('Position enregistrée.');
-      },
-      () => setLocationMessage('Autorisez la localisation pour enregistrer votre zone d’intervention.'),
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
   };
 
   return (
-    <div className="min-h-screen pt-28 pb-24 flex flex-col justify-center bg-[#F8FAFC] px-4 relative overflow-hidden">
+    <div className="min-h-screen pt-16 sm:pt-24 pb-16 flex flex-col justify-center bg-[#F8FAFC] px-4 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-elite-emerald/5 blur-[120px] rounded-full -translate-y-1/2 -translate-x-1/2" />
       <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-elite-gold/5 blur-[120px] rounded-full translate-y-1/2 translate-x-1/2" />
 
@@ -164,7 +198,7 @@ const CompleteProfile = () => {
           )}
 
           <form className="space-y-8" onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-8">
               <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.3em]">Nom</label>
               <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.3em]">Prénom</label>
               <div className="relative group">
@@ -187,7 +221,7 @@ const CompleteProfile = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-8">
               <div>
                 <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.3em]">Identifiant Email</label>
                 <div className="relative group">
@@ -215,7 +249,7 @@ const CompleteProfile = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-8">
               <div>
                 <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.3em]">Localisation (Région)</label>
                 <div className="relative group">
@@ -225,40 +259,48 @@ const CompleteProfile = () => {
                     value={localisation}
                     onChange={(e) => setLocalisation(e.target.value)}
                     className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300"
-                    placeholder="Lomé, Maritime..."
+                    placeholder="Saisissez votre adresse ou utilisez votre position"
                   />
                 </div>
-                <button type="button" onClick={useCurrentLocation} className="mt-3 flex items-center gap-2 text-xs font-black text-elite-emerald hover:underline">
-                  <MapPin size={16} /> Utiliser ma position actuelle
+                <button type="button" onClick={useCurrentLocation} disabled={isLocating} className="mt-3 flex items-center gap-2 text-xs font-black text-elite-emerald hover:underline disabled:opacity-50">
+                  {isLocating ? <Loader2 size={16} className="animate-spin" /> : <LocateFixed size={16} />}
+                  {isLocating ? 'Localisation...' : 'Utiliser ma position actuelle'}
                 </button>
                 {locationMessage && <p className="mt-2 text-xs font-bold text-slate-500">{locationMessage}</p>}
               </div>
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.3em]">Mot de passe</label>
-                <div className="relative group">
-                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300"
-                    placeholder="••••••••"
-                  />
-                </div>
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                <Lock className="text-slate-400 shrink-0" size={20} />
+                <p className="text-xs font-bold text-slate-500 leading-relaxed">
+                  Pour définir ou modifier votre mot de passe, rendez-vous dans <span className="text-elite-emerald">Sécurité</span> après cette étape.
+                </p>
               </div>
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.3em]">Valider le mot de passe</label>
-              <div className="relative group">
-                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300"
-                  placeholder="Répétez le mot de passe"
-                />
+              <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.3em]">
+                Genre (pour votre icône de profil)
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setGenre('HOMME')}
+                  className={`py-4 rounded-2xl flex items-center justify-center gap-3 border-2 font-bold text-sm transition-all ${
+                    genre === 'HOMME' ? 'border-elite-emerald bg-elite-emerald/5 text-slate-900' : 'border-slate-100 text-slate-400 hover:border-slate-200'
+                  }`}
+                >
+                  <User size={18} className={genre === 'HOMME' ? 'text-elite-emerald' : 'opacity-40'} />
+                  Homme
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGenre('FEMME')}
+                  className={`py-4 rounded-2xl flex items-center justify-center gap-3 border-2 font-bold text-sm transition-all ${
+                    genre === 'FEMME' ? 'border-elite-gold bg-elite-gold/5 text-slate-900' : 'border-slate-100 text-slate-400 hover:border-slate-200'
+                  }`}
+                >
+                  <User size={18} className={genre === 'FEMME' ? 'text-elite-gold' : 'opacity-40'} />
+                  Femme
+                </button>
               </div>
             </div>
 
@@ -352,6 +394,45 @@ const CompleteProfile = () => {
                     </div>
                   )}
                 </div>
+
+                <div className="pt-2 border-t border-elite-gold/20">
+                  <h4 className="font-black text-slate-900 flex items-center gap-3 text-xs uppercase tracking-widest mt-6 mb-4">
+                    <FileText size={18} className="text-elite-gold" />
+                    Document justificatif <span className="text-red-500">*</span>
+                  </h4>
+                  <p className="text-xs font-bold text-slate-500 mb-4 leading-relaxed">
+                    Attestation de service, carte professionnelle ou tout document prouvant votre qualification. Il sera envoyé au super admin pour vérification — votre profil ne sera visible publiquement qu'une fois validé.
+                  </p>
+
+                  {documentUploaded && !documentFile ? (
+                    <div className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-sm">
+                      <CheckCircle2 size={20} />
+                      Document déjà envoyé — en attente de vérification.
+                      <label className="ml-auto text-xs underline cursor-pointer">
+                        Remplacer
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/gif,application/pdf"
+                          className="hidden"
+                          onChange={(e) => setDocumentFile(e.target.files?.[0] || null)}
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    <label className="flex items-center gap-4 p-5 rounded-2xl bg-white border-2 border-dashed border-elite-gold/40 cursor-pointer hover:border-elite-gold transition-all">
+                      <UploadCloud size={24} className="text-elite-gold shrink-0" />
+                      <span className="text-sm font-bold text-slate-600 truncate">
+                        {documentFile ? documentFile.name : 'Choisir un fichier (PDF, JPG, PNG — 10 Mo max)'}
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/gif,application/pdf"
+                        className="hidden"
+                        onChange={(e) => setDocumentFile(e.target.files?.[0] || null)}
+                      />
+                    </label>
+                  )}
+                </div>
               </div>
             )}
 
@@ -360,7 +441,7 @@ const CompleteProfile = () => {
               disabled={isLoading}
               className="w-full py-5 bg-emerald-600 text-white font-black rounded-3xl uppercase tracking-[0.2em] hover:bg-emerald-700 transition-all disabled:opacity-70"
             >
-              {isLoading ? 'Chargement...' : 'Terminer l’inscription'}
+              {isUploadingDocument ? 'Envoi du document...' : isLoading ? 'Chargement...' : 'Terminer l’inscription'}
             </button>
           </form>
         </div>

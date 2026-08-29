@@ -14,12 +14,14 @@ interface User {
   prenom?: string;
   role: 'CLIENT' | 'PRESTATAIRE' | 'ADMIN';
   photoUrl?: string;
+  genre?: 'HOMME' | 'FEMME';
   titreProfessionnel?: string;
   bio?: string;
   localisation?: string;
   telephone?: string;
   verificationStatus?: 'PENDING' | 'VERIFIED' | 'REJECTED';
   rejectionReason?: string;
+  emailVerified?: boolean;
   media?: Media[];
 }
 
@@ -28,7 +30,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: any) => Promise<void>;
-  register: (data: any) => Promise<void>;
+  register: (data: any) => Promise<any>;
+  verifyEmail: (email: string, code: string) => Promise<void>;
   logout: () => void;
   updateUser: (updatedUser: User) => void;
 }
@@ -59,13 +62,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('token');
       const onboarding = urlParams.get('onboarding');
-      const tempPassword = urlParams.get('tempPassword');
 
       if (token) {
         localStorage.setItem('access_token', token);
-        if (tempPassword) {
-          sessionStorage.setItem('tempPassword', tempPassword);
-        }
         // Nettoyer l'URL pour éviter de garder le token dans la query
         window.history.replaceState({}, document.title, window.location.pathname);
 
@@ -98,7 +97,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const register = async (data: any) => {
     const response = await authService.register(data);
-    setUser(response.user);
+    if (response?.user) {
+      setUser(response.user);
+    }
+    return response;
+  };
+
+  const verifyEmail = async (email: string, code: string) => {
+    const response = await authService.verifyEmail(email, code);
+    if (response?.user) {
+      setUser(response.user);
+    }
   };
 
   const logout = () => {
@@ -115,9 +124,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     <AuthContext.Provider value={{ 
       user, 
       isAuthenticated: !!user, 
-      isLoading, 
-      login, 
-      register, 
+      isLoading,
+      login,
+      register,
+      verifyEmail,
       logout,
       updateUser
     }}>

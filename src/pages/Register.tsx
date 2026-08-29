@@ -1,9 +1,17 @@
 import { useState, useEffect } from 'react';
-import { User, Mail, Lock, Phone, MapPin, Briefcase, ArrowRight, CheckCircle2, Shield, Zap, Loader2, ShieldCheck, ListPlus, ChevronDown } from 'lucide-react';
+import { User, Mail, Lock, Phone, MapPin, Briefcase, ArrowRight, CheckCircle2, Shield, Zap, Loader2, ShieldCheck, ListPlus, ChevronDown, LocateFixed } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import {
+  validateName,
+  validatePassword,
+  validatePhone,
+  getPasswordChecks,
+  passwordStrengthScore,
+} from '../utils/validation';
+import { reverseGeocode, getCurrentPosition } from '../utils/geocode';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -26,6 +34,11 @@ const Register = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationMessage, setLocationMessage] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  const passwordChecks = getPasswordChecks(password);
+  const strengthScore = passwordStrengthScore(password);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -41,27 +54,62 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
+    const nomError = validateName(nom, 'Le nom');
+    if (nomError) { setError(nomError); return; }
+
+    if (prenom.trim()) {
+      const prenomError = validateName(prenom, 'Le prénom');
+      if (prenomError) { setError(prenomError); return; }
+    }
+
+    if (!telephone.trim()) { setError('Le numéro de téléphone est obligatoire.'); return; }
+    const phoneError = validatePhone(telephone);
+    if (phoneError) { setError(phoneError); return; }
+
+    if (!region.trim()) { setError('La localisation est obligatoire.'); return; }
+
+    const passwordError = validatePassword(password);
+    if (passwordError) { setError(passwordError); return; }
+
     if (password !== confirmPassword) {
       setError('Les mots de passe ne correspondent pas.');
       return;
     }
 
+    if (role === 'PRESTATAIRE' && !specialite.trim()) {
+      setError('La spécialité est obligatoire pour les prestataires.');
+      return;
+    }
+
+    if (!acceptedTerms) {
+      setError('Vous devez accepter les Normes d’Excellence et la Charte de Confidentialité.');
+      return;
+    }
+
     setIsLoading(true);
-    setError(null);
 
     try {
-      await register({
-        email,
-        nom,
-        prenom,
-        telephone,
+      const result = await register({
+        email: email.trim(),
+        nom: nom.trim(),
+        prenom: prenom.trim() || undefined,
+        telephone: telephone.trim(),
         motDePasse: password,
         role,
-        region,
-        specialite: role === 'PRESTATAIRE' ? specialite : undefined,
+        region: region.trim(),
+        specialite: role === 'PRESTATAIRE' ? specialite.trim() : undefined,
         ...coordinates,
       });
-      navigate('/complete-profile');
+
+      if (result?.emailVerificationRequired) {
+        const ttl = result.otpExpiresIn ?? 120;
+        navigate(`/verify-email?email=${encodeURIComponent(email.trim())}&ttl=${ttl}`);
+      } else {
+        // Inscription manuelle complète (mode sans SMTP) : rien à compléter.
+        navigate('/');
+      }
     } catch (err: any) {
       console.error('Register error:', err);
       // Le backend utilise AllExceptionsFilter ou class-validator standard
@@ -72,19 +120,24 @@ const Register = () => {
     }
   };
 
-  const useCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationMessage('La géolocalisation n’est pas disponible.');
-      return;
+  const useCurrentLocation = async () => {
+    setIsLocating(true);
+    setLocationMessage('Récupération de votre position...');
+    try {
+      const { coords } = await getCurrentPosition();
+      setCoordinates({ latitude: coords.latitude, longitude: coords.longitude });
+      try {
+        const geo = await reverseGeocode(coords.latitude, coords.longitude);
+        setRegion(geo.label);
+        setLocationMessage('Adresse détectée automatiquement (modifiable).');
+      } catch {
+        setLocationMessage('Position enregistrée. Saisissez l’adresse manuellement si besoin.');
+      }
+    } catch (err: any) {
+      setLocationMessage(err?.message || 'Autorisez la localisation ou saisissez votre adresse manuellement.');
+    } finally {
+      setIsLocating(false);
     }
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setCoordinates({ latitude: coords.latitude, longitude: coords.longitude });
-        setLocationMessage('Position enregistrée pour la recherche de proximité.');
-      },
-      () => setLocationMessage('Autorisez la localisation pour activer la géolocalisation.'),
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
   };
 
   const handleGoogleLogin = () => {
@@ -93,91 +146,107 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen pt-32 pb-24 flex flex-col justify-center bg-[#F8FAFC] px-4 relative overflow-hidden">
+    <div className="min-h-screen pt-16 sm:pt-24 pb-16 flex flex-col justify-center bg-[#F8FAFC] px-4 relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-elite-emerald/5 blur-[120px] rounded-full -translate-y-1/2 -translate-x-1/2" />
       <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-elite-gold/5 blur-[120px] rounded-full translate-y-1/2 translate-x-1/2" />
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-xl relative z-10 text-center mb-12">
-        <div className="flex justify-center mb-8 transform hover:rotate-3 transition-transform duration-500">
-          <Logo variant="dark" className="scale-125" />
+      <div className="sm:mx-auto sm:w-full sm:max-w-xl relative z-10 text-center mb-8 sm:mb-12">
+        <div className="flex justify-center mb-6 sm:mb-8 transform hover:rotate-3 transition-transform duration-500">
+          <Logo variant="dark" className="scale-110 sm:scale-125" />
         </div>
-        <h2 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight font-heading mb-4">
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight font-heading mb-3 sm:mb-4">
           Cercle <span className="gold-accent">Privé</span> EDOTEAM
         </h2>
-        <p className="text-slate-500 font-medium text-lg max-w-md mx-auto">
+        <p className="text-slate-500 font-medium text-base sm:text-lg max-w-md mx-auto">
           L'excellence à votre service. Rejoignez la première plateforme de talents d'exception au Togo.
         </p>
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-xl relative z-10">
-        <div className="glass-card py-12 px-10 rounded-[4rem] border-elite-emerald/5 shadow-2xl">
+        <div className="glass-card py-8 px-5 sm:py-12 sm:px-10 rounded-[2rem] sm:rounded-[4rem] border-elite-emerald/5 shadow-2xl">
           {/* Role Selector Premium */}
-          <div className="grid grid-cols-2 gap-6 mb-12">
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 mb-8 sm:mb-12">
             <button
+              type="button"
               onClick={() => setRole('CLIENT')}
-              className={`p-6 rounded-3xl flex flex-col items-center gap-3 border-2 transition-all duration-500 relative overflow-hidden group ${
+              className={`p-4 sm:p-6 rounded-2xl sm:rounded-3xl flex flex-col items-center gap-2 sm:gap-3 border-2 transition-all duration-500 relative overflow-hidden group ${
                 role === 'CLIENT' 
                   ? 'border-elite-emerald bg-elite-emerald/5 shadow-xl shadow-elite-emerald/10 scale-105' 
                   : 'border-slate-50 text-slate-400 hover:border-slate-200'
               }`}
             >
               {role === 'CLIENT' && <div className="absolute top-0 right-0 w-12 h-12 bg-elite-gold/20 blur-xl rounded-full" />}
-              <User size={32} className={role === 'CLIENT' ? 'text-elite-emerald' : 'opacity-40'} />
-              <span className={`font-black text-xs uppercase tracking-[0.2em] ${role === 'CLIENT' ? 'text-slate-900' : 'text-slate-400'}`}>Particulier Elite</span>
+              <User size={28} className={role === 'CLIENT' ? 'text-elite-emerald' : 'opacity-40'} />
+              <span className={`font-black text-[10px] sm:text-xs uppercase tracking-[0.15em] sm:tracking-[0.2em] text-center ${role === 'CLIENT' ? 'text-slate-900' : 'text-slate-400'}`}>Particulier Elite</span>
             </button>
             <button
+              type="button"
               onClick={() => setRole('PRESTATAIRE')}
-              className={`p-6 rounded-3xl flex flex-col items-center gap-3 border-2 transition-all duration-500 relative overflow-hidden group ${
-                role === 'PRESTATAIRE' 
-                  ? 'border-elite-gold bg-elite-gold/5 shadow-xl shadow-elite-gold/10 scale-105' 
+              className={`p-4 sm:p-6 rounded-2xl sm:rounded-3xl flex flex-col items-center gap-2 sm:gap-3 border-2 transition-all duration-500 relative overflow-hidden group ${
+                role === 'PRESTATAIRE'
+                  ? 'border-elite-gold bg-elite-gold/5 shadow-xl shadow-elite-gold/10 scale-105'
                   : 'border-slate-50 text-slate-400 hover:border-slate-200'
               }`}
             >
               {role === 'PRESTATAIRE' && <div className="absolute top-0 right-0 w-12 h-12 bg-elite-emerald/20 blur-xl rounded-full" />}
-              <Briefcase size={32} className={role === 'PRESTATAIRE' ? 'text-elite-gold' : 'opacity-40'} />
-              <span className={`font-black text-xs uppercase tracking-[0.2em] ${role === 'PRESTATAIRE' ? 'text-slate-900' : 'text-slate-400'}`}>Expert Certifié</span>
+              <Briefcase size={28} className={role === 'PRESTATAIRE' ? 'text-elite-gold' : 'opacity-40'} />
+              <span className={`font-black text-[10px] sm:text-xs uppercase tracking-[0.15em] sm:tracking-[0.2em] text-center ${role === 'PRESTATAIRE' ? 'text-slate-900' : 'text-slate-400'}`}>Expert Certifié</span>
             </button>
           </div>
 
-          <form className="space-y-8" onSubmit={handleSubmit}>
+          <form className="space-y-6 sm:space-y-8" onSubmit={handleSubmit}>
             {error && (
               <div className="p-4 bg-red-50 border border-red-100 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-2xl flex items-center gap-3 animate-in fade-in duration-300">
                 <ShieldCheck size={18} className="text-red-400" />
                 {error}
               </div>
             )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-8">
               <div>
-                <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Nom & Prénoms</label>
+                <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Nom</label>
                 <div className="relative group">
                   <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-emerald transition-colors" size={20} />
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     required
                     value={nom}
                     onChange={(e) => setNom(e.target.value)}
-                    className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300" 
-                    placeholder="Jean Kouassi" 
+                    className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300"
+                    placeholder="Kouassi"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Mobile Elite</label>
+                <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Prénom</label>
                 <div className="relative group">
-                  <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-emerald transition-colors" size={20} />
-                  <input 
-                    type="tel" 
-                    value={telephone}
-                    onChange={(e) => setTelephone(e.target.value)}
-                    className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300" 
-                    placeholder="+228 90 00 00 00" 
+                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-emerald transition-colors" size={20} />
+                  <input
+                    type="text"
+                    value={prenom}
+                    onChange={(e) => setPrenom(e.target.value)}
+                    className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300"
+                    placeholder="Jean"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-8">
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Mobile Elite</label>
+                <div className="relative group">
+                  <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-emerald transition-colors" size={20} />
+                  <input
+                    type="tel"
+                    required
+                    value={telephone}
+                    onChange={(e) => setTelephone(e.target.value)}
+                    className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300"
+                    placeholder="+228 90 00 00 00"
+                  />
+                </div>
+              </div>
               <div>
                 <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Identifiant Email</label>
                 <div className="relative group">
@@ -202,17 +271,18 @@ const Register = () => {
                     value={region}
                     onChange={(e) => setRegion(e.target.value)}
                     className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300" 
-                    placeholder="Lomé, Maritime..." 
+                    placeholder="Saisissez votre adresse ou utilisez votre position"
                   />
                 </div>
-                <button type="button" onClick={useCurrentLocation} className="mt-3 flex items-center gap-2 text-xs font-black text-elite-emerald hover:underline">
-                  <MapPin size={16} /> Utiliser ma position actuelle
+                <button type="button" onClick={useCurrentLocation} disabled={isLocating} className="mt-3 flex items-center gap-2 text-xs font-black text-elite-emerald hover:underline disabled:opacity-50">
+                  {isLocating ? <Loader2 size={16} className="animate-spin" /> : <LocateFixed size={16} />}
+                  {isLocating ? 'Localisation...' : 'Utiliser ma position actuelle'}
                 </button>
                 {locationMessage && <p className="mt-2 text-xs font-bold text-slate-500">{locationMessage}</p>}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-8">
               <div>
                 <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Sécurité</label>
                 <div className="relative group">
@@ -242,6 +312,40 @@ const Register = () => {
                 </div>
               </div>
             </div>
+
+            {password.length > 0 && (
+              <div className="rounded-2xl bg-slate-50 border border-slate-100 p-5 space-y-3">
+                <div className="flex gap-1.5">
+                  {[0, 1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className={`h-1.5 flex-1 rounded-full transition-colors ${
+                        strengthScore > i
+                          ? strengthScore >= 4
+                            ? 'bg-elite-emerald'
+                            : strengthScore >= 2
+                            ? 'bg-elite-gold'
+                            : 'bg-red-400'
+                          : 'bg-slate-200'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                  {passwordChecks.map((check) => (
+                    <li
+                      key={check.label}
+                      className={`flex items-center gap-2 text-[11px] font-bold ${
+                        check.valid ? 'text-elite-emerald' : 'text-slate-400'
+                      }`}
+                    >
+                      <CheckCircle2 size={14} className={check.valid ? 'opacity-100' : 'opacity-30'} />
+                      {check.label}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {role === 'PRESTATAIRE' && (
               <div className="p-8 bg-elite-gold/5 rounded-[2.5rem] border border-elite-gold/20 space-y-6 animate-in slide-in-from-top-4 duration-700">
@@ -325,15 +429,20 @@ const Register = () => {
             )}
 
             <div className="flex items-start">
-              <input type="checkbox" className="mt-1 h-5 w-5 text-elite-emerald focus:ring-elite-emerald border-none rounded-lg bg-slate-100" />
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="mt-1 h-5 w-5 text-elite-emerald focus:ring-elite-emerald border-none rounded-lg bg-slate-100"
+              />
               <label className="ml-4 text-xs text-slate-500 font-bold leading-relaxed uppercase tracking-wider">
-                Je consens aux <a href="#" className="text-elite-emerald hover:text-elite-gold transition-colors">Normes d'Excellence</a> et à la <a href="#" className="text-elite-emerald hover:text-elite-gold transition-colors">Chartre de Confidentialité</a>.
+                Je consens aux <a href="#" className="text-elite-emerald hover:text-elite-gold transition-colors">Normes d'Excellence</a> et à la <a href="#" className="text-elite-emerald hover:text-elite-gold transition-colors">Charte de Confidentialité</a>.
               </label>
             </div>
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !acceptedTerms}
               className={`w-full py-5 text-white text-sm font-black rounded-3xl shadow-2xl shadow-slate-900/10 transform transition-all active:scale-[0.98] uppercase tracking-[0.2em] flex items-center justify-center gap-4 disabled:opacity-70 disabled:cursor-not-allowed ${
                 role === 'CLIENT' ? 'bg-slate-900 hover:bg-elite-emerald' : 'bg-elite-emerald hover:bg-slate-900 shadow-elite-emerald/20'
               }`}

@@ -1,17 +1,19 @@
 import { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, ShieldCheck, ArrowRight, Shield, Loader2 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, Eye, EyeOff, ShieldCheck, ArrowRight, Shield, Loader2, CheckCircle2 } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Logo from '../components/Logo';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const resetSuccess = (location.state as any)?.resetSuccess;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,12 +21,19 @@ const Login = () => {
     setError(null);
 
     try {
-      await login({ email, motDePasse: password });
+      await login({ email: email.trim(), motDePasse: password });
       navigate('/');
     } catch (err: any) {
       console.error('Login error:', err);
-      // Extraire le message d'erreur de la réponse NestJS standard (avec ou sans AllExceptionsFilter)
-      const backendError = err.response?.data?.error?.message || err.response?.data?.message;
+      const data = err.response?.data;
+      // Email pas encore vérifié -> on redirige vers la saisie du code OTP
+      if (err.response?.status === 403 && data?.error?.code === 'EMAIL_NOT_VERIFIED') {
+        const targetEmail = data.error.email || email.trim();
+        const ttl = data.error.otpExpiresIn ?? 120;
+        navigate(`/verify-email?email=${encodeURIComponent(targetEmail)}&ttl=${ttl}`);
+        return;
+      }
+      const backendError = data?.error?.message || data?.message;
       const errorMsg = Array.isArray(backendError) ? backendError[0] : (backendError || 'Identifiants invalides ou erreur serveur.');
       setError(errorMsg);
     } finally {
@@ -39,7 +48,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen pt-32 pb-12 flex flex-col justify-center bg-[#F8FAFC] px-4 relative overflow-hidden">
+    <div className="min-h-screen pt-16 sm:pt-24 pb-12 flex flex-col justify-center bg-[#F8FAFC] px-4 relative overflow-hidden">
       {/* Premium Background Ornaments */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-elite-gold/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-elite-emerald/5 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2" />
@@ -59,6 +68,12 @@ const Login = () => {
       <div className="mt-12 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="glass-card py-12 px-10 rounded-[3.5rem] border-elite-emerald/5 transition-all hover:shadow-2xl">
           <form className="space-y-8" onSubmit={handleSubmit}>
+            {resetSuccess && !error && (
+              <div className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-widest rounded-2xl flex items-center gap-3">
+                <CheckCircle2 size={18} className="text-emerald-500" />
+                Mot de passe réinitialisé. Connectez-vous avec votre nouveau mot de passe.
+              </div>
+            )}
             {error && (
               <div className="p-4 bg-red-50 border border-red-100 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-2xl flex items-center gap-3 animate-in fade-in duration-300">
                 <ShieldCheck size={18} className="text-red-400" />
@@ -90,9 +105,9 @@ const Login = () => {
                 <label htmlFor="password" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
                   Mot de Passe
                 </label>
-                <a href="#" className="text-[10px] font-black text-elite-emerald hover:text-elite-gold transition-colors uppercase tracking-widest">
+                <Link to="/forgot-password" className="text-[10px] font-black text-elite-emerald hover:text-elite-gold transition-colors uppercase tracking-widest">
                   Oublié ?
-                </a>
+                </Link>
               </div>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-elite-emerald transition-colors">

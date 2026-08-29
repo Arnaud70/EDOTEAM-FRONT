@@ -4,7 +4,8 @@ import { Shield, Lock, Smartphone, Fingerprint, Eye, ArrowRight, ShieldCheck, Ma
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import PageHeader from '../components/PageHeader';
-import api from '../services/api';
+import api, { getApiErrorMessage } from '../services/api';
+import { validatePassword, getPasswordChecks } from '../utils/validation';
 
 const Security = () => {
   const { user } = useAuth();
@@ -14,19 +15,31 @@ const Security = () => {
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsUpdating(true);
     setMessage({ type: '', text: '' });
 
+    const passwordError = validatePassword(passwords.newPassword);
+    if (passwordError) {
+      setMessage({ type: 'error', text: passwordError });
+      return;
+    }
+    if (passwords.newPassword === passwords.oldPassword) {
+      setMessage({ type: 'error', text: 'Le nouveau mot de passe doit être différent de l’ancien.' });
+      return;
+    }
+
+    setIsUpdating(true);
     try {
       await api.patch('/users/password', passwords);
       setMessage({ type: 'success', text: 'Mot de passe mis à jour avec succès.' });
       setPasswords({ oldPassword: '', newPassword: '' });
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.response?.data?.message || 'Erreur lors de la mise à jour.' });
+      setMessage({ type: 'error', text: getApiErrorMessage(error, 'Erreur lors de la mise à jour.') });
     } finally {
       setIsUpdating(false);
     }
   };
+
+  const newPasswordChecks = getPasswordChecks(passwords.newPassword);
 
   if (!user) return null;
 
@@ -83,12 +96,25 @@ const Security = () => {
                   type="password" 
                   value={passwords.newPassword}
                   onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
-                  placeholder="••••••••" 
+                  placeholder="••••••••"
                   required
-                  className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" 
+                  className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
                 />
               </div>
-              <button 
+              {passwords.newPassword.length > 0 && (
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 px-2">
+                  {newPasswordChecks.map((check) => (
+                    <li
+                      key={check.label}
+                      className={`flex items-center gap-2 text-[11px] font-bold ${check.valid ? 'text-elite-emerald' : 'text-slate-400'}`}
+                    >
+                      <ShieldCheck size={13} className={check.valid ? 'opacity-100' : 'opacity-30'} />
+                      {check.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <button
                 type="submit"
                 disabled={isUpdating}
                 className="w-full py-5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-elite-emerald transition-all shadow-lg active:scale-95 mt-4 flex items-center justify-center gap-2"

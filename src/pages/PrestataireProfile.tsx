@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import MessageModal from '../components/MessageModal';
 import AvisModal from '../components/AvisModal';
+import DefaultAvatar from '../components/DefaultAvatar';
 
 interface ProviderData {
   id: string;
@@ -16,6 +17,7 @@ interface ProviderData {
   bio: string;
   localisation: string;
   photoUrl: string;
+  genre?: 'HOMME' | 'FEMME';
   emailVerified: boolean;
   services: {
     id: string;
@@ -217,7 +219,7 @@ const PrestataireProfile = () => {
           <div className="px-12 pb-12 relative">
             <div className="flex flex-col lg:flex-row gap-12 items-end -mt-24">
               <div className="w-48 h-48 rounded-[3rem] border-[10px] border-white overflow-hidden shadow-premium bg-white relative group">
-                <img src={provider.photoUrl || profileImages[0]} alt={provider.nom} loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700" />
+                <DefaultAvatar photoUrl={provider.photoUrl} genre={provider.genre} alt={provider.nom} className="group-hover:scale-110 transition-all duration-700" iconClassName="w-2/5 h-2/5" />
                 <div className="absolute inset-0 bg-black/5" />
               </div>
               <div className="flex-1 pb-4">

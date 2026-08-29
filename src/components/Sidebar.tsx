@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from './Logo';
+import DefaultAvatar from './DefaultAvatar';
 import { Image } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -174,8 +175,8 @@ const Sidebar = () => {
       }`}>
         {(mobile || !isCollapsed) && (
           <div className="flex items-center gap-3 px-2 py-3 mb-1">
-            <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/30 flex items-center justify-center font-black text-white text-sm flex-shrink-0">
-              {currentUser.nom?.[0] || 'A'}
+            <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/30 overflow-hidden flex-shrink-0">
+              <DefaultAvatar photoUrl={currentUser.photoUrl} genre={currentUser.genre} iconClassName="w-1/2 h-1/2 text-white" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-black text-white truncate">{currentUser.nom} {currentUser.prenom}</p>
@@ -186,9 +187,9 @@ const Sidebar = () => {
         {!mobile && isCollapsed && (
           <div
             title={`${currentUser.nom} ${currentUser.prenom} • ${currentUser.role}`}
-            className="w-9 h-9 rounded-xl bg-white/10 border border-white/30 flex items-center justify-center font-black text-white text-sm"
+            className="w-9 h-9 rounded-xl bg-white/10 border border-white/30 overflow-hidden"
           >
-            {currentUser.nom?.[0] || 'A'}
+            <DefaultAvatar photoUrl={currentUser.photoUrl} genre={currentUser.genre} iconClassName="w-1/2 h-1/2 text-white" />
           </div>
         )}
         <div className="flex items-center gap-2 mb-3">
@@ -253,14 +254,18 @@ const Sidebar = () => {
 
 // Bouton hamburger exporté séparément pour être utilisé dans le header de chaque page
 export const MobileMenuButton = () => {
-  const { toggleMobile } = useSidebar();
+  const { isMobileOpen, toggleMobile } = useSidebar();
   return (
     <button
       onClick={toggleMobile}
-      className="lg:hidden w-10 h-10 flex items-center justify-center bg-elite-emerald text-white rounded-xl shadow-lg hover:bg-elite-emerald/90 transition-all active:scale-95"
-      title="Afficher le menu"
+      aria-expanded={isMobileOpen}
+      className={`lg:hidden fixed top-1/2 -translate-y-1/2 z-[60] w-11 h-20 flex items-center justify-center bg-elite-emerald text-white shadow-2xl ring-4 ring-white/40 hover:bg-elite-emerald/90 transition-all active:scale-95 rounded-r-2xl ${
+        isMobileOpen ? 'left-[20rem]' : 'left-0'
+      }`}
+      title={isMobileOpen ? 'Masquer le menu' : 'Afficher le menu'}
+      aria-label={isMobileOpen ? 'Masquer le menu' : 'Afficher le menu'}
     >
-      <span className="text-xl font-black leading-none">›</span>
+      {isMobileOpen ? <ChevronLeft size={26} strokeWidth={3} /> : <ChevronRight size={26} strokeWidth={3} />}
     </button>
   );
 };

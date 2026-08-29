@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
-import { Search, Filter, MoreVertical, CheckCircle2, XCircle, Clock, Mail, ShieldAlert, ShieldCheck, Trash2 } from 'lucide-react';
+import { Search, Filter, MoreVertical, CheckCircle2, XCircle, Clock, Mail, ShieldAlert, ShieldCheck, Trash2, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import api from '../services/api';
@@ -18,6 +18,7 @@ interface UserData {
   verificationStatus?: 'PENDING' | 'VERIFIED' | 'REJECTED';
   rejectionReason?: string | null;
   deletedAt: string | null;
+  media?: { id: string; url: string; mimeType?: string; createdAt: string }[];
 }
 
 const AdminUsers = () => {
@@ -68,8 +69,10 @@ const AdminUsers = () => {
     try {
       await api.patch(`/admin/users/${userId}/verify`);
       fetchUsers();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error verifying user:', error);
+      const msg = error?.response?.data?.error?.message || error?.response?.data?.message || 'Impossible de valider ce profil.';
+      alert(Array.isArray(msg) ? msg[0] : msg);
     }
   };
 
@@ -167,7 +170,7 @@ const AdminUsers = () => {
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center font-black text-elite-gold text-xs shadow-lg">
-                          {item.nom?.[0] || 'U'}
+                          {item.nom?.[0]?.toUpperCase() || 'U'}
                         </div>
                         <div>
                           <p className="font-bold text-slate-900 text-sm">{item.nom} {item.prenom}</p>
@@ -201,12 +204,26 @@ const AdminUsers = () => {
                     </td>
                     <td className="px-8 py-6 text-center">
                       {item.role === 'PRESTATAIRE' ? (
-                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                          item.verificationStatus === 'VERIFIED' ? 'bg-emerald-100 text-emerald-700' :
-                          item.verificationStatus === 'REJECTED' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
-                        }`}>
-                          {item.verificationStatus || 'PENDING'}
-                        </span>
+                        <div className="flex flex-col items-center gap-2">
+                          <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                            item.verificationStatus === 'VERIFIED' ? 'bg-emerald-100 text-emerald-700' :
+                            item.verificationStatus === 'REJECTED' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                          }`}>
+                            {item.verificationStatus || 'PENDING'}
+                          </span>
+                          {item.media && item.media.length > 0 ? (
+                            <a
+                              href={item.media[0].url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-[10px] font-black text-elite-emerald hover:underline"
+                            >
+                              <FileText size={12} /> Voir le document
+                            </a>
+                          ) : (
+                            <span className="text-[10px] font-bold text-slate-300">Aucun document</span>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest">N/A</span>
                       )}

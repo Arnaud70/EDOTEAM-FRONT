@@ -34,10 +34,18 @@ const AdminLogs = lazy(() => import('./pages/AdminLogs'));
 const ProviderAvailability = lazy(() => import('./pages/ProviderAvailability'));
 const Reports = lazy(() => import('./pages/Reports'));
 const CompleteProfile = lazy(() => import('./pages/CompleteProfile'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 
 const DASHBOARD_PATHS = [
   '/dashboard', '/messages', '/admin', '/provider',
   '/bookings', '/wallet', '/security', '/favorites', '/settings', '/reports'
+];
+
+// Pages "seules" : ni navbar ni footer (comme l'inscription).
+const STANDALONE_PATHS = [
+  '/login', '/register', '/verify-email', '/forgot-password', '/reset-password', '/complete-profile',
 ];
 
 const isUserProfileComplete = (user: any) => {
@@ -63,7 +71,10 @@ const Home = () => (
 const Footer = () => {
   const location = useLocation();
   const { user } = useAuth();
-  const shouldHideFooter = DASHBOARD_PATHS.some(p => location.pathname.startsWith(p)) || (!!user && !isUserProfileComplete(user));
+  const shouldHideFooter =
+    DASHBOARD_PATHS.some(p => location.pathname.startsWith(p)) ||
+    STANDALONE_PATHS.some(p => location.pathname.startsWith(p)) ||
+    (!!user && !isUserProfileComplete(user));
   if (shouldHideFooter) return null;
   return (
     <footer className="bg-white border-t border-slate-100 py-24 text-slate-900">
@@ -133,7 +144,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const { user } = useAuth();
   const isProfileIncomplete = !!user && !isUserProfileComplete(user);
-  const hideNavbar = DASHBOARD_PATHS.some(p => location.pathname.startsWith(p)) || isProfileIncomplete;
+  const hideNavbar =
+    DASHBOARD_PATHS.some(p => location.pathname.startsWith(p)) ||
+    STANDALONE_PATHS.some(p => location.pathname.startsWith(p)) ||
+    isProfileIncomplete;
 
   return (
     <div className="min-h-screen bg-white">
@@ -204,6 +218,9 @@ const AppRouter = ({ user }: { user: any }) => {
             <Route path="/services" element={<ServiceList />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
             <Route path="/profile/:id" element={<PrestataireProfile />} />
 

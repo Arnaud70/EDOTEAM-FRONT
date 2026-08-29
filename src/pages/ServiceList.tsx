@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Star, ShieldCheck, Heart, Filter, ChevronRight, SlidersHorizontal, Loader2 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
+import DefaultAvatar from '../components/DefaultAvatar';
 
 const ServiceList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -150,12 +151,11 @@ const ServiceList = () => {
               const minPrice = prices?.length > 0 ? Math.min(...prices) : 0;
               const priceDisplay = minPrice > 0 ? `À partir de ${minPrice.toLocaleString()} F` : "Prix sur devis";
               const tags = p.services?.slice(0, 3).map((s: any) => s.service?.nom).filter(Boolean) || [];
-              const image = p.photoUrl || "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=600&auto=format&fit=crop";
 
               return (
                 <div key={p.id || i} className="group glass-card rounded-[3rem] overflow-hidden hover:-translate-y-2 transition-all duration-500 hover:shadow-2xl hover:shadow-elite-emerald/10 border-elite-emerald/5">
                   <div className="relative h-64 overflow-hidden">
-                    <img src={image} alt={name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                    <DefaultAvatar photoUrl={p.photoUrl} genre={p.genre} alt={name} className="group-hover:scale-110 transition-transform duration-1000" iconClassName="w-1/3 h-1/3" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     
                     <button className="absolute top-5 right-5 p-3 bg-white/20 backdrop-blur-xl text-white rounded-2xl hover:bg-white hover:text-red-500 transition-all shadow-xl">

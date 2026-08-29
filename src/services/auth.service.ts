@@ -38,14 +38,39 @@ class AuthService {
     return result;
   }
 
-  async register(dto: RegisterDto): Promise<AuthResponse> {
+  async register(dto: RegisterDto): Promise<any> {
     const response = await api.post<any>('/auth/register', dto);
+    const result = unwrapApiData<any>(response);
+    if (result && result.access_token) {
+      localStorage.setItem('access_token', result.access_token);
+      localStorage.setItem('user', JSON.stringify(result.user));
+    }
+    return result;
+  }
+
+  async verifyEmail(email: string, code: string): Promise<AuthResponse> {
+    const response = await api.post<any>('/auth/verify-email', { email, code });
     const result = unwrapApiData<AuthResponse>(response);
     if (result && result.access_token) {
       localStorage.setItem('access_token', result.access_token);
       localStorage.setItem('user', JSON.stringify(result.user));
     }
     return result;
+  }
+
+  async resendVerification(email: string): Promise<{ message: string; otpExpiresIn?: number }> {
+    const response = await api.post<any>('/auth/resend-verification', { email });
+    return unwrapApiData(response);
+  }
+
+  async forgotPassword(email: string): Promise<{ message: string; otpExpiresIn?: number }> {
+    const response = await api.post<any>('/auth/forgot-password', { email });
+    return unwrapApiData(response);
+  }
+
+  async resetPassword(email: string, code: string, motDePasse: string): Promise<{ message: string }> {
+    const response = await api.post<any>('/auth/reset-password', { email, code, motDePasse });
+    return unwrapApiData(response);
   }
 
   async getProfile(): Promise<User> {

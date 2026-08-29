@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '../components/Sidebar';
-import { User, Mail, Phone, MapPin, Camera, Save, Globe, Bell, Briefcase, FileText, Loader2, CheckCircle2, Trash2, Plus, Image as ImageIcon, AlertCircle, X, Zap } from 'lucide-react';
+import DefaultAvatar from '../components/DefaultAvatar';
+import { User, Mail, Phone, MapPin, Camera, Save, Globe, Bell, Briefcase, FileText, Loader2, CheckCircle2, Trash2, Plus, Image as ImageIcon, AlertCircle, X, Zap, UploadCloud, ShieldCheck, ShieldAlert, ShieldQuestion } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageHeader from '../components/PageHeader';
 import api from '../services/api';
+import { validateName, validatePhone } from '../utils/validation';
 
 const Settings = () => {
   const { user, updateUser } = useAuth();
@@ -24,8 +26,11 @@ const Settings = () => {
     titreProfessionnel: '',
     bio: '',
     photoUrl: '',
+    genre: '' as '' | 'HOMME' | 'FEMME',
   });
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingDocument, setIsUploadingDocument] = useState(false);
 
   const fetchProfile = async () => {
     try {
@@ -41,6 +46,7 @@ const Settings = () => {
         titreProfessionnel: userData.titreProfessionnel || '',
         bio: userData.bio || '',
         photoUrl: userData.photoUrl || '',
+        genre: userData.genre || '',
       });
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -71,13 +77,26 @@ const Settings = () => {
 
   const handleSubmit = async (e?: React.FormEvent, silent = false) => {
     if (e) e.preventDefault();
-    if (!silent) setIsSaving(true);
     setMessage(null);
+
+    const validationError =
+      (formData.nom.trim() && validateName(formData.nom, 'Le nom')) ||
+      (formData.prenom.trim() && validateName(formData.prenom, 'Le prénom')) ||
+      validatePhone(formData.telephone);
+    if (validationError) {
+      if (!silent) setMessage({ type: 'error', text: validationError });
+      return;
+    }
+
+    if (!silent) setIsSaving(true);
 
     // Filter out empty optional fields to avoid validation errors
     const cleanedData = Object.entries(formData).reduce((acc, [key, value]) => {
       if (key === 'photoUrl' && value === '') {
         return { ...acc, photoUrl: null };
+      }
+      if (key === 'genre' && value === '') {
+        return acc;
       }
       return { ...acc, [key]: value };
     }, {} as Record<string, any>);
@@ -102,24 +121,27 @@ const Settings = () => {
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'PROFILE' | 'WORK') => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'PROFILE' | 'WORK' | 'DOCUMENT') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      setMessage({ type: 'error', text: 'Le fichier est trop volumineux (max 5 Mo).' });
+    const maxSize = type === 'DOCUMENT' ? 10 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setMessage({ type: 'error', text: `Le fichier est trop volumineux (max ${type === 'DOCUMENT' ? 10 : 5} Mo).` });
       return;
     }
 
     const uploadData = new FormData();
     uploadData.append('file', file);
 
+    const setBusy = type === 'DOCUMENT' ? setIsUploadingDocument : setIsUploading;
+
     try {
-      setIsUploading(true);
+      setBusy(true);
       setMessage(null);
-      
+
       const response = await api.post('/upload', uploadData);
-      
+
       const fileUrl = response.data.data?.url || response.data.url;
 
       if (type === 'PROFILE') {
@@ -131,11 +153,16 @@ const Settings = () => {
         updateUser({ ...user, ...updatedUserData });
         setMessage({ type: 'success', text: 'Photo de profil mise à jour !' });
         setTimeout(() => setMessage(null), 3000);
-      } else {
+      } else if (type === 'WORK') {
         await api.post('/users/media', { url: fileUrl, type: 'WORK' });
         await fetchProfile();
         setMessage({ type: 'success', text: 'Image ajoutée au portfolio !' });
         setTimeout(() => setMessage(null), 3000);
+      } else {
+        await api.post('/users/media', { url: fileUrl, type: 'DOCUMENT' });
+        await fetchProfile();
+        setMessage({ type: 'success', text: 'Document envoyé ! Il est en attente de vérification par un administrateur.' });
+        setTimeout(() => setMessage(null), 4000);
       }
     } catch (error: any) {
       console.error('Full Error Object:', error);
@@ -143,7 +170,7 @@ const Settings = () => {
       const errMsg = Array.isArray(backendError) ? backendError[0] : backendError || error.message || 'Erreur lors de l\'envoi du fichier.';
       setMessage({ type: 'error', text: errMsg });
     } finally {
-      setIsUploading(false);
+      setBusy(false);
       // Clear the input value so the same file can be selected again
       if (e.target) e.target.value = '';
     }
@@ -253,9 +280,9 @@ const Settings = () => {
             <section className="glass-card p-10 rounded-[3rem] bg-white border-none shadow-premium transition-all">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-10 mb-12">
                 <div className="relative group mx-auto sm:mx-0">
-                    <div className="w-32 h-32 bg-slate-100 rounded-[2.5rem] flex items-center justify-center font-black text-slate-300 text-3xl overflow-hidden shadow-inner uppercase border-4 border-white transition-transform group-hover:scale-105">
+                    <div className="w-32 h-32 bg-slate-100 rounded-[2.5rem] overflow-hidden shadow-inner border-4 border-white transition-transform group-hover:scale-105 flex items-center justify-center">
                         {isUploading ? <Loader2 className="animate-spin text-elite-emerald" /> : (
-                            formData.photoUrl ? <img src={formData.photoUrl} alt="Profil" className="w-full h-full object-cover" /> : user.nom[0]
+                            <DefaultAvatar photoUrl={formData.photoUrl} genre={formData.genre || null} iconClassName="w-1/2 h-1/2" />
                         )}
                     </div>
                     <button 
@@ -313,6 +340,17 @@ const Settings = () => {
                     <div className="relative group">
                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-elite-emerald transition-all" size={18} />
                     <input name="localisation" value={formData.localisation} onChange={handleChange} type="text" placeholder="Lomé, Togo" className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" />
+                    </div>
+                </div>
+                <div className="space-y-3 md:col-span-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Genre (icône de profil par défaut)</label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <button type="button" onClick={() => setFormData(prev => ({ ...prev, genre: 'HOMME' }))} className={`py-4 rounded-2xl flex items-center justify-center gap-3 border-2 font-bold text-sm transition-all ${formData.genre === 'HOMME' ? 'border-elite-emerald bg-elite-emerald/5 text-slate-900' : 'border-slate-100 text-slate-400 hover:border-slate-200'}`}>
+                            <User size={18} className={formData.genre === 'HOMME' ? 'text-elite-emerald' : 'opacity-40'} /> Homme
+                        </button>
+                        <button type="button" onClick={() => setFormData(prev => ({ ...prev, genre: 'FEMME' }))} className={`py-4 rounded-2xl flex items-center justify-center gap-3 border-2 font-bold text-sm transition-all ${formData.genre === 'FEMME' ? 'border-elite-gold bg-elite-gold/5 text-slate-900' : 'border-slate-100 text-slate-400 hover:border-slate-200'}`}>
+                            <User size={18} className={formData.genre === 'FEMME' ? 'text-elite-gold' : 'opacity-40'} /> Femme
+                        </button>
                     </div>
                 </div>
 
@@ -408,7 +446,61 @@ const Settings = () => {
           </motion.div>
 
           <div className="space-y-10">
-            <motion.div 
+            {user.role === 'PRESTATAIRE' && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="glass-card p-10 rounded-[3rem] bg-white border-none shadow-premium"
+              >
+                <h3 className="text-xl font-black text-slate-900 mb-6">Vérification du compte</h3>
+
+                {user.verificationStatus === 'VERIFIED' && (
+                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-sm mb-6">
+                    <ShieldCheck size={20} className="shrink-0" />
+                    Votre compte est validé. Vos services sont visibles publiquement.
+                  </div>
+                )}
+                {user.verificationStatus === 'REJECTED' && (
+                  <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 font-bold text-sm mb-6 space-y-1">
+                    <div className="flex items-center gap-3"><ShieldAlert size={20} className="shrink-0" /> Document non validé</div>
+                    {user.rejectionReason && <p className="text-xs font-semibold text-red-600 pl-8">{user.rejectionReason}</p>}
+                  </div>
+                )}
+                {user.verificationStatus === 'PENDING' && (
+                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 font-bold text-sm mb-6">
+                    <ShieldQuestion size={20} className="shrink-0" />
+                    En attente de vérification par un administrateur.
+                  </div>
+                )}
+
+                <p className="text-xs font-bold text-slate-400 mb-4 leading-relaxed">
+                  Importez une attestation de service, carte professionnelle ou tout document prouvant votre qualification.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => documentInputRef.current?.click()}
+                  disabled={isUploadingDocument}
+                  className="w-full flex items-center gap-4 p-5 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 hover:border-elite-emerald transition-all disabled:opacity-50"
+                >
+                  {isUploadingDocument ? <Loader2 size={22} className="animate-spin text-elite-emerald shrink-0" /> : <UploadCloud size={22} className="text-elite-emerald shrink-0" />}
+                  <span className="text-sm font-bold text-slate-600">
+                    {user.media?.some(m => m.type === 'DOCUMENT')
+                      ? 'Remplacer mon document justificatif'
+                      : 'Importer mon document justificatif'}
+                  </span>
+                </button>
+                <input
+                  type="file"
+                  ref={documentInputRef}
+                  onChange={(e) => handleFileUpload(e, 'DOCUMENT')}
+                  className="hidden"
+                  accept="image/png,image/jpeg,image/gif,application/pdf"
+                />
+              </motion.div>
+            )}
+
+            <motion.div
                initial={{ opacity: 0, y: 20 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ delay: 0.1 }}

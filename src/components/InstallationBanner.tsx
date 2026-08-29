@@ -1,118 +1,125 @@
-import React, { useEffect, useState } from 'react';
-import { Download, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Download, X, Share, Plus } from 'lucide-react';
+import {
+  getDeferredPrompt,
+  onPromptChange,
+  clearDeferredPrompt,
+  isStandalone,
+  isIos,
+} from '../lib/pwa';
+
+// Durée d'affichage automatique (ms) avant disparition.
+const VISIBLE_MS = 7000;
 
 const InstallationBanner = () => {
-  const [installPrompt, setInstallPrompt] = useState<any>(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const [autoHideTimer, setAutoHideTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [leaving, setLeaving] = useState(false);
+  const [hasPrompt, setHasPrompt] = useState(!!getDeferredPrompt());
+  const [showIosHint, setShowIosHint] = useState(false);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const startHideTimer = () => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => dismiss(), VISIBLE_MS);
+  };
+
+  const dismiss = () => {
+    setLeaving(true);
+    setTimeout(() => {
+      setVisible(false);
+      setLeaving(false);
+    }, 300);
+  };
 
   useEffect(() => {
-    // Check if app is already installed
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                         (window.navigator as any).standalone === true;
-    const isDismissed = localStorage.getItem('edoteam-install-dismissed');
+    // Déjà installée -> jamais de bannière.
+    if (isStandalone()) return;
 
-    // Don't show if already installed or dismissed
-    if (isStandalone || isDismissed) {
-      return;
-    }
+    // Affichage à chaque chargement de page (montage du composant).
+    // Pas de persistance : au rafraîchissement, la bannière revient puis repart.
+    setVisible(true);
+    startHideTimer();
 
-    const listener = (event: Event) => {
-      event.preventDefault();
-      setInstallPrompt(event as any);
-      showBannerTemporarily();
-    };
-
-    const appInstalledListener = () => {
-      setIsVisible(false);
-      setInstallPrompt(null);
-      localStorage.removeItem('edoteam-install-dismissed');
-    };
-
-    window.addEventListener('beforeinstallprompt', listener);
-    window.addEventListener('appinstalled', appInstalledListener);
-
-    // Fallback: Show banner on localhost after 2 seconds if not dismissed
-    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    let devTimer: ReturnType<typeof setTimeout> | undefined;
-    if (isDev && !installPrompt) {
-      devTimer = setTimeout(() => {
-        showBannerTemporarily();
-      }, 2000);
-    }
+    const off = onPromptChange(() => setHasPrompt(!!getDeferredPrompt()));
 
     return () => {
-      if (devTimer) clearTimeout(devTimer);
-      if (autoHideTimer) clearTimeout(autoHideTimer);
-      window.removeEventListener('beforeinstallprompt', listener);
-      window.removeEventListener('appinstalled', appInstalledListener);
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+      off();
     };
-  }, [installPrompt, autoHideTimer]);
-
-  const showBannerTemporarily = () => {
-    setIsVisible(true);
-    
-    // Auto-hide after 8 seconds
-    const timer = setTimeout(() => {
-      setIsVisible(false);
-    }, 8000);
-    
-    setAutoHideTimer(timer);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleInstall = async () => {
-    if (!installPrompt) {
-      setIsVisible(false);
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+
+    const prompt = getDeferredPrompt();
+    if (prompt) {
+      await prompt.prompt();
+      const { outcome } = await prompt.userChoice;
+      clearDeferredPrompt();
+      setHasPrompt(false);
+      if (outcome === 'accepted') dismiss();
+      else startHideTimer();
       return;
     }
 
-    installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
-    
-    if (outcome === 'accepted') {
-      setIsVisible(false);
-      setInstallPrompt(null);
-      localStorage.removeItem('edoteam-install-dismissed');
+    if (isIos()) {
+      setShowIosHint(true);
+      return;
     }
+    // Navigateur sans prompt natif : on laisse la bannière, l'utilisateur
+    // peut installer via le menu du navigateur.
+    startHideTimer();
   };
 
-  const handleDismiss = () => {
-    setIsVisible(false);
-    if (autoHideTimer) clearTimeout(autoHideTimer);
-    localStorage.setItem('edoteam-install-dismissed', 'true');
-  };
-
-  if (!isVisible) return null;
+  if (!visible) return null;
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] bg-elite-emerald/95 backdrop-blur-sm shadow-lg rounded-lg animate-in slide-in-from-bottom-2 duration-300 w-80">
-      <div className="px-2.5 py-1.5 flex items-center justify-between gap-1.5">
-        {/* Left: Icon + Text */}
-        <div className="flex items-center gap-1.5 flex-1 min-w-0">
-          <div className="flex-shrink-0 w-6 h-6 bg-white/20 rounded flex items-center justify-center">
-            <Download size={12} className="text-white" />
+    <div
+      className={`fixed inset-x-0 bottom-0 z-[70] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pointer-events-none transition-all duration-300 ${
+        leaving ? 'translate-y-6 opacity-0' : 'translate-y-0 opacity-100'
+      }`}
+    >
+      <div className="pointer-events-auto mx-auto w-full max-w-md rounded-2xl bg-slate-900 text-white shadow-2xl shadow-black/30 ring-1 ring-white/10">
+        {showIosHint ? (
+          <div className="p-4 text-sm">
+            <div className="flex items-start justify-between gap-3">
+              <p className="font-bold">Installer EDOTEAM sur iPhone</p>
+              <button onClick={dismiss} className="p-1 -m-1 text-white/60 hover:text-white" aria-label="Fermer">
+                <X size={16} />
+              </button>
+            </div>
+            <p className="mt-2 text-white/70 leading-relaxed">
+              Touchez <Share size={14} className="inline mx-0.5 -mt-0.5" /> puis
+              <span className="inline-flex items-center gap-1 mx-1 font-semibold text-white">
+                <Plus size={13} /> Sur l’écran d’accueil
+              </span>
+            </p>
           </div>
-          <p className="text-white font-bold text-xs truncate">
-            Installer EDOTEAM
-          </p>
-        </div>
-
-        {/* Right: Actions */}
-        <div className="flex items-center gap-1 flex-shrink-0">
-          <button
-            onClick={handleInstall}
-            className="px-2.5 py-0.5 bg-white text-elite-emerald font-bold rounded text-xs whitespace-nowrap hover:scale-105 transition-all"
-          >
-            Installer
-          </button>
-          <button
-            onClick={handleDismiss}
-            className="p-0.5 bg-white/10 text-white rounded hover:bg-white/20 transition-colors flex-shrink-0"
-            title="Fermer"
-          >
-            <X size={12} />
-          </button>
-        </div>
+        ) : (
+          <div className="flex items-center gap-3 p-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400">
+              <Download size={18} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold leading-tight">Installer l’application EDOTEAM</p>
+              <p className="truncate text-xs text-white/55">Accès rapide depuis votre écran d’accueil</p>
+            </div>
+            <button
+              onClick={handleInstall}
+              className="shrink-0 rounded-xl bg-emerald-500 px-3.5 py-2 text-xs font-black uppercase tracking-wide text-white transition-transform active:scale-95 hover:bg-emerald-400"
+            >
+              {hasPrompt || isIos() ? 'Installer' : 'Comment ?'}
+            </button>
+            <button
+              onClick={dismiss}
+              className="shrink-0 rounded-lg p-1.5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+              aria-label="Fermer"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
