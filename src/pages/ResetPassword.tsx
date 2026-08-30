@@ -83,7 +83,7 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen pt-16 sm:pt-24 pb-12 flex flex-col justify-center bg-[#F8FAFC] px-4">
+    <div className="min-h-screen pt-16 sm:pt-24 pb-12 flex flex-col justify-center bg-[#F8FAFC] dark:bg-[#0b1220] px-4">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <div className="flex justify-center mb-10">
           <Logo variant="dark" className="scale-125" />
@@ -91,8 +91,8 @@ const ResetPassword = () => {
         <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-elite-emerald/10 flex items-center justify-center text-elite-emerald">
           <KeyRound size={30} />
         </div>
-        <h2 className="text-3xl font-black text-slate-900 tracking-tight font-heading">Nouveau mot de passe</h2>
-        <p className="mt-3 text-slate-500 font-medium">
+        <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight font-heading">Nouveau mot de passe</h2>
+        <p className="mt-3 text-slate-500 dark:text-slate-400 font-medium">
           Saisissez le code reçu par email et choisissez un nouveau mot de passe robuste.
         </p>
       </div>
@@ -112,15 +112,15 @@ const ResetPassword = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Email</label>
+              <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest">Email</label>
               <div className="relative group">
-                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none"
+                  className="w-full pl-14 pr-5 py-5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 dark:text-white outline-none"
                   placeholder="votre@email.com"
                 />
               </div>
@@ -128,8 +128,8 @@ const ResetPassword = () => {
 
             <div>
               <div className="flex items-center justify-between mb-3">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Code à 6 chiffres</label>
-                <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${expired ? 'text-red-500' : 'text-slate-500'}`}>
+                <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Code à 6 chiffres</label>
+                <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${expired ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}`}>
                   <Timer size={12} />
                   {expired ? 'Expiré' : <span className="tabular-nums">{mmss}</span>}
                 </span>
@@ -142,36 +142,36 @@ const ResetPassword = () => {
                 disabled={expired}
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-                className="w-full px-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-black text-slate-900 outline-none tracking-[0.5em] text-center text-xl disabled:opacity-40"
+                className="w-full px-5 py-5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-black text-slate-900 dark:text-white outline-none tracking-[0.5em] text-center text-xl disabled:opacity-40"
                 placeholder="______"
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Nouveau mot de passe</label>
+              <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest">Nouveau mot de passe</label>
               <div className="relative group">
-                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none"
+                  className="w-full pl-14 pr-5 py-5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 dark:text-white outline-none"
                   placeholder="••••••••"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Confirmer</label>
+              <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest">Confirmer</label>
               <div className="relative group">
-                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
                 <input
                   type="password"
                   required
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
-                  className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none"
+                  className="w-full pl-14 pr-5 py-5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 dark:text-white outline-none"
                   placeholder="••••••••"
                 />
               </div>
@@ -180,7 +180,7 @@ const ResetPassword = () => {
             {password.length > 0 && (
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 px-1">
                 {checks.map((c) => (
-                  <li key={c.label} className={`flex items-center gap-2 text-[11px] font-bold ${c.valid ? 'text-elite-emerald' : 'text-slate-400'}`}>
+                  <li key={c.label} className={`flex items-center gap-2 text-[11px] font-bold ${c.valid ? 'text-elite-emerald' : 'text-slate-400 dark:text-slate-500'}`}>
                     <CheckCircle2 size={13} className={c.valid ? 'opacity-100' : 'opacity-30'} />
                     {c.label}
                   </li>
@@ -209,7 +209,7 @@ const ResetPassword = () => {
             </button>
           </div>
         </div>
-        <p className="mt-8 text-center text-slate-500 font-bold text-sm">
+        <p className="mt-8 text-center text-slate-500 dark:text-slate-400 font-bold text-sm">
           <Link to="/login" className="text-elite-emerald hover:text-elite-gold underline underline-offset-8 decoration-elite-gold/30">
             Retour à la connexion
           </Link>

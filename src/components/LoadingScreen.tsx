@@ -4,7 +4,7 @@ import Logo from './Logo';
 
 const LoadingScreen = () => {
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/95 backdrop-blur-xl">
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl">
       <div className="relative">
         {/* Animated Rings */}
         <motion.div
@@ -44,7 +44,7 @@ const LoadingScreen = () => {
       </div>
 
       {/* Loading Bar */}
-      <div className="mt-12 w-48 h-1 bg-slate-100 rounded-full overflow-hidden">
+      <div className="mt-12 w-48 h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
         <motion.div
           animate={{
             x: ["-100%", "100%"]
@@ -62,7 +62,7 @@ const LoadingScreen = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="mt-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400"
+        className="mt-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500"
       >
         Chargement de l'excellence
       </motion.p>

@@ -44,7 +44,7 @@ const Security = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-sans overflow-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b1220] flex font-sans overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
@@ -58,15 +58,15 @@ const Security = () => {
           <motion.div 
              initial={{ opacity: 0, y: 20 }}
              animate={{ opacity: 1, y: 0 }}
-             className="glass-card p-10 rounded-[3rem] bg-white border-none shadow-premium transition-all hover:shadow-2xl"
+             className="glass-card p-10 rounded-[3rem] bg-white dark:bg-slate-900 border-none shadow-premium transition-all hover:shadow-2xl"
           >
             <div className="flex items-center gap-6 mb-10">
               <div className="w-16 h-16 bg-elite-emerald/5 rounded-2xl flex items-center justify-center text-elite-emerald">
                 <Lock size={32} />
               </div>
               <div>
-                <h3 className="text-xl font-black text-slate-900">Mot de Passe</h3>
-                <p className="text-sm text-slate-400 font-medium">Dernière modification il y a quelques mois</p>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white">Mot de Passe</h3>
+                <p className="text-sm text-slate-400 dark:text-slate-500 font-medium">Dernière modification il y a quelques mois</p>
               </div>
             </div>
 
@@ -80,25 +80,25 @@ const Security = () => {
 
             <form onSubmit={handleUpdatePassword} className="space-y-6">
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Ancien mot de passe</label>
+                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Ancien mot de passe</label>
                 <input 
                   type="password" 
                   value={passwords.oldPassword}
                   onChange={(e) => setPasswords({ ...passwords, oldPassword: e.target.value })}
                   placeholder="••••••••" 
                   required
-                  className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" 
+                  className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" 
                 />
               </div>
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Nouveau mot de passe</label>
+                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Nouveau mot de passe</label>
                 <input 
                   type="password" 
                   value={passwords.newPassword}
                   onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
                   placeholder="••••••••"
                   required
-                  className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
+                  className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
                 />
               </div>
               {passwords.newPassword.length > 0 && (
@@ -106,7 +106,7 @@ const Security = () => {
                   {newPasswordChecks.map((check) => (
                     <li
                       key={check.label}
-                      className={`flex items-center gap-2 text-[11px] font-bold ${check.valid ? 'text-elite-emerald' : 'text-slate-400'}`}
+                      className={`flex items-center gap-2 text-[11px] font-bold ${check.valid ? 'text-elite-emerald' : 'text-slate-400 dark:text-slate-500'}`}
                     >
                       <ShieldCheck size={13} className={check.valid ? 'opacity-100' : 'opacity-30'} />
                       {check.label}
@@ -129,7 +129,7 @@ const Security = () => {
                initial={{ opacity: 0, y: 20 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ delay: 0.1 }}
-               className="glass-card p-10 rounded-[3rem] bg-white border-none shadow-premium"
+               className="glass-card p-10 rounded-[3rem] bg-white dark:bg-slate-900 border-none shadow-premium"
             >
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-6">
@@ -137,16 +137,16 @@ const Security = () => {
                     <Smartphone size={28} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black text-slate-900">Double Authentification (2FA)</h3>
-                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Recommandé</p>
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white">Double Authentification (2FA)</h3>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-1">Recommandé</p>
                   </div>
                 </div>
                 <div className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" className="sr-only peer" defaultChecked />
-                  <div className="w-14 h-8 bg-slate-100 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-elite-emerald shadow-inner transition-all" />
+                  <div className="w-14 h-8 bg-slate-100 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-elite-emerald shadow-inner transition-all" />
                 </div>
               </div>
-              <p className="text-sm text-slate-500 font-medium leading-relaxed">
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                 Une couche de sécurité supplémentaire en demandant un code envoyé par SMS ou application mobile.
               </p>
             </motion.div>

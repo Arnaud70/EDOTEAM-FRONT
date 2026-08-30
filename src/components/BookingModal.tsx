@@ -162,9 +162,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-xl max-h-[90vh] bg-white rounded-[3rem] shadow-2xl overflow-hidden"
+          className="relative w-full max-w-xl max-h-[90vh] bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl overflow-hidden"
         >
-          <button onClick={onClose} className="absolute top-8 right-8 p-3 hover:bg-slate-50 rounded-2xl transition-all text-slate-400 hover:text-slate-900 z-10">
+          <button onClick={onClose} className="absolute top-8 right-8 p-3 hover:bg-slate-50 rounded-2xl transition-all text-slate-400 dark:text-slate-500 hover:text-slate-900 z-10">
             <X size={24} />
           </button>
 
@@ -172,15 +172,15 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
             {step === 1 && (
               <div className="space-y-8">
                 <div>
-                  <h2 className="text-3xl font-black text-slate-900 mb-2">Réserver un service</h2>
-                  <p className="text-slate-500 font-medium">Avec {provider.prenom} {provider.nom}</p>
+                  <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Réserver un service</h2>
+                  <p className="text-slate-500 dark:text-slate-400 font-medium">Avec {provider.prenom} {provider.nom}</p>
                 </div>
 
                 <form onSubmit={(e) => { e.preventDefault(); setStep(2); }} className="space-y-6">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Service souhaité</label>
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Service souhaité</label>
                     {provider.services.length === 0 ? (
-                      <div className="w-full px-6 py-4 bg-slate-50 rounded-2xl text-slate-500 text-sm">
+                      <div className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-2xl text-slate-500 dark:text-slate-400 text-sm">
                         Ce prestataire n'a pas encore ajouté de service. Vous ne pouvez pas réserver pour le moment.
                       </div>
                     ) : (
@@ -188,7 +188,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                         required
                         value={formData.serviceId}
                         onChange={(e) => setFormData({...formData, serviceId: e.target.value})}
-                        className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm appearance-none"
+                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm appearance-none"
                       >
                         <option value="">Sélectionner un service</option>
                         {provider.services.map(s => (
@@ -206,7 +206,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Date</label>
+                      <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Date</label>
                       <div className="relative">
                         <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
                         <input 
@@ -215,12 +215,12 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                           min={new Date().toISOString().split('T')[0]}
                           value={formData.date}
                           onChange={(e) => setFormData({...formData, date: e.target.value})}
-                          className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
+                          className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
                         />
                       </div>
                     </div>
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Heure</label>
+                      <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Heure</label>
                       <div className="relative">
                         <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
                         <input 
@@ -228,15 +228,15 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                           type="time" 
                           value={formData.startTime}
                           onChange={(e) => setFormData({...formData, startTime: e.target.value})}
-                          className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
+                          className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
                         />
                       </div>
                     </div>
                   </div>
 
                   {formData.date && (
-                    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">Disponibilités du jour</p>
+                    <div className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-4">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-3">Disponibilités du jour</p>
                       <div className="max-h-64 overflow-y-auto pr-1 custom-scrollbar">
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                           {timeSlots.map((slot) => {
@@ -252,7 +252,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                                     ? 'bg-red-100 text-red-600 border-red-200 cursor-not-allowed'
                                     : isSelected
                                       ? 'bg-elite-emerald text-white border-elite-emerald shadow-md'
-                                      : 'bg-white text-slate-700 border-slate-200 hover:border-elite-emerald/30 hover:text-elite-emerald'
+                                      : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-elite-emerald/30 hover:text-elite-emerald'
                                 }`}
                               >
                                 {slot.label}
@@ -269,7 +269,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                       <p className="text-[10px] font-black uppercase tracking-widest text-amber-700 mb-2">Créneaux déjà réservés</p>
                       <div className="flex flex-wrap gap-2">
                         {busySlots.map((slot, index) => (
-                          <span key={`${slot.startTime}-${index}`} className="bg-white text-amber-700 border border-amber-200 rounded-full px-3 py-1 text-xs font-bold">
+                          <span key={`${slot.startTime}-${index}`} className="bg-white dark:bg-slate-900 text-amber-700 border border-amber-200 rounded-full px-3 py-1 text-xs font-bold">
                             {new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(slot.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         ))}
@@ -294,13 +294,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                   <button onClick={() => setStep(1)} className="text-[10px] font-black text-elite-emerald uppercase tracking-widest mb-4 hover:underline">
                     ← Retour aux détails
                   </button>
-                  <h2 className="text-3xl font-black text-slate-900 mb-2">Lieu de l'intervention</h2>
-                  <p className="text-slate-500 font-medium">Où {provider.prenom} doit-il intervenir ?</p>
+                  <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Lieu de l'intervention</h2>
+                  <p className="text-slate-500 dark:text-slate-400 font-medium">Où {provider.prenom} doit-il intervenir ?</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Adresse complète</label>
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Adresse complète</label>
                     <div className="relative">
                       <MapPin className="absolute left-4 top-6 text-slate-300" size={18} />
                       <textarea 
@@ -309,7 +309,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                         onChange={(e) => setFormData({...formData, address: e.target.value})}
                         rows={3}
                         placeholder="Ex: Quartier Adidogomé, Rue de l'Eglise..."
-                        className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-3xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm resize-none"
+                        className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-3xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm resize-none"
                       />
                     </div>
                   </div>
@@ -335,8 +335,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                   <CheckCircle2 size={48} />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-black text-slate-900 mb-2">Demande envoyée !</h2>
-                  <p className="text-slate-500 font-medium leading-relaxed">
+                  <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Demande envoyée !</h2>
+                  <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                     Votre demande de rendez-vous a été envoyée à {provider.prenom}. <br />
                     Vous recevrez une notification dès qu'elle sera acceptée.
                   </p>

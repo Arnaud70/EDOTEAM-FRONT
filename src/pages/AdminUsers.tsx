@@ -100,7 +100,7 @@ const AdminUsers = () => {
   if (!user || user.role?.toUpperCase() !== 'ADMIN') return null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-sans overflow-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b1220] flex font-sans overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
@@ -111,19 +111,19 @@ const AdminUsers = () => {
           actions={(
             <>
               <div className="flex-1 md:flex-none relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-emerald transition-colors" size={18} />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-elite-emerald transition-colors" size={18} />
                 <input 
                   type="text" 
                   placeholder="Rechercher un membre..." 
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full md:w-80 pl-12 pr-6 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-medium text-sm"
+                  className="w-full md:w-80 pl-12 pr-6 py-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-medium text-sm"
                 />
               </div>
               <select 
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="p-4 bg-white border border-slate-100 rounded-2xl text-slate-500 font-black text-[10px] uppercase tracking-widest outline-none shadow-sm cursor-pointer hover:border-elite-gold transition-colors"
+                className="p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-slate-500 dark:text-slate-400 font-black text-[10px] uppercase tracking-widest outline-none shadow-sm cursor-pointer hover:border-elite-gold transition-colors"
               >
                 <option value="">Tous les Rôles</option>
                 <option value="CLIENT">Clients</option>
@@ -137,19 +137,19 @@ const AdminUsers = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="glass-card rounded-[2.5rem] overflow-hidden border-none shadow-premium bg-white/70 backdrop-blur-xl"
+          className="glass-card rounded-[2.5rem] overflow-hidden border-none shadow-premium backdrop-blur-xl"
         >
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-slate-50">
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">ID</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Utilisateur</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Rôle</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Statut</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Validation</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Inscription</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right px-12">Actions</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">ID</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Utilisateur</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Rôle</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Statut</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Validation</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Inscription</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-right px-12">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -173,8 +173,8 @@ const AdminUsers = () => {
                           {item.nom?.[0]?.toUpperCase() || 'U'}
                         </div>
                         <div>
-                          <p className="font-bold text-slate-900 text-sm">{item.nom} {item.prenom}</p>
-                          <p className="text-xs text-slate-400 flex items-center gap-1">
+                          <p className="font-bold text-slate-900 dark:text-white text-sm">{item.nom} {item.prenom}</p>
+                          <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
                             <Mail size={12} /> {item.email}
                           </p>
                         </div>
@@ -225,10 +225,10 @@ const AdminUsers = () => {
                           )}
                         </div>
                       ) : (
-                        <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest">N/A</span>
+                        <span className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest">N/A</span>
                       )}
                     </td>
-                    <td className="px-8 py-6 text-xs text-slate-500 font-bold">
+                    <td className="px-8 py-6 text-xs text-slate-500 dark:text-slate-400 font-bold">
                       {new Date(item.createdAt).toLocaleDateString('fr-FR')}
                     </td>
                     <td className="px-8 py-6 text-right px-12">
@@ -287,11 +287,11 @@ const AdminUsers = () => {
           </div>
           
           <div className="px-8 py-6 border-t border-slate-50 flex items-center justify-between">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
               Affichage de {users.length} membres
             </p>
             <div className="flex gap-2">
-              <button className="px-4 py-2 border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-slate-50 transition-all">Précédent</button>
+              <button className="px-4 py-2 border border-slate-100 dark:border-slate-800 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 hover:bg-slate-50 transition-all">Précédent</button>
               <button className="px-4 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-elite-emerald transition-all shadow-lg active:scale-95">Suivant</button>
             </div>
           </div>

@@ -83,7 +83,10 @@ const CompleteProfile = () => {
         const uploadRes = await api.post('/upload', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
-        const fileUrl = uploadRes.data?.url;
+        const fileUrl = uploadRes.data?.data?.url ?? uploadRes.data?.url;
+        if (!fileUrl) {
+          throw new Error("Le fichier n'a pas pu être téléversé (URL manquante dans la réponse du serveur).");
+        }
         await api.post('/users/media', { url: fileUrl, type: 'DOCUMENT' });
         setDocumentUploaded(true);
         setIsUploadingDocument(false);
@@ -136,7 +139,7 @@ const CompleteProfile = () => {
   };
 
   return (
-    <div className="min-h-screen pt-16 sm:pt-24 pb-16 flex flex-col justify-center bg-[#F8FAFC] px-4 relative overflow-hidden">
+    <div className="min-h-screen pt-16 sm:pt-24 pb-16 flex flex-col justify-center bg-[#F8FAFC] dark:bg-[#0b1220] px-4 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-elite-emerald/5 blur-[120px] rounded-full -translate-y-1/2 -translate-x-1/2" />
       <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-elite-gold/5 blur-[120px] rounded-full translate-y-1/2 translate-x-1/2" />
 
@@ -144,10 +147,10 @@ const CompleteProfile = () => {
         <div className="flex justify-center mb-8 transform hover:rotate-3 transition-transform duration-500">
           <Logo variant="dark" className="scale-125" />
         </div>
-        <h2 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight font-heading mb-4">
+        <h2 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight font-heading mb-4">
           Compléter votre profil
         </h2>
-        <p className="text-slate-500 font-medium text-lg max-w-md mx-auto">
+        <p className="text-slate-500 dark:text-slate-400 font-medium text-lg max-w-md mx-auto">
           Même page que l'inscription, avec les champs client / prestataire adaptés.
         </p>
         {role === 'PRESTATAIRE' && (
@@ -166,11 +169,11 @@ const CompleteProfile = () => {
               className={`p-5 rounded-3xl flex flex-col items-center gap-3 border-2 transition-all duration-500 ${
                 role === 'CLIENT'
                   ? 'border-elite-emerald bg-elite-emerald/5 shadow-xl shadow-elite-emerald/10 scale-105'
-                  : 'border-slate-50 text-slate-400 hover:border-slate-200'
+                  : 'border-slate-50 text-slate-400 dark:text-slate-500 hover:border-slate-200'
               }`}
             >
               <User size={28} className={role === 'CLIENT' ? 'text-elite-emerald' : 'opacity-40'} />
-              <span className={`font-black text-xs uppercase tracking-[0.2em] ${role === 'CLIENT' ? 'text-slate-900' : 'text-slate-400'}`}>
+              <span className={`font-black text-xs uppercase tracking-[0.2em] ${role === 'CLIENT' ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'}`}>
                 Particulier Elite
               </span>
             </button>
@@ -180,11 +183,11 @@ const CompleteProfile = () => {
               className={`p-5 rounded-3xl flex flex-col items-center gap-3 border-2 transition-all duration-500 ${
                 role === 'PRESTATAIRE'
                   ? 'border-elite-gold bg-elite-gold/5 shadow-xl shadow-elite-gold/10 scale-105'
-                  : 'border-slate-50 text-slate-400 hover:border-slate-200'
+                  : 'border-slate-50 text-slate-400 dark:text-slate-500 hover:border-slate-200'
               }`}
             >
               <Briefcase size={28} className={role === 'PRESTATAIRE' ? 'text-elite-gold' : 'opacity-40'} />
-              <span className={`font-black text-xs uppercase tracking-[0.2em] ${role === 'PRESTATAIRE' ? 'text-slate-900' : 'text-slate-400'}`}>
+              <span className={`font-black text-xs uppercase tracking-[0.2em] ${role === 'PRESTATAIRE' ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'}`}>
                 Expert Certifié
               </span>
             </button>
@@ -199,50 +202,50 @@ const CompleteProfile = () => {
 
           <form className="space-y-8" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-8">
-              <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.3em]">Nom</label>
-              <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.3em]">Prénom</label>
+              <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-[0.3em]">Nom</label>
+              <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-[0.3em]">Prénom</label>
               <div className="relative group">
-                <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
                 <input
                   type="text"
                   readOnly
                   value={user?.nom ?? ''}
-                  className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl text-slate-900 font-bold outline-none"
+                  className="w-full pl-14 pr-5 py-5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl text-slate-900 dark:text-white font-bold outline-none"
                 />
               </div>
               <div className="relative group">
-                <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
                 <input
                   type="text"
                   readOnly
                   value={user?.prenom ?? ''}
-                  className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl text-slate-900 font-bold outline-none"
+                  className="w-full pl-14 pr-5 py-5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl text-slate-900 dark:text-white font-bold outline-none"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-8">
               <div>
-                <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.3em]">Identifiant Email</label>
+                <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-[0.3em]">Identifiant Email</label>
                 <div className="relative group">
-                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
                   <input
                     type="email"
                     readOnly
                     value={user?.email ?? ''}
-                    className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl text-slate-900 font-bold outline-none"
+                    className="w-full pl-14 pr-5 py-5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl text-slate-900 dark:text-white font-bold outline-none"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.3em]">Mobile Elite</label>
+                <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-[0.3em]">Mobile Elite</label>
                 <div className="relative group">
-                  <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                  <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
                   <input
                     type="tel"
                     value={telephone}
                     onChange={(e) => setTelephone(e.target.value)}
-                    className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300"
+                    className="w-full pl-14 pr-5 py-5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 dark:text-white outline-none placeholder:text-slate-300"
                     placeholder="+228 90 00 00 00"
                   />
                 </div>
@@ -251,14 +254,14 @@ const CompleteProfile = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-8">
               <div>
-                <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.3em]">Localisation (Région)</label>
+                <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-[0.3em]">Localisation (Région)</label>
                 <div className="relative group">
-                  <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                  <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
                   <input
                     type="text"
                     value={localisation}
                     onChange={(e) => setLocalisation(e.target.value)}
-                    className="w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 outline-none placeholder:text-slate-300"
+                    className="w-full pl-14 pr-5 py-5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 dark:text-white outline-none placeholder:text-slate-300"
                     placeholder="Saisissez votre adresse ou utilisez votre position"
                   />
                 </div>
@@ -266,18 +269,18 @@ const CompleteProfile = () => {
                   {isLocating ? <Loader2 size={16} className="animate-spin" /> : <LocateFixed size={16} />}
                   {isLocating ? 'Localisation...' : 'Utiliser ma position actuelle'}
                 </button>
-                {locationMessage && <p className="mt-2 text-xs font-bold text-slate-500">{locationMessage}</p>}
+                {locationMessage && <p className="mt-2 text-xs font-bold text-slate-500 dark:text-slate-400">{locationMessage}</p>}
               </div>
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                <Lock className="text-slate-400 shrink-0" size={20} />
-                <p className="text-xs font-bold text-slate-500 leading-relaxed">
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800">
+                <Lock className="text-slate-400 dark:text-slate-500 shrink-0" size={20} />
+                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 leading-relaxed">
                   Pour définir ou modifier votre mot de passe, rendez-vous dans <span className="text-elite-emerald">Sécurité</span> après cette étape.
                 </p>
               </div>
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.3em]">
+              <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-[0.3em]">
                 Genre (pour votre icône de profil)
               </label>
               <div className="grid grid-cols-2 gap-4">
@@ -285,7 +288,7 @@ const CompleteProfile = () => {
                   type="button"
                   onClick={() => setGenre('HOMME')}
                   className={`py-4 rounded-2xl flex items-center justify-center gap-3 border-2 font-bold text-sm transition-all ${
-                    genre === 'HOMME' ? 'border-elite-emerald bg-elite-emerald/5 text-slate-900' : 'border-slate-100 text-slate-400 hover:border-slate-200'
+                    genre === 'HOMME' ? 'border-elite-emerald bg-elite-emerald/5 text-slate-900 dark:text-white' : 'border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500 hover:border-slate-200'
                   }`}
                 >
                   <User size={18} className={genre === 'HOMME' ? 'text-elite-emerald' : 'opacity-40'} />
@@ -295,7 +298,7 @@ const CompleteProfile = () => {
                   type="button"
                   onClick={() => setGenre('FEMME')}
                   className={`py-4 rounded-2xl flex items-center justify-center gap-3 border-2 font-bold text-sm transition-all ${
-                    genre === 'FEMME' ? 'border-elite-gold bg-elite-gold/5 text-slate-900' : 'border-slate-100 text-slate-400 hover:border-slate-200'
+                    genre === 'FEMME' ? 'border-elite-gold bg-elite-gold/5 text-slate-900 dark:text-white' : 'border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500 hover:border-slate-200'
                   }`}
                 >
                   <User size={18} className={genre === 'FEMME' ? 'text-elite-gold' : 'opacity-40'} />
@@ -306,7 +309,7 @@ const CompleteProfile = () => {
 
             {role === 'PRESTATAIRE' && (
               <div className="p-8 bg-elite-gold/5 rounded-[2.5rem] border border-elite-gold/20 space-y-6">
-                <h4 className="font-black text-slate-900 flex items-center gap-3 text-xs uppercase tracking-widest">
+                <h4 className="font-black text-slate-900 dark:text-white flex items-center gap-3 text-xs uppercase tracking-widest">
                   <Zap size={18} className="text-elite-gold" />
                   Profil d’Expertise
                 </h4>
@@ -321,7 +324,7 @@ const CompleteProfile = () => {
                             setIsOtherSpecialite(false);
                             setSpecialite(s.nom);
                           }}
-                          className={`px-4 py-2 rounded-2xl border transition-all text-sm font-bold ${specialite === s.nom ? 'bg-elite-gold text-white border-elite-gold' : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-elite-emerald hover:text-elite-emerald'}`}
+                          className={`px-4 py-2 rounded-2xl border transition-all text-sm font-bold ${specialite === s.nom ? 'bg-elite-gold text-white border-elite-gold' : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-elite-emerald hover:text-elite-emerald'}`}
                         >
                           {s.nom}
                         </button>
@@ -329,24 +332,24 @@ const CompleteProfile = () => {
                     </div>
                   )}
                   <div className="relative z-20">
-                    <Briefcase className={`absolute left-5 top-1/2 -translate-y-1/2 transition-colors text-slate-400 ${isDropdownOpen ? 'text-elite-gold' : ''}`} size={18} />
+                    <Briefcase className={`absolute left-5 top-1/2 -translate-y-1/2 transition-colors text-slate-400 dark:text-slate-500 ${isDropdownOpen ? 'text-elite-gold' : ''}`} size={18} />
                     {isDropdownOpen && (
                       <div className="fixed inset-0 z-30" onClick={() => setIsDropdownOpen(false)} />
                     )}
                     <div
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className={`w-full pl-14 pr-5 py-4 bg-white border-2 rounded-2xl cursor-pointer font-bold text-sm outline-none transition-all flex justify-between items-center relative z-40 ${
-                        isDropdownOpen ? 'border-elite-gold shadow-lg shadow-elite-gold/10' : 'border-transparent text-slate-700 hover:shadow-md'
+                      className={`w-full pl-14 pr-5 py-4 bg-white dark:bg-slate-900 border-2 rounded-2xl cursor-pointer font-bold text-sm outline-none transition-all flex justify-between items-center relative z-40 ${
+                        isDropdownOpen ? 'border-elite-gold shadow-lg shadow-elite-gold/10' : 'border-transparent text-slate-700 dark:text-slate-200 hover:shadow-md'
                       }`}
                     >
-                      <span className={specialite || isOtherSpecialite ? 'text-slate-900' : 'text-slate-400 font-normal truncate'}>
+                      <span className={specialite || isOtherSpecialite ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500 font-normal truncate'}>
                         {isOtherSpecialite ? 'Autre (nouveau domaine)' : specialite || 'Sélectionnez un domaine d expertise'}
                       </span>
-                      <ChevronDown size={20} className={`text-slate-400 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180 text-elite-gold' : ''}`} />
+                      <ChevronDown size={20} className={`text-slate-400 dark:text-slate-500 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180 text-elite-gold' : ''}`} />
                     </div>
 
                     {isDropdownOpen && (
-                      <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 origin-top">
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 origin-top">
                         <div className="max-h-64 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-slate-200">
                           {services.map((s) => (
                             <div
@@ -356,22 +359,22 @@ const CompleteProfile = () => {
                                 setSpecialite(s.nom);
                                 setIsDropdownOpen(false);
                               }}
-                              className={`px-4 py-3 rounded-xl cursor-pointer font-medium text-sm transition-all flex items-center ${!isOtherSpecialite && specialite === s.nom ? 'bg-elite-gold/10 text-elite-gold font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                              className={`px-4 py-3 rounded-xl cursor-pointer font-medium text-sm transition-all flex items-center ${!isOtherSpecialite && specialite === s.nom ? 'bg-elite-gold/10 text-elite-gold font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 hover:text-slate-900'}`}
                             >
                               {s.nom}
                             </div>
                           ))}
-                          <div className="h-px bg-slate-100 my-2 mx-2"></div>
+                          <div className="h-px bg-slate-100 dark:bg-slate-800 my-2 mx-2"></div>
                           <div
                             onClick={() => {
                               setIsOtherSpecialite(true);
                               setSpecialite('');
                               setIsDropdownOpen(false);
                             }}
-                            className={`px-4 py-3 rounded-xl cursor-pointer font-medium text-sm transition-all flex items-center gap-3 ${isOtherSpecialite ? 'bg-elite-gold/10 text-elite-gold font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                            className={`px-4 py-3 rounded-xl cursor-pointer font-medium text-sm transition-all flex items-center gap-3 ${isOtherSpecialite ? 'bg-elite-gold/10 text-elite-gold font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 hover:text-slate-900'}`}
                           >
-                            <div className={`p-1.5 rounded-lg ${isOtherSpecialite ? 'bg-elite-gold/20' : 'bg-slate-100'}`}>
-                              <ListPlus size={16} className={isOtherSpecialite ? 'text-elite-gold' : 'text-slate-400'} />
+                            <div className={`p-1.5 rounded-lg ${isOtherSpecialite ? 'bg-elite-gold/20' : 'bg-slate-100 dark:bg-slate-800'}`}>
+                              <ListPlus size={16} className={isOtherSpecialite ? 'text-elite-gold' : 'text-slate-400 dark:text-slate-500'} />
                             </div>
                             Autre (nouveau domaine)
                           </div>
@@ -382,13 +385,13 @@ const CompleteProfile = () => {
 
                   {isOtherSpecialite && (
                     <div className="relative group animate-in fade-in slide-in-from-top-2">
-                      <ListPlus className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-gold transition-colors" size={18} />
+                      <ListPlus className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-elite-gold transition-colors" size={18} />
                       <input
                         type="text"
                         required={role === 'PRESTATAIRE' && isOtherSpecialite}
                         value={specialite}
                         onChange={(e) => setSpecialite(e.target.value)}
-                        className="w-full pl-14 pr-5 py-4 bg-white border-none rounded-2xl focus:ring-2 focus:ring-elite-gold font-bold text-slate-700 text-sm outline-none placeholder:text-slate-300"
+                        className="w-full pl-14 pr-5 py-4 bg-white dark:bg-slate-900 border-none rounded-2xl focus:ring-2 focus:ring-elite-gold font-bold text-slate-700 dark:text-slate-200 text-sm outline-none placeholder:text-slate-300"
                         placeholder="Veuillez préciser votre domaine..."
                       />
                     </div>
@@ -396,11 +399,11 @@ const CompleteProfile = () => {
                 </div>
 
                 <div className="pt-2 border-t border-elite-gold/20">
-                  <h4 className="font-black text-slate-900 flex items-center gap-3 text-xs uppercase tracking-widest mt-6 mb-4">
+                  <h4 className="font-black text-slate-900 dark:text-white flex items-center gap-3 text-xs uppercase tracking-widest mt-6 mb-4">
                     <FileText size={18} className="text-elite-gold" />
                     Document justificatif <span className="text-red-500">*</span>
                   </h4>
-                  <p className="text-xs font-bold text-slate-500 mb-4 leading-relaxed">
+                  <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
                     Attestation de service, carte professionnelle ou tout document prouvant votre qualification. Il sera envoyé au super admin pour vérification — votre profil ne sera visible publiquement qu'une fois validé.
                   </p>
 
@@ -419,9 +422,9 @@ const CompleteProfile = () => {
                       </label>
                     </div>
                   ) : (
-                    <label className="flex items-center gap-4 p-5 rounded-2xl bg-white border-2 border-dashed border-elite-gold/40 cursor-pointer hover:border-elite-gold transition-all">
+                    <label className="flex items-center gap-4 p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-dashed border-elite-gold/40 cursor-pointer hover:border-elite-gold transition-all">
                       <UploadCloud size={24} className="text-elite-gold shrink-0" />
-                      <span className="text-sm font-bold text-slate-600 truncate">
+                      <span className="text-sm font-bold text-slate-600 dark:text-slate-300 truncate">
                         {documentFile ? documentFile.name : 'Choisir un fichier (PDF, JPG, PNG — 10 Mo max)'}
                       </span>
                       <input

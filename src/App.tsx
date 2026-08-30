@@ -56,8 +56,9 @@ const isUserProfileComplete = (user: any) => {
   const hasPhone = !!user.telephone && user.telephone.trim().length > 0;
   const hasLocation = !!user.localisation && user.localisation.trim().length > 0;
   const hasProfessionalTitle = user.role !== 'PRESTATAIRE' || (!!user.titreProfessionnel && user.titreProfessionnel.trim().length > 0);
+  const hasDocument = user.role !== 'PRESTATAIRE' || !!user.media?.some((m: any) => m.type === 'DOCUMENT');
 
-  return hasPhone && hasLocation && hasProfessionalTitle;
+  return hasPhone && hasLocation && hasProfessionalTitle && hasDocument;
 };
 
 const Home = () => (
@@ -77,19 +78,19 @@ const Footer = () => {
     (!!user && !isUserProfileComplete(user));
   if (shouldHideFooter) return null;
   return (
-    <footer className="bg-white border-t border-slate-100 py-24 text-slate-900">
+    <footer className="bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 py-24 text-slate-900 dark:text-white">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-16">
           <div className="col-span-1 md:col-span-2">
             <Logo className="mb-8" />
-            <p className="text-slate-500 max-w-sm mb-10 font-medium leading-relaxed">
+            <p className="text-slate-500 dark:text-slate-400 max-w-sm mb-10 font-medium leading-relaxed">
               L'excellence du service de proximité au Togo.
               Une plateforme premium pour des prestations d'exception.
             </p>
           </div>
           <div>
             <h4 className="font-black mb-8 text-elite-emerald uppercase tracking-widest text-xs">Services</h4>
-            <ul className="space-y-4 text-slate-500 font-bold text-sm">
+            <ul className="space-y-4 text-slate-500 dark:text-slate-400 font-bold text-sm">
               <li><a href="#" className="hover:text-elite-gold transition-colors">Plomberie Elite</a></li>
               <li><a href="#" className="hover:text-elite-gold transition-colors">Électricité</a></li>
               <li><a href="#" className="hover:text-elite-gold transition-colors">Conciergerie</a></li>
@@ -98,7 +99,7 @@ const Footer = () => {
           </div>
           <div>
             <h4 className="font-black mb-8 text-elite-emerald uppercase tracking-widest text-xs">Exclusivité</h4>
-            <ul className="space-y-4 text-slate-500 font-bold text-sm">
+            <ul className="space-y-4 text-slate-500 dark:text-slate-400 font-bold text-sm">
               <li><a href="/dashboard" className="hover:text-elite-gold transition-colors">Tableau de Bord</a></li>
               <li><a href="#" className="hover:text-elite-gold transition-colors">Devenir Partenaire</a></li>
               <li><a href="#" className="hover:text-elite-gold transition-colors">EDOTEAM Plus</a></li>
@@ -106,7 +107,7 @@ const Footer = () => {
             </ul>
           </div>
         </div>
-        <div className="mt-20 pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6 text-slate-400 text-xs font-bold uppercase tracking-widest">
+        <div className="mt-20 pt-10 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-widest">
           <p>© 2026 EDOTEAM. Signature de Qualité.</p>
           <div className="flex gap-8">
             <a href="#" className="hover:text-elite-emerald transition-colors">Confidentialité</a>
@@ -123,16 +124,21 @@ const MobileDashboardHeader = () => {
   const location = useLocation();
   if (!DASHBOARD_PATHS.some(p => location.pathname.startsWith(p))) return null;
   return (
-    <div className="lg:hidden fixed top-0 left-0 right-0 h-[72px] bg-white/90 backdrop-blur-md border-b border-slate-100 z-50 flex items-center justify-between px-4 shadow-sm">
-      <MobileMenuButton />
-      <div className="flex items-center gap-3">
-        <NotificationDropdown />
-        <Link to="/messages" className="relative p-2 text-slate-400 hover:text-elite-emerald transition-colors">
-          <MessageSquare size={22} />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-elite-gold rounded-full border-2 border-white" />
-        </Link>
+    <>
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-[72px] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 z-50 flex items-center justify-between px-4 shadow-sm">
+        <MobileMenuButton />
+        <div className="flex items-center gap-3">
+          <NotificationDropdown />
+          <Link to="/messages" className="relative p-2 text-slate-400 dark:text-slate-500 hover:text-elite-emerald transition-colors">
+            <MessageSquare size={22} />
+            <span className="absolute top-1 right-1 w-2 h-2 bg-elite-gold rounded-full border-2 border-white" />
+          </Link>
+        </div>
       </div>
-    </div>
+      {/* Réserve l'espace occupé par la barre fixed ci-dessus, pour que le contenu qui suit
+          (dont le PageHeader désormais non-fixed sur mobile) ne passe pas dessous. */}
+      <div className="lg:hidden h-[72px]" />
+    </>
   );
 };
 
@@ -150,7 +156,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     isProfileIncomplete;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-slate-900">
       {!hideNavbar && <Navbar />}
       <MobileDashboardHeader />
       <main>{children}</main>

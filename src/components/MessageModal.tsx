@@ -68,7 +68,7 @@ const MessageModal: React.FC<MessageModalProps> = ({ isOpen, onClose, provider }
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-xl bg-white rounded-[3rem] shadow-premium overflow-hidden"
+            className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-[3rem] shadow-premium overflow-hidden"
           >
             <div className="p-10">
               <div className="flex justify-between items-center mb-8">
@@ -77,17 +77,17 @@ const MessageModal: React.FC<MessageModalProps> = ({ isOpen, onClose, provider }
                     <MessageSquare size={28} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-slate-900 leading-tight tracking-tight">
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
                       Contacter {provider.prenom}
                     </h3>
-                    <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-1">
+                    <p className="text-slate-400 dark:text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">
                       Demande d'étude personnalisée
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={onClose}
-                  className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-slate-100 transition-all active:scale-90"
+                  className="p-3 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-2xl hover:bg-slate-100 transition-all active:scale-90"
                 >
                   <X size={20} />
                 </button>
@@ -102,20 +102,20 @@ const MessageModal: React.FC<MessageModalProps> = ({ isOpen, onClose, provider }
                   >
                     <CheckCircle2 size={48} />
                   </motion.div>
-                  <h4 className="text-2xl font-black text-slate-900 mb-2">Message Envoyé !</h4>
-                  <p className="text-slate-500 font-medium">Redirection vers vos conversations...</p>
+                  <h4 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Message Envoyé !</h4>
+                  <p className="text-slate-500 dark:text-slate-400 font-medium">Redirection vers vos conversations...</p>
                 </div>
               ) : (
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-3 ml-4">
+                    <label className="block text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-3 ml-4">
                       Votre Message
                     </label>
                     <textarea
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
                       placeholder={`Bonjour ${provider.prenom}, je souhaiterais obtenir plus d'informations sur vos services...`}
-                      className="w-full min-h-[160px] p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] text-slate-900 placeholder-slate-300 font-medium focus:ring-4 focus:ring-elite-emerald/10 focus:border-elite-gold/30 outline-none transition-all resize-none shadow-inner"
+                      className="w-full min-h-[160px] p-8 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] text-slate-900 dark:text-white placeholder-slate-300 font-medium focus:ring-4 focus:ring-elite-emerald/10 focus:border-elite-gold/30 outline-none transition-all resize-none shadow-inner"
                       autoFocus
                     />
                   </div>
@@ -140,7 +140,7 @@ const MessageModal: React.FC<MessageModalProps> = ({ isOpen, onClose, provider }
                         </>
                       )}
                     </button>
-                    <p className="text-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                    <p className="text-center text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-widest">
                       Sécurisé par EDOTEAM Excellence
                     </p>
                   </div>

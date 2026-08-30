@@ -55,20 +55,20 @@ const AvisModal = ({ isOpen, onClose, providerId, providerName, onSuccess }: Avi
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-xl bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100"
+          className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800"
         >
           <div className="p-8 lg:p-12">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+              <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                 Votre <span className="gold-accent">Avis</span>
               </h2>
-              <button onClick={onClose} className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:text-red-500 transition-all">
+              <button onClick={onClose} className="p-3 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-2xl hover:text-red-500 transition-all">
                 <X size={20} />
               </button>
             </div>
 
-            <p className="text-slate-500 font-medium mb-8">
-              Comment s'est passée votre expérience avec <span className="text-slate-900 font-bold">{providerName}</span> ?
+            <p className="text-slate-500 dark:text-slate-400 font-medium mb-8">
+              Comment s'est passée votre expérience avec <span className="text-slate-900 dark:text-white font-bold">{providerName}</span> ?
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-8">
@@ -79,7 +79,7 @@ const AvisModal = ({ isOpen, onClose, providerId, providerName, onSuccess }: Avi
                 </div>
               )}
 
-              <div className="flex flex-col items-center gap-4 py-6 bg-slate-50 rounded-[2rem] border border-slate-100">
+              <div className="flex flex-col items-center gap-4 py-6 bg-slate-50 dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-800">
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -98,18 +98,18 @@ const AvisModal = ({ isOpen, onClose, providerId, providerName, onSuccess }: Avi
                     </button>
                   ))}
                 </div>
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">
                   {note === 5 ? 'Excellent' : note === 4 ? 'Très Bien' : note === 3 ? 'Bien' : note === 2 ? 'Moyen' : 'Passable'}
                 </p>
               </div>
 
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block px-2">Commentaire (Optionnel)</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 block px-2">Commentaire (Optionnel)</label>
                 <textarea
                   value={commentaire}
                   onChange={(e) => setCommentaire(e.target.value)}
                   placeholder="Partagez les détails de votre collaboration..."
-                  className="w-full bg-slate-50 border border-slate-100 rounded-[2rem] p-6 min-h-[150px] outline-none focus:ring-2 ring-elite-emerald/10 font-medium text-slate-900 placeholder:text-slate-300 transition-all"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 rounded-[2rem] p-6 min-h-[150px] outline-none focus:ring-2 ring-elite-emerald/10 font-medium text-slate-900 dark:text-white placeholder:text-slate-300 transition-all"
                 />
               </div>
 

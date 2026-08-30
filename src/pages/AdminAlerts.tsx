@@ -53,7 +53,7 @@ const AdminAlerts = () => {
   if (!user || user.role?.toUpperCase() !== 'ADMIN') return null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-sans overflow-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b1220] flex font-sans overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
@@ -65,14 +65,14 @@ const AdminAlerts = () => {
 
         <div className="space-y-6">
           {isLoading ? (
-            <div className="py-20 text-center bg-white/50 backdrop-blur-md rounded-[2.5rem] shadow-premium">
+            <div className="py-20 text-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-[2.5rem] shadow-premium">
               <div className="w-12 h-12 border-4 border-elite-gold/20 border-t-elite-gold rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Analyse des rapports en cours...</p>
+              <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Analyse des rapports en cours...</p>
             </div>
           ) : reports.length === 0 ? (
-            <div className="py-20 text-center bg-white/50 backdrop-blur-md rounded-[2.5rem] shadow-premium">
+            <div className="py-20 text-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-[2.5rem] shadow-premium">
               <CheckCircle2 className="mx-auto text-green-200 mb-4" size={48} />
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aucun signalement en attente</p>
+              <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Aucun signalement en attente</p>
             </div>
           ) : reports.map((alert, index) => (
             <motion.div 
@@ -80,7 +80,7 @@ const AdminAlerts = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="glass-card p-8 rounded-[2.5rem] bg-white border-none shadow-premium relative group hover:-translate-y-1 transition-all"
+              className="glass-card p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border-none shadow-premium relative group hover:-translate-y-1 transition-all"
             >
               <div className="flex flex-col xl:flex-row xl:items-center gap-8">
                 <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all ${
@@ -99,11 +99,11 @@ const AdminAlerts = () => {
                     </span>
                     <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{alert.type} • #{alert.id.slice(0, 8)}</span>
                   </div>
-                  <h3 className="text-xl font-black text-slate-900">{alert.reason}</h3>
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white">{alert.reason}</h3>
                   {alert.description && (
-                    <p className="text-sm text-slate-600 bg-slate-50 rounded-2xl p-4 border border-slate-100">{alert.description}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">{alert.description}</p>
                   )}
-                  <div className="flex items-center gap-6 text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                  <div className="flex items-center gap-6 text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest">
                     <span className="flex items-center gap-2 italic"><User size={12} /> Par: {alert.reporter.nom} {alert.reporter.prenom}</span>
                     <span className="flex items-center gap-2 italic"><AlertCircle size={12} /> Cible ID: {alert.targetId.slice(0, 8)}</span>
                   </div>
@@ -111,8 +111,8 @@ const AdminAlerts = () => {
 
                 <div className="xl:pl-8 xl:border-l border-slate-50 flex items-center justify-between xl:justify-end gap-10">
                    <div className="text-right">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Date</p>
-                    <p className="text-sm font-black text-slate-900">
+                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Date</p>
+                    <p className="text-sm font-black text-slate-900 dark:text-white">
                       {new Date(alert.createdAt).toLocaleDateString('fr-FR')}
                     </p>
                    </div>
@@ -125,7 +125,7 @@ const AdminAlerts = () => {
                         Marquer comme résolu
                       </button>
                     )}
-                    <button className="p-4 bg-slate-50 text-slate-300 hover:text-slate-600 rounded-2xl transition-all"><MoreVertical size={20} /></button>
+                    <button className="p-4 bg-slate-50 dark:bg-slate-800 text-slate-300 hover:text-slate-600 rounded-2xl transition-all"><MoreVertical size={20} /></button>
                    </div>
                 </div>
               </div>

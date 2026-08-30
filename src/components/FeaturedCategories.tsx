@@ -19,7 +19,7 @@ const colorMap: { [key: string]: { color: string; bg: string } } = {
   Électricité: { color: 'text-amber-500', bg: 'bg-amber-50' },
   Peinture: { color: 'text-purple-600', bg: 'bg-purple-50' },
   Ménage: { color: 'text-emerald-600', bg: 'bg-emerald-50' },
-  Mécanique: { color: 'text-slate-600', bg: 'bg-slate-50' },
+  Mécanique: { color: 'text-slate-600 dark:text-slate-300', bg: 'bg-slate-50 dark:bg-slate-800' },
   Beauté: { color: 'text-pink-600', bg: 'bg-pink-50' },
   Sécurité: { color: 'text-rose-600', bg: 'bg-rose-50' },
   Éducation: { color: 'text-indigo-600', bg: 'bg-indigo-50' },
@@ -49,20 +49,20 @@ const FeaturedCategories = () => {
   const getColor = (serviceName: string) => colorMap[serviceName] || { color: 'text-blue-600', bg: 'bg-blue-50' };
 
   return (
-    <section id="categories" className="py-24 bg-white">
+    <section id="categories" className="py-24 bg-white dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
           <div className="max-w-xl">
-            <h2 className="text-3xl lg:text-4xl font-black text-slate-900 mb-4 tracking-tight">
+            <h2 className="text-3xl lg:text-4xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">
               Explorer par <span className="text-elite-emerald">Catégorie</span>
             </h2>
-            <p className="text-slate-500 font-medium text-sm leading-relaxed">
+            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm leading-relaxed">
               Trouvez le talent qu'il vous faut parmi nos meilleures catégories.
             </p>
           </div>
           <button
             onClick={() => navigate('/services')}
-            className="flex items-center gap-2 px-5 py-2.5 bg-slate-50 text-slate-900 font-bold rounded-lg hover:bg-elite-emerald hover:text-white transition-all text-sm group whitespace-nowrap"
+            className="flex items-center gap-2 px-5 py-2.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-bold rounded-lg hover:bg-elite-emerald hover:text-white transition-all text-sm group whitespace-nowrap"
           >
             Voir tout
             <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -89,13 +89,13 @@ const FeaturedCategories = () => {
                     <div className={`w-16 h-16 ${colors.bg} ${colors.color} rounded-2xl flex items-center justify-center mb-3 transition-all duration-500 group-hover:scale-110 group-hover:bg-elite-emerald group-hover:text-white shadow-sm`}>
                       <Icon size={28} />
                     </div>
-                    <h3 className="font-bold text-slate-900 mb-1 text-xs leading-tight">{cat.nom}</h3>
-                    <p className="text-slate-400 text-[8px] font-black uppercase tracking-widest">VERIFIÉS</p>
+                    <h3 className="font-bold text-slate-900 dark:text-white mb-1 text-xs leading-tight">{cat.nom}</h3>
+                    <p className="text-slate-400 dark:text-slate-500 text-[8px] font-black uppercase tracking-widest">VERIFIÉS</p>
                   </button>
                 );
               })
             ) : (
-              <div className="w-full text-center py-8 text-slate-400">
+              <div className="w-full text-center py-8 text-slate-400 dark:text-slate-500">
                 Aucun service disponible
               </div>
             )}

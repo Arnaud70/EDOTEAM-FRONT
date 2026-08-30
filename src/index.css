@@ -14,7 +14,7 @@
   }
 
   body {
-    @apply font-sans antialiased bg-[#F8FAFC] text-[#1E293B];
+    @apply font-sans antialiased bg-[#F8FAFC] text-[#1E293B] transition-colors duration-300;
     overflow-x: hidden;
   }
 
@@ -29,27 +29,22 @@
   }
 }
 
-/* Theme backgrounds (controlled via ThemeContext -> data-site-theme attribute) */
-:root[data-site-theme='default'] body {
+/* Theme backgrounds (controlled via ThemeContext -> data-site-theme / .dark) */
+:root[data-site-theme='light'] body {
   background-color: #F8FAFC;
   color: #1E293B;
 }
 
-:root[data-site-theme='light'] body {
-  background-color: #ffffff;
-  color: #0f172a;
-}
-
 :root[data-site-theme='dark'] body {
-  background-color: #0f172a;
+  background-color: #0b1220;
   color: #e2e8f0;
 }
 
 @layer components {
   .glass-card {
-    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-glass;
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-glass dark:bg-slate-900/70 dark:border-white/10;
   }
-  
+
   .glass-sidebar {
     @apply bg-[#064e3b]/95 backdrop-blur-xl text-white;
   }
@@ -60,6 +55,19 @@
 
   .gold-accent {
     @apply text-[#d4af37];
+  }
+
+  /* Fonds/textes de page réutilisés tels quels sur la plupart des écrans (dashboard, formulaires). */
+  .page-surface {
+    @apply bg-[#F8FAFC] dark:bg-[#0b1220] transition-colors duration-300;
+  }
+
+  .surface-title {
+    @apply text-slate-900 dark:text-white;
+  }
+
+  .surface-subtitle {
+    @apply text-slate-500 dark:text-slate-400;
   }
 }
 

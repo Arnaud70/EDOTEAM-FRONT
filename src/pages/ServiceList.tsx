@@ -75,23 +75,23 @@ const ServiceList = () => {
   }, [search, userLocation]);
 
   return (
-    <div className="pt-32 pb-24 bg-[#F8FAFC]">
+    <div className="pt-32 pb-24 bg-[#F8FAFC] dark:bg-[#0b1220]">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10 mb-16">
           <div>
-            <h1 className="text-4xl lg:text-5xl font-black text-slate-900 mb-3 tracking-tight">
+            <h1 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">
               Nos <span className="gold-accent">Experts</span> EDOTEAM
             </h1>
-            <p className="text-slate-500 font-medium text-lg">Trouvez le talent d'exception pour vos besoins les plus exigeants.</p>
+            <p className="text-slate-500 dark:text-slate-400 font-medium text-lg">Trouvez le talent d'exception pour vos besoins les plus exigeants.</p>
           </div>
           
           <div className="flex items-center gap-4 w-full md:w-auto">
-            <div className="flex-1 bg-white border border-slate-100 rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm focus-within:ring-2 ring-elite-emerald/10 transition-all min-w-[300px]">
-              <Search size={20} className="text-slate-400" />
+            <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl px-5 py-4 flex items-center gap-4 shadow-sm focus-within:ring-2 ring-elite-emerald/10 transition-all min-w-[300px]">
+              <Search size={20} className="text-slate-400 dark:text-slate-500" />
               <input 
                 type="text" 
                 placeholder="Rechercher par service ou nom..." 
-                className="bg-transparent border-none outline-none text-sm w-full font-bold text-slate-900 placeholder:text-slate-400" 
+                className="bg-transparent border-none outline-none text-sm w-full font-bold text-slate-900 dark:text-white placeholder:text-slate-400" 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -99,7 +99,7 @@ const ServiceList = () => {
             <button className="p-4 bg-slate-900 text-white rounded-2xl hover:bg-elite-emerald transition-all shadow-xl group">
               <SlidersHorizontal size={22} className="group-hover:text-elite-gold" />
             </button>
-            <button onClick={findNearbyProviders} title="Afficher les prestataires proches" className={`p-4 rounded-2xl transition-all shadow-xl ${userLocation ? 'bg-elite-emerald text-white' : 'bg-white text-slate-900 border border-slate-200 hover:border-elite-emerald'}`}>
+            <button onClick={findNearbyProviders} title="Afficher les prestataires proches" className={`p-4 rounded-2xl transition-all shadow-xl ${userLocation ? 'bg-elite-emerald text-white' : 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 hover:border-elite-emerald'}`}>
               <MapPin size={22} />
             </button>
           </div>
@@ -113,7 +113,7 @@ const ServiceList = () => {
             className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all ${
               search === ''
                 ? 'bg-elite-emerald text-white'
-                : 'bg-white border border-slate-200 text-slate-600 hover:border-elite-emerald hover:text-elite-emerald'
+                : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-elite-emerald hover:text-elite-emerald'
             }`}
           >
             Tous les services
@@ -125,7 +125,7 @@ const ServiceList = () => {
               className={`px-5 py-2.5 rounded-2xl font-bold text-sm transition-all ${
                 search === category.nom
                   ? 'bg-elite-emerald text-white'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:border-elite-emerald hover:text-elite-emerald'
+                  : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-elite-emerald hover:text-elite-emerald'
               }`}
             >
               {category.nom}
@@ -136,11 +136,11 @@ const ServiceList = () => {
         {isLoading ? (
           <div className="col-span-full py-20 flex flex-col items-center justify-center">
             <Loader2 className="animate-spin text-elite-emerald mb-4" size={48} />
-            <p className="text-slate-500 font-black uppercase tracking-widest text-xs">Chargement des experts...</p>
+            <p className="text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-xs">Chargement des experts...</p>
           </div>
         ) : prestataires.length === 0 ? (
           <div className="col-span-full py-20 text-center">
-            <p className="text-slate-500 font-bold text-lg">Aucun prestataire disponible pour le moment.</p>
+            <p className="text-slate-500 dark:text-slate-400 font-bold text-lg">Aucun prestataire disponible pour le moment.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -173,7 +173,7 @@ const ServiceList = () => {
                   <div className="p-8 lg:p-10">
                     <div className="flex justify-between items-start mb-6">
                       <div>
-                        <h3 className="text-2xl font-black text-slate-900 mb-1 lg:text-xl">{name || 'Anonyme'}</h3>
+                        <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-1 lg:text-xl">{name || 'Anonyme'}</h3>
                         <p className="text-elite-emerald font-black text-xs tracking-[0.15em] uppercase flex items-center gap-2">
                            <span className="w-2 h-2 bg-elite-gold rounded-full" />
                            {role}
@@ -186,25 +186,25 @@ const ServiceList = () => {
                     </div>
 
                     <div className="space-y-4 mb-8">
-                      <div className="flex items-center gap-3 text-slate-400 text-sm font-bold uppercase tracking-widest">
+                      <div className="flex items-center gap-3 text-slate-400 dark:text-slate-500 text-sm font-bold uppercase tracking-widest">
                         <MapPin size={18} className="text-elite-gold" />
                         <span>{p.localisation || "Lomé"}</span>
                         {p.distanceKm != null && <span className="text-elite-emerald">· {p.distanceKm.toFixed(1)} km</span>}
                       </div>
-                      <div className="text-xl font-black text-slate-900 tracking-tight">
+                      <div className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
                         {priceDisplay}
                       </div>
                     </div>
 
                     <div className="flex flex-wrap gap-2 mb-10">
                       {tags.map((tag: string, j: number) => (
-                        <span key={j} className="px-4 py-2 bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-[0.1em] rounded-xl border border-slate-100">
+                        <span key={j} className="px-4 py-2 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-[0.1em] rounded-xl border border-slate-100 dark:border-slate-800">
                           {tag}
                         </span>
                       ))}
                     </div>
 
-                    <Link to={`/profile/${p.id}`} className="flex items-center justify-between w-full p-5 bg-white border-2 border-slate-900 text-slate-900 font-black rounded-3xl hover:bg-slate-900 hover:text-white transition-all transform active:scale-95 group/btn uppercase tracking-widest text-xs">
+                    <Link to={`/profile/${p.id}`} className="flex items-center justify-between w-full p-5 bg-white dark:bg-slate-900 border-2 border-slate-900 text-slate-900 dark:text-white font-black rounded-3xl hover:bg-slate-900 hover:text-white transition-all transform active:scale-95 group/btn uppercase tracking-widest text-xs">
                       Voir le profil Expert
                       <ChevronRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
                     </Link>

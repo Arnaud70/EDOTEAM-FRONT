@@ -93,7 +93,7 @@ const ProviderAvailability = () => {
   if (!user || user.role !== 'PRESTATAIRE') return null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-sans overflow-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b1220] flex font-sans overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
@@ -118,12 +118,12 @@ const ProviderAvailability = () => {
               {isLoading ? (
                 <div className="py-20 text-center glass-card rounded-3xl">
                   <Loader2 className="animate-spin text-elite-gold mx-auto mb-4" size={40} />
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Récupération de votre emploi du temps...</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Récupération de votre emploi du temps...</p>
                 </div>
               ) : availability.length === 0 ? (
                 <div className="py-20 text-center glass-card rounded-3xl">
                   <Calendar className="mx-auto text-slate-200 mb-4" size={48} />
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Aucun créneau défini</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Aucun créneau défini</p>
                 </div>
               ) : availability.map((item) => (
                 <motion.div
@@ -132,14 +132,14 @@ const ProviderAvailability = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="glass-card p-8 rounded-3xl bg-white border-none shadow-premium flex flex-wrap items-center gap-6"
+                  className="glass-card p-8 rounded-3xl bg-white dark:bg-slate-900 border-none shadow-premium flex flex-wrap items-center gap-6"
                 >
                   <div className="flex-1 min-w-[200px]">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2 mb-2 block">Jour de la semaine</label>
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2 mb-2 block">Jour de la semaine</label>
                     <select
                       value={item.day}
                       onChange={(e) => updateSlot(item.id, 'day', parseInt(e.target.value))}
-                      className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
                     >
                       {days.map(day => (
                         <option key={day.id} value={day.id}>{day.label}</option>
@@ -148,27 +148,27 @@ const ProviderAvailability = () => {
                   </div>
 
                   <div className="flex-1 min-w-[150px]">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2 mb-2 block">Heure de début</label>
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2 mb-2 block">Heure de début</label>
                     <div className="relative">
                       <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
                       <input
                         type="time"
                         value={item.start}
                         onChange={(e) => updateSlot(item.id, 'start', e.target.value)}
-                        className="w-full pl-12 pr-6 py-3 bg-slate-50 border-none rounded-xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
+                        className="w-full pl-12 pr-6 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
                       />
                     </div>
                   </div>
 
                   <div className="flex-1 min-w-[150px]">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2 mb-2 block">Heure de fin</label>
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2 mb-2 block">Heure de fin</label>
                     <div className="relative">
                       <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
                       <input
                         type="time"
                         value={item.end}
                         onChange={(e) => updateSlot(item.id, 'end', e.target.value)}
-                        className="w-full pl-12 pr-6 py-3 bg-slate-50 border-none rounded-xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
+                        className="w-full pl-12 pr-6 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
                       />
                     </div>
                   </div>
@@ -230,13 +230,13 @@ const ProviderAvailability = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="glass-card p-10 rounded-[3rem] bg-white border-none shadow-premium"
+              className="glass-card p-10 rounded-[3rem] bg-white dark:bg-slate-900 border-none shadow-premium"
             >
-              <h3 className="text-xl font-black text-slate-900 mb-8">Statut Hebdomadaire</h3>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white mb-8">Statut Hebdomadaire</h3>
               <div className="space-y-4">
                 {days.map(day => (
                   <div key={day.id} className="flex items-center justify-between py-2 border-b border-slate-50 last:border-none">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{day.label}</span>
+                    <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{day.label}</span>
                     <span className="px-3 py-1 bg-green-100 text-green-600 rounded-lg text-[8px] font-black uppercase tracking-widest">Ouvert</span>
                   </div>
                 ))}

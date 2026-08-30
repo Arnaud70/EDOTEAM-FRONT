@@ -9,7 +9,7 @@ const Login = () => {
   const location = useLocation();
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState((location.state as any)?.prefillEmail || '');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +48,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen pt-16 sm:pt-24 pb-12 flex flex-col justify-center bg-[#F8FAFC] px-4 relative overflow-hidden">
+    <div className="min-h-screen pt-16 sm:pt-24 pb-12 flex flex-col justify-center bg-[#F8FAFC] dark:bg-[#0b1220] px-4 relative overflow-hidden">
       {/* Premium Background Ornaments */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-elite-gold/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-elite-emerald/5 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2" />
@@ -57,10 +57,10 @@ const Login = () => {
         <div className="flex justify-center mb-10 transform hover:scale-105 transition-transform duration-500">
           <Logo variant="dark" className="scale-125" />
         </div>
-        <h2 className="text-center text-4xl font-black text-slate-900 tracking-tight font-heading">
+        <h2 className="text-center text-4xl font-black text-slate-900 dark:text-white tracking-tight font-heading">
           L'Espace <span className="gold-accent">Elite</span>
         </h2>
-        <p className="mt-4 text-center text-slate-500 font-medium">
+        <p className="mt-4 text-center text-slate-500 dark:text-slate-400 font-medium">
           Identifiez-vous pour accéder à votre univers EDOTEAM.
         </p>
       </div>
@@ -81,11 +81,11 @@ const Login = () => {
               </div>
             )}
             <div>
-              <label htmlFor="email" className="block text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">
+              <label htmlFor="email" className="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest">
                 Identifiant Email
               </label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-elite-emerald transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500 group-focus-within:text-elite-emerald transition-colors">
                   <Mail size={20} />
                 </div>
                 <input
@@ -94,7 +94,7 @@ const Login = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-14 pr-5 py-5 bg-slate-50 border-none rounded-2xl text-slate-900 font-bold placeholder-slate-300 focus:ring-2 focus:ring-elite-emerald/10 transition-all text-sm outline-none"
+                  className="block w-full pl-14 pr-5 py-5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl text-slate-900 dark:text-white font-bold placeholder-slate-300 focus:ring-2 focus:ring-elite-emerald/10 transition-all text-sm outline-none"
                   placeholder="votre@email.com"
                 />
               </div>
@@ -102,7 +102,7 @@ const Login = () => {
 
             <div>
               <div className="flex justify-between items-center mb-3">
-                <label htmlFor="password" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <label htmlFor="password" className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                   Mot de Passe
                 </label>
                 <Link to="/forgot-password" className="text-[10px] font-black text-elite-emerald hover:text-elite-gold transition-colors uppercase tracking-widest">
@@ -110,7 +110,7 @@ const Login = () => {
                 </Link>
               </div>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-elite-emerald transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500 group-focus-within:text-elite-emerald transition-colors">
                   <Lock size={20} />
                 </div>
                 <input
@@ -119,13 +119,13 @@ const Login = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-14 pr-14 py-5 bg-slate-50 border-none rounded-2xl text-slate-900 font-bold placeholder-slate-300 focus:ring-2 focus:ring-elite-emerald/10 transition-all text-sm outline-none"
+                  className="block w-full pl-14 pr-14 py-5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl text-slate-900 dark:text-white font-bold placeholder-slate-300 focus:ring-2 focus:ring-elite-emerald/10 transition-all text-sm outline-none"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-5 flex items-center text-slate-400 hover:text-elite-emerald transition-colors"
+                  className="absolute inset-y-0 right-0 pr-5 flex items-center text-slate-400 dark:text-slate-500 hover:text-elite-emerald transition-colors"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -136,9 +136,9 @@ const Login = () => {
               <input
                 id="remember-me"
                 type="checkbox"
-                className="h-5 w-5 text-elite-emerald focus:ring-elite-emerald border-none rounded-lg bg-slate-100"
+                className="h-5 w-5 text-elite-emerald focus:ring-elite-emerald border-none rounded-lg bg-slate-100 dark:bg-slate-800"
               />
-              <label htmlFor="remember-me" className="ml-3 block text-xs text-slate-500 font-bold uppercase tracking-wider">
+              <label htmlFor="remember-me" className="ml-3 block text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
                 Rester connecté
               </label>
             </div>
@@ -162,10 +162,10 @@ const Login = () => {
           <div className="mt-10">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-100" />
+                <div className="w-full border-t border-slate-100 dark:border-slate-800" />
               </div>
               <div className="relative flex justify-center text-[10px]">
-                <span className="px-5 bg-white text-slate-400 font-black uppercase tracking-widest">Social Elite</span>
+                <span className="px-5 bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest">Social Elite</span>
               </div>
             </div>
 
@@ -173,7 +173,7 @@ const Login = () => {
               <button 
                 type="button"
                 onClick={handleGoogleLogin}
-                className="w-full flex justify-center items-center py-4 px-6 border-2 border-slate-50 rounded-2xl bg-white hover:bg-slate-50 transition-all font-black text-slate-700 text-xs uppercase tracking-widest shadow-sm"
+                className="w-full flex justify-center items-center py-4 px-6 border-2 border-slate-50 rounded-2xl bg-white dark:bg-slate-900 hover:bg-slate-50 transition-all font-black text-slate-700 dark:text-slate-200 text-xs uppercase tracking-widest shadow-sm"
               >
                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5 mr-4" alt="Google" />
                 Via Google Elite
@@ -182,14 +182,14 @@ const Login = () => {
           </div>
         </div>
 
-        <p className="mt-10 text-center text-slate-500 font-bold text-sm">
+        <p className="mt-10 text-center text-slate-500 dark:text-slate-400 font-bold text-sm">
           Nouveau chez EDOTEAM ?{' '}
           <Link to="/register" className="text-elite-emerald hover:text-elite-gold transition-colors decoration-2 underline-offset-8 underline decoration-elite-gold/30">
             Créer un compte prestige
           </Link>
         </p>
 
-        <div className="mt-12 flex items-center justify-center gap-3 text-slate-400 text-[10px] bg-white/50 backdrop-blur-md border border-white py-4 rounded-full shadow-sm font-black uppercase tracking-widest">
+        <div className="mt-12 flex items-center justify-center gap-3 text-slate-400 dark:text-slate-500 text-[10px] bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border border-white dark:border-slate-700 py-4 rounded-full shadow-sm font-black uppercase tracking-widest">
           <Shield size={16} className="text-elite-gold" />
           <span>Sécurité Grade Bancaire • Cryptage 256-bit</span>
         </div>

@@ -71,22 +71,22 @@ const Messaging = () => {
   if (!user) return null;
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC]">
+    <div className="flex min-h-screen bg-[#F8FAFC] dark:bg-[#0b1220]">
       <Sidebar />
 
       <main className="flex-1 flex overflow-hidden h-screen layout-main transition-all duration-300 px-2 py-2 sm:px-4 sm:py-4">
-        <div className="flex-1 flex flex-col md:flex-row bg-white overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] shadow-premium border border-slate-100 min-h-0">
+        <div className="flex-1 flex flex-col md:flex-row bg-white dark:bg-slate-900 overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] shadow-premium border border-slate-100 dark:border-slate-800 min-h-0">
           
           {/* Conversations List */}
           <aside className={`w-full md:w-96 border-b md:border-b-0 md:border-r border-slate-50 flex flex-col ${activeChat ? 'hidden md:flex' : 'flex'}`}>
             <div className="p-4 sm:p-8 border-b border-slate-50">
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mb-4 sm:mb-8">Messages</h1>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mb-4 sm:mb-8">Messages</h1>
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
                 <input 
                   type="text" 
                   placeholder="Rechercher..." 
-                  className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl outline-none text-sm font-bold"
+                  className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none text-sm font-bold"
                 />
               </div>
             </div>
@@ -106,14 +106,14 @@ const Messaging = () => {
                       activeChat?.id === conv.id ? 'bg-elite-emerald text-white shadow-lg' : 'hover:bg-slate-50'
                     }`}
                   >
-                    <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center font-black text-slate-400 group-hover:scale-105 transition-all uppercase">
+                    <div className="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center font-black text-slate-400 dark:text-slate-500 group-hover:scale-105 transition-all uppercase">
                       {partner?.nom?.[0] || 'U'}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <h4 className="font-black text-sm truncate">{partner?.nom} {partner?.prenom}</h4>
                       </div>
-                      <p className={`text-xs truncate ${activeChat?.id === conv.id ? 'text-white/70' : 'text-slate-400'}`}>
+                      <p className={`text-xs truncate ${activeChat?.id === conv.id ? 'text-white/70' : 'text-slate-400 dark:text-slate-500'}`}>
                         {conv.lastMessage?.content || 'Démarrez une conversion'}
                       </p>
                     </div>
@@ -127,16 +127,16 @@ const Messaging = () => {
           <section className={`flex-1 flex flex-col min-w-0 bg-slate-50/30 ${!activeChat ? 'hidden md:flex items-center justify-center' : 'flex'}`}>
             {activeChat ? (
               <>
-                <header className="p-4 sm:p-6 bg-white border-b border-slate-50 flex items-center justify-between">
+                <header className="p-4 sm:p-6 bg-white dark:bg-slate-900 border-b border-slate-50 flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <button onClick={() => setActiveChat(null)} className="md:hidden p-2 text-slate-400">
+                    <button onClick={() => setActiveChat(null)} className="md:hidden p-2 text-slate-400 dark:text-slate-500">
                       <ArrowLeft size={20} />
                     </button>
-                    <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center font-black text-slate-400 uppercase">
+                    <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center font-black text-slate-400 dark:text-slate-500 uppercase">
                       {activeChat.partner?.nom?.[0] || activeChat.participants?.find((p: any) => p.user.id !== user.id)?.user.nom?.[0]}
                     </div>
                     <div>
-                      <h3 className="font-black text-slate-900">
+                      <h3 className="font-black text-slate-900 dark:text-white">
                         {activeChat.partner ? `${activeChat.partner.prenom} ${activeChat.partner.nom}` : 
                          activeChat.participants?.find((p: any) => p.user.id !== user.id)?.user.nom}
                       </h3>
@@ -144,9 +144,9 @@ const Messaging = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button className="p-3 text-slate-400 hover:bg-slate-50 rounded-xl transition-all"><Phone size={20} /></button>
-                    <button className="p-3 text-slate-400 hover:bg-slate-50 rounded-xl transition-all"><Video size={20} /></button>
-                    <button className="p-3 text-slate-400 hover:bg-slate-50 rounded-xl transition-all"><MoreVertical size={20} /></button>
+                    <button className="p-3 text-slate-400 dark:text-slate-500 hover:bg-slate-50 rounded-xl transition-all"><Phone size={20} /></button>
+                    <button className="p-3 text-slate-400 dark:text-slate-500 hover:bg-slate-50 rounded-xl transition-all"><Video size={20} /></button>
+                    <button className="p-3 text-slate-400 dark:text-slate-500 hover:bg-slate-50 rounded-xl transition-all"><MoreVertical size={20} /></button>
                   </div>
                 </header>
 
@@ -156,10 +156,10 @@ const Messaging = () => {
                       <div className={`max-w-[85%] sm:max-w-[70%] p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] shadow-sm ${
                         msg.senderId === user.id 
                           ? 'bg-slate-900 text-white rounded-tr-none' 
-                          : 'bg-white text-slate-900 rounded-tl-none border border-slate-50'
+                          : 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-tl-none border border-slate-50'
                       }`}>
                         <p className="text-sm font-medium leading-relaxed">{msg.content}</p>
-                        <p className={`text-[9px] font-black uppercase tracking-widest mt-2 ${msg.senderId === user.id ? 'text-white/40' : 'text-slate-400'}`}>
+                        <p className={`text-[9px] font-black uppercase tracking-widest mt-2 ${msg.senderId === user.id ? 'text-white/40' : 'text-slate-400 dark:text-slate-500'}`}>
                           {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
@@ -167,9 +167,9 @@ const Messaging = () => {
                   ))}
                 </div>
 
-                <div className="p-4 sm:p-8 bg-white border-t border-slate-50">
-                  <form onSubmit={handleSendMessage} className="flex items-center gap-2 sm:gap-4 bg-slate-50 p-2 rounded-2xl sm:rounded-3xl">
-                    <button type="button" className="p-4 text-slate-400 hover:text-elite-emerald transition-all">
+                <div className="p-4 sm:p-8 bg-white dark:bg-slate-900 border-t border-slate-50">
+                  <form onSubmit={handleSendMessage} className="flex items-center gap-2 sm:gap-4 bg-slate-50 dark:bg-slate-800 p-2 rounded-2xl sm:rounded-3xl">
+                    <button type="button" className="p-4 text-slate-400 dark:text-slate-500 hover:text-elite-emerald transition-all">
                       <Paperclip size={20} />
                     </button>
                     <input 
@@ -177,7 +177,7 @@ const Messaging = () => {
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       placeholder="Votre message elite..." 
-                      className="flex-1 bg-transparent border-none outline-none py-4 px-2 text-sm font-bold text-slate-900"
+                      className="flex-1 bg-transparent border-none outline-none py-4 px-2 text-sm font-bold text-slate-900 dark:text-white"
                     />
                     <button type="submit" className="p-4 bg-elite-emerald text-white rounded-2xl shadow-lg shadow-elite-emerald/20 hover:scale-105 active:scale-95 transition-all">
                       <Send size={20} />
@@ -190,8 +190,8 @@ const Messaging = () => {
                 <div className="w-24 h-24 bg-elite-gold/5 text-elite-gold rounded-[2.5rem] flex items-center justify-center mx-auto mb-8">
                   <MessageSquare size={40} />
                 </div>
-                <h3 className="text-2xl font-black text-slate-900 mb-2">Elite Messaging</h3>
-                <p className="text-slate-400 font-medium">Sélectionnez une conversation pour démarrer</p>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Elite Messaging</h3>
+                <p className="text-slate-400 dark:text-slate-500 font-medium">Sélectionnez une conversation pour démarrer</p>
               </div>
             )}
           </section>

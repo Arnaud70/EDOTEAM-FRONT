@@ -45,8 +45,8 @@ const AdminDashboard = () => {
             <Users size={28} />
           </div>
           <div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Utilisateurs</p>
-            <h3 className="text-3xl font-black text-slate-900">{stats?.utilisateurs?.total ?? stats?.totalUsers ?? 0}</h3>
+            <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Utilisateurs</p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.utilisateurs?.total ?? stats?.totalUsers ?? 0}</h3>
           </div>
         </div>
 
@@ -55,8 +55,8 @@ const AdminDashboard = () => {
             <Star size={28} />
           </div>
           <div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Prestataires</p>
-            <h3 className="text-3xl font-black text-slate-900">{stats?.utilisateurs?.prestataires ?? stats?.totalPrestataires ?? 0}</h3>
+            <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Prestataires</p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.utilisateurs?.prestataires ?? stats?.totalPrestataires ?? 0}</h3>
           </div>
         </div>
 
@@ -65,8 +65,8 @@ const AdminDashboard = () => {
             <TrendingUp size={28} />
           </div>
           <div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Services</p>
-            <h3 className="text-3xl font-black text-slate-900">{stats?.services ?? stats?.totalServices ?? 0}</h3>
+            <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Services</p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.services ?? stats?.totalServices ?? 0}</h3>
           </div>
         </div>
 
@@ -75,15 +75,15 @@ const AdminDashboard = () => {
             <AlertCircle size={28} />
           </div>
           <div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Alertes</p>
-            <h3 className="text-3xl font-black text-slate-900">{stats?.signalements?.enAttente ?? stats?.pendingReports ?? 0}</h3>
+            <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Alertes</p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.signalements?.enAttente ?? stats?.pendingReports ?? 0}</h3>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
         <section className="glass-card p-8 rounded-[2.5rem]">
-          <h2 className="text-2xl font-black text-slate-900 mb-8">Nouveaux Prestataires à Valider</h2>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-8">Nouveaux Prestataires à Valider</h2>
           <div className="py-10 text-center text-slate-300">
              <ShieldCheck size={48} className="mx-auto mb-4 opacity-20" />
              <p className="text-[10px] font-black uppercase tracking-widest">Aucune validation en attente</p>
@@ -91,7 +91,7 @@ const AdminDashboard = () => {
         </section>
 
         <section className="glass-card p-8 rounded-[2.5rem]">
-          <h2 className="text-2xl font-black text-slate-900 mb-8">Dernières Activités Admin</h2>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-8">Dernières Activités Admin</h2>
           <div className="py-10 text-center text-slate-300">
              <Settings size={48} className="mx-auto mb-4 opacity-20" />
              <Link to="/admin/logs" className="text-[10px] font-black uppercase tracking-widest text-elite-emerald hover:underline">
@@ -143,8 +143,8 @@ const ProviderDashboard = () => {
             <TrendingUp size={28} />
           </div>
           <div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Services Proposés</p>
-            <h3 className="text-3xl font-black text-slate-900">{stats?.totalServices ?? 0}</h3>
+            <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Services Proposés</p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.totalServices ?? 0}</h3>
           </div>
         </div>
 
@@ -153,8 +153,8 @@ const ProviderDashboard = () => {
             <Calendar size={28} />
           </div>
           <div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Disponibilités</p>
-            <h3 className="text-3xl font-black text-slate-900">{stats?.totalAvailabilities ?? 0}</h3>
+            <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Disponibilités</p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.totalAvailabilities ?? 0}</h3>
           </div>
         </div>
 
@@ -169,15 +169,15 @@ const ProviderDashboard = () => {
         </div>
       </div>
 
-      <section className="glass-card p-10 rounded-[3rem] bg-white border-none shadow-premium relative overflow-hidden group">
+      <section className="glass-card p-10 rounded-[3rem] bg-white dark:bg-slate-900 border-none shadow-premium relative overflow-hidden group">
         <div className="absolute right-0 top-0 w-64 h-64 bg-elite-gold/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-110 transition-transform duration-700" />
         <div className="relative flex flex-col md:flex-row items-center gap-10">
           <div className="w-24 h-24 bg-elite-gold/10 rounded-[2rem] flex items-center justify-center text-elite-gold shadow-inner">
             <Settings size={40} className="group-hover:rotate-90 transition-transform duration-700" />
           </div>
           <div className="flex-1 text-center md:text-left">
-            <h2 className="text-2xl font-black text-slate-900 mb-2">Configurez votre Profil Public</h2>
-            <p className="text-slate-500 font-medium mb-6 max-w-lg">
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Configurez votre Profil Public</h2>
+            <p className="text-slate-500 dark:text-slate-400 font-medium mb-6 max-w-lg">
               Ajoutez votre bio, votre titre professionnel et vos plus belles réalisations pour attirer plus de clients.
             </p>
             <Link to="/settings" className="inline-flex items-center gap-3 px-8 py-4 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-elite-emerald transition-all shadow-xl group/btn">
@@ -239,8 +239,8 @@ const ClientDashboard = () => {
             <Calendar size={28} />
           </div>
           <div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Mes Réservations</p>
-            <h3 className="text-3xl font-black text-slate-900">{stats?.totalBookings ?? 0}</h3>
+            <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Mes Réservations</p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.totalBookings ?? 0}</h3>
           </div>
         </div>
 
@@ -249,8 +249,8 @@ const ClientDashboard = () => {
             <CreditCard size={28} />
           </div>
           <div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Balance</p>
-            <h3 className="text-3xl font-black text-slate-900">
+            <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Balance</p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white">
               {(stats?.balance ?? 0).toLocaleString()} <span className="text-xs uppercase">F</span>
             </h3>
           </div>
@@ -273,8 +273,8 @@ const ClientDashboard = () => {
             <Search size={40} />
           </div>
           <div className="flex-1 text-center md:text-left">
-            <h2 className="text-2xl font-black text-slate-900 mb-2">Trouvez votre prestataire idéal</h2>
-            <p className="text-slate-500 font-medium mb-6 max-w-lg">
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Trouvez votre prestataire idéal</h2>
+            <p className="text-slate-500 dark:text-slate-400 font-medium mb-6 max-w-lg">
               Des centaines d'experts vérifiés sont disponibles pour vous accompagner dans vos projets.
             </p>
             <Link to="/services" className="inline-flex items-center gap-3 px-8 py-4 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-elite-emerald transition-all shadow-xl group/btn">
@@ -296,7 +296,7 @@ const Dashboard = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-sans overflow-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b1220] transition-colors duration-300 flex font-sans overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
@@ -308,19 +308,19 @@ const Dashboard = () => {
           actions={(
             <>
               <div className="hidden md:flex items-center gap-4">
-                <div className="flex items-center bg-white border border-slate-100 rounded-2xl px-4 py-2 shadow-sm focus-within:ring-2 ring-elite-emerald/10 transition-all">
-                  <Search size={18} className="text-slate-400 mr-2" />
+                <div className="flex items-center bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-2 shadow-sm focus-within:ring-2 ring-elite-emerald/10 transition-all">
+                  <Search size={18} className="text-slate-400 dark:text-slate-500 mr-2" />
                   <input type="text" placeholder="Rechercher..." className="bg-transparent border-none outline-none text-sm w-48 font-medium" />
                 </div>
 
                 <NotificationDropdown />
                 
-                <Link to="/messages" className="relative p-3 bg-white border border-slate-100 rounded-xl text-slate-400 hover:text-elite-emerald hover:border-elite-emerald/30 transition-all shadow-sm group">
+                <Link to="/messages" className="relative p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-slate-400 dark:text-slate-500 hover:text-elite-emerald hover:border-elite-emerald/30 transition-all shadow-sm group">
                   <MessageSquare size={20} />
                   <span className="absolute top-3 right-3 w-2 h-2 bg-elite-gold rounded-full border-2 border-white" />
                 </Link>
 
-                <Link to="/settings" className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white shadow-premium bg-slate-100 hover:scale-105 transition-all">
+                <Link to="/settings" className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white shadow-premium bg-slate-100 dark:bg-slate-800 hover:scale-105 transition-all">
                   <DefaultAvatar photoUrl={user.photoUrl} genre={user.genre} />
                 </Link>
               </div>

@@ -143,7 +143,7 @@ const Reports = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex font-sans overflow-hidden">
+      <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b1220] flex font-sans overflow-hidden">
         <Sidebar />
         <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
           <div className="flex items-center justify-center h-full">
@@ -155,7 +155,7 @@ const Reports = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-sans overflow-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b1220] flex font-sans overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
@@ -165,21 +165,21 @@ const Reports = () => {
           fixed
           actions={(
             <>
-              <div className="bg-white p-1 rounded-xl shadow-sm border border-slate-100 flex items-center">
+              <div className="bg-white dark:bg-slate-900 p-1 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center">
                 <button
                   onClick={() => setTimeRange('7j')}
-                  className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${timeRange === '7j' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:bg-slate-50'}`}
+                  className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${timeRange === '7j' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50'}`}
                 >
                   7 Jours
                 </button>
                 <button
                   onClick={() => setTimeRange('30j')}
-                  className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${timeRange === '30j' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:bg-slate-50'}`}
+                  className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${timeRange === '30j' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50'}`}
                 >
                   30 Jours
                 </button>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all shadow-sm">
+              <button className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all shadow-sm">
                 <Download size={16} />
                 <span className="hidden sm:inline">Exporter</span>
               </button>
@@ -189,7 +189,7 @@ const Reports = () => {
 
         {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="glass-card p-6 rounded-[2rem] bg-white">
+          <div className="glass-card p-6 rounded-[2rem] bg-white dark:bg-slate-900">
             <div className="flex justify-between items-start mb-4">
               <div className="w-12 h-12 bg-elite-emerald/5 rounded-xl flex items-center justify-center text-elite-emerald">
                 <TrendingUp size={24} />
@@ -198,13 +198,13 @@ const Reports = () => {
                 <ArrowUpRight size={14} /> +12%
               </span>
             </div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{mainLabel}</p>
-            <h3 className="text-3xl font-black text-slate-900">
+            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">{mainLabel}</p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white">
               {mainValue} <span className="text-lg">F</span>
             </h3>
           </div>
 
-          <div className="glass-card p-6 rounded-[2rem] bg-white">
+          <div className="glass-card p-6 rounded-[2rem] bg-white dark:bg-slate-900">
             <div className="flex justify-between items-start mb-4">
               <div className="w-12 h-12 bg-elite-gold/10 rounded-xl flex items-center justify-center text-elite-gold">
                 <Calendar size={24} />
@@ -213,8 +213,8 @@ const Reports = () => {
                 <ArrowUpRight size={14} /> +5%
               </span>
             </div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{secondaryLabel}</p>
-            <h3 className="text-3xl font-black text-slate-900">{secondaryValue}</h3>
+            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">{secondaryLabel}</p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white">{secondaryValue}</h3>
           </div>
 
           <div className="glass-card p-6 rounded-[2rem] bg-elite-emerald text-white">

@@ -19,7 +19,7 @@ const Favorites = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-sans overflow-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b1220] flex font-sans overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
@@ -39,25 +39,25 @@ const Favorites = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.1 }}
-              className="glass-card group p-8 rounded-[3rem] bg-white border-none shadow-premium hover:-translate-y-2 transition-all relative overflow-hidden"
+              className="glass-card group p-8 rounded-[3rem] bg-white dark:bg-slate-900 border-none shadow-premium hover:-translate-y-2 transition-all relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-6">
                 <Heart size={24} className="text-red-500 fill-red-500" />
               </div>
 
-              <div className="w-16 h-16 bg-slate-100 rounded-3xl flex items-center justify-center font-black text-slate-300 text-xl mb-6">
+              <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-3xl flex items-center justify-center font-black text-slate-300 text-xl mb-6">
                 {(fav.prenom || fav.nom || '?')[0]}
               </div>
 
-              <h3 className="text-xl font-black text-slate-900 mb-1">{fav.prenom} {fav.nom}</h3>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1">{fav.prenom} {fav.nom}</h3>
               <p className="text-elite-emerald font-bold text-sm mb-6">{fav.titreProfessionnel || 'Expert Prestataire'}</p>
 
               <div className="flex items-center gap-6 mb-8">
                 <div className="flex items-center gap-1">
                     <Star size={14} className="text-elite-gold fill-elite-gold" />
-                    <span className="text-xs font-black text-slate-900">{rating}</span>
+                    <span className="text-xs font-black text-slate-900 dark:text-white">{rating}</span>
                 </div>
-                <div className="flex items-center gap-1 text-slate-400">
+                <div className="flex items-center gap-1 text-slate-400 dark:text-slate-500">
                     <MapPin size={14} />
                     <span className="text-xs font-bold">{fav.localisation || 'Lomé'}</span>
                 </div>
@@ -72,7 +72,7 @@ const Favorites = () => {
             </motion.div>
             );
           })}
-          {favorites.length === 0 && <p className="col-span-full py-20 text-center font-bold text-slate-400">Aucun prestataire dans vos favoris.</p>}
+          {favorites.length === 0 && <p className="col-span-full py-20 text-center font-bold text-slate-400 dark:text-slate-500">Aucun prestataire dans vos favoris.</p>}
         </div>
       </main>
     </div>

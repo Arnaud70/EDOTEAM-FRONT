@@ -74,7 +74,7 @@ const NotificationDropdown = () => {
     <div className="relative">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-3 bg-slate-50 text-slate-400 hover:text-elite-emerald hover:bg-elite-emerald/5 rounded-2xl transition-all shadow-sm"
+        className="relative p-3 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-elite-emerald hover:bg-elite-emerald/5 rounded-2xl transition-all shadow-sm"
       >
         <Bell size={20} />
         {unreadCount > 0 && (
@@ -92,12 +92,12 @@ const NotificationDropdown = () => {
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="absolute right-0 mt-4 w-96 bg-white rounded-[2.5rem] shadow-premium border border-slate-50 z-[70] overflow-hidden"
+              className="absolute right-0 mt-4 w-96 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-premium border border-slate-50 z-[70] overflow-hidden"
             >
               <div className="p-8 border-b border-slate-50 flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">Notifications</h3>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{unreadCount} nouveaux messages</p>
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white">Notifications</h3>
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{unreadCount} nouveaux messages</p>
                 </div>
                 {unreadCount > 0 && (
                   <button 
@@ -113,10 +113,10 @@ const NotificationDropdown = () => {
               <div className="max-h-[400px] overflow-y-auto">
                 {(!Array.isArray(notifications) || notifications.length === 0) ? (
                   <div className="p-12 text-center">
-                    <div className="w-16 h-16 bg-slate-50 rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 text-slate-200">
+                    <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 text-slate-200">
                       <Bell size={24} />
                     </div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aucune notification</p>
+                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Aucune notification</p>
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-50">
@@ -128,13 +128,13 @@ const NotificationDropdown = () => {
                       >
                         <div className="flex gap-4">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                            !notif.isRead ? 'bg-elite-emerald text-white' : 'bg-slate-100 text-slate-400'
+                            !notif.isRead ? 'bg-elite-emerald text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'
                           }`}>
                             <Info size={18} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-black text-slate-900 mb-1">{notif.title}</h4>
-                            <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">{notif.message}</p>
+                            <h4 className="text-sm font-black text-slate-900 dark:text-white mb-1">{notif.title}</h4>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">{notif.message}</p>
                             <div className="flex items-center gap-2 mt-3 text-[9px] font-black text-slate-300 uppercase tracking-widest">
                               <Clock size={10} />
                               {new Date(notif.createdAt).toLocaleDateString()}
@@ -151,7 +151,7 @@ const NotificationDropdown = () => {
               </div>
 
               <div className="p-4 bg-slate-50/50 text-center">
-                <button className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-elite-emerald transition-all">
+                <button className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest hover:text-elite-emerald transition-all">
                   Voir tout l'historique
                 </button>
               </div>

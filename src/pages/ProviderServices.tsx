@@ -104,7 +104,7 @@ const ProviderServices = () => {
   if (!user || user.role !== 'PRESTATAIRE') return null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-sans overflow-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b1220] flex font-sans overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
@@ -127,12 +127,12 @@ const ProviderServices = () => {
           {isLoading ? (
             <div className="col-span-full py-20 text-center">
               <Loader2 className="animate-spin text-elite-gold mx-auto mb-4" size={40} />
-              <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Synchronisation de votre catalogue...</p>
+              <p className="text-[10px] font-black tracking-widest text-slate-400 dark:text-slate-500 uppercase">Synchronisation de votre catalogue...</p>
             </div>
           ) : myServices.length === 0 ? (
             <div className="col-span-full py-20 text-center glass-card rounded-[2.5rem]">
               <Zap className="mx-auto text-slate-200 mb-4" size={48} />
-              <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Vous n'avez pas encore configuré de services</p>
+              <p className="text-[10px] font-black tracking-widest text-slate-400 dark:text-slate-500 uppercase">Vous n'avez pas encore configuré de services</p>
             </div>
           ) : myServices.map((item, index) => {
             const IconMap: any = { Zap, Pipette, Brush, Flower, Computer, Wind, Settings, ShieldCheck, Scissors, Droplet, Hammer, Baby, Camera, Wrench, Book, ChefHat, Truck, Activity, PenTool, Code };
@@ -143,7 +143,7 @@ const ProviderServices = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="glass-card p-8 rounded-[2.5rem] bg-white border-none shadow-premium relative group hover:-translate-y-2 transition-all"
+              className="glass-card p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border-none shadow-premium relative group hover:-translate-y-2 transition-all"
             >
               <div className="flex justify-between items-start mb-8">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center transition-all bg-elite-emerald/5 text-elite-emerald group-hover:bg-elite-emerald group-hover:text-white">
@@ -164,22 +164,22 @@ const ProviderServices = () => {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Star size={14} className="text-elite-gold fill-elite-gold" />
-                    <span className="text-xs font-black text-slate-900">N/A</span>
+                    <span className="text-xs font-black text-slate-900 dark:text-white">N/A</span>
                   </div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.experience || 0} ans d'exp.</span>
+                  <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{item.experience || 0} ans d'exp.</span>
                 </div>
-                <h3 className="text-lg font-black text-slate-900 mb-1">{item.service.nom}</h3>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic truncate">{item.service.description || 'Pas de description'}</p>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">{item.service.nom}</h3>
+                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest italic truncate">{item.service.description || 'Pas de description'}</p>
               </div>
 
               <div className="flex items-center justify-between pt-6 border-t border-slate-50">
                 <div>
                   <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Prix Indicatif</p>
-                  <p className="text-xl font-black text-slate-900">{item.prixIndicatif || 0} F</p>
+                  <p className="text-xl font-black text-slate-900 dark:text-white">{item.prixIndicatif || 0} F</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-green-500" />
-                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">ACTIF</span>
+                  <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">ACTIF</span>
                 </div>
               </div>
             </motion.div>
@@ -193,26 +193,26 @@ const ProviderServices = () => {
             <motion.div 
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              className="relative w-full max-w-lg bg-white rounded-[3rem] shadow-2xl overflow-hidden"
+              className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl overflow-hidden"
             >
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="absolute top-8 right-8 p-3 hover:bg-slate-50 rounded-2xl transition-all text-slate-400 hover:text-slate-900 z-10"
+                className="absolute top-8 right-8 p-3 hover:bg-slate-50 rounded-2xl transition-all text-slate-400 dark:text-slate-500 hover:text-slate-900 z-10"
               >
                 <X size={24} />
               </button>
 
               <div className="p-12">
-                <h2 className="text-3xl font-black text-slate-900 mb-8">Ajouter une prestation</h2>
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-8">Ajouter une prestation</h2>
                 
                 <form onSubmit={handleAddService} className="space-y-6">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Service à proposer</label>
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Service à proposer</label>
                     <select 
                       required
                       value={newService.serviceId}
                       onChange={(e) => setNewService({...newService, serviceId: e.target.value, customServiceName: e.target.value === 'custom' ? newService.customServiceName : ''})}
-                      className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm appearance-none"
+                      className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm appearance-none"
                     >
                       <option value="">Sélectionner un service</option>
                       {allServices
@@ -231,32 +231,32 @@ const ProviderServices = () => {
                         value={newService.customServiceName}
                         onChange={(e) => setNewService({...newService, customServiceName: e.target.value})}
                         placeholder="Ex: Création de mobilier sur mesure"
-                        className="w-full mt-3 px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
+                        className="w-full mt-3 px-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
                       />
                     )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Prix (F)</label>
+                      <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Prix (F)</label>
                       <input 
                         required
                         type="number"
                         value={newService.prixIndicatif}
                         onChange={(e) => setNewService({...newService, prixIndicatif: e.target.value})}
                         placeholder="Ex: 5000"
-                        className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
+                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
                       />
                     </div>
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Années d'exp.</label>
+                      <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Années d'exp.</label>
                       <input 
                         required
                         type="number"
                         value={newService.experience}
                         onChange={(e) => setNewService({...newService, experience: e.target.value})}
                         placeholder="Ex: 5"
-                        className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
+                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
                       />
                     </div>
                   </div>

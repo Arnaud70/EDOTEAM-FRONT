@@ -20,11 +20,12 @@ import {
   ChevronRight,
   Menu,
   X,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from './Logo';
 import DefaultAvatar from './DefaultAvatar';
-import { Image } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useSidebar } from '../context/SidebarContext';
@@ -195,13 +196,13 @@ const Sidebar = () => {
         <div className="flex items-center gap-2 mb-3">
           <button
             onClick={() => toggleTheme()}
-            title={!mobile && isCollapsed ? 'Changer le fond' : undefined}
+            title={!mobile && isCollapsed ? (theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre') : undefined}
             className={`flex items-center gap-3 px-3 py-3 text-white/50 hover:text-white font-semibold transition-all rounded-2xl hover:bg-white/5 w-full ${!mobile && isCollapsed ? 'justify-center' : ''}`}
           >
-            <Image size={18} className="flex-shrink-0" />
+            {theme === 'dark' ? <Sun size={18} className="flex-shrink-0" /> : <Moon size={18} className="flex-shrink-0" />}
             {(mobile || !isCollapsed) && (
               <span className="text-sm">
-                {theme === 'default' ? 'Thème: par défaut' : theme === 'light' ? 'Thème clair' : 'Thème sombre'}
+                {theme === 'dark' ? 'Thème clair' : 'Thème sombre'}
               </span>
             )}
           </button>
@@ -252,20 +253,20 @@ const Sidebar = () => {
   );
 };
 
-// Bouton hamburger exporté séparément pour être utilisé dans le header de chaque page
+// Bouton hamburger exporté séparément pour être utilisé dans le header mobile du dashboard.
+// Icône ☰ classique (au lieu d'un chevron flottant sur le bord) pour rester reconnaissable
+// et cohérent avec le hamburger de la navbar publique.
 export const MobileMenuButton = () => {
   const { isMobileOpen, toggleMobile } = useSidebar();
   return (
     <button
       onClick={toggleMobile}
       aria-expanded={isMobileOpen}
-      className={`lg:hidden fixed top-1/2 -translate-y-1/2 z-[60] w-11 h-20 flex items-center justify-center bg-elite-emerald text-white shadow-2xl ring-4 ring-white/40 hover:bg-elite-emerald/90 transition-all active:scale-95 rounded-r-2xl ${
-        isMobileOpen ? 'left-[20rem]' : 'left-0'
-      }`}
+      className="lg:hidden flex items-center justify-center w-11 h-11 rounded-2xl bg-elite-emerald/10 dark:bg-elite-emerald/20 text-elite-emerald hover:bg-elite-emerald hover:text-white transition-all active:scale-95 flex-shrink-0"
       title={isMobileOpen ? 'Masquer le menu' : 'Afficher le menu'}
       aria-label={isMobileOpen ? 'Masquer le menu' : 'Afficher le menu'}
     >
-      {isMobileOpen ? <ChevronLeft size={26} strokeWidth={3} /> : <ChevronRight size={26} strokeWidth={3} />}
+      {isMobileOpen ? <X size={24} strokeWidth={2.5} /> : <Menu size={24} strokeWidth={2.5} />}
     </button>
   );
 };

@@ -16,8 +16,9 @@ const isUserProfileComplete = (user: any) => {
   const hasPhone = !!user.telephone && user.telephone.trim().length > 0;
   const hasLocation = !!user.localisation && user.localisation.trim().length > 0;
   const hasProfessionalTitle = user.role !== 'PRESTATAIRE' || (!!user.titreProfessionnel && user.titreProfessionnel.trim().length > 0);
+  const hasDocument = user.role !== 'PRESTATAIRE' || !!user.media?.some((m: any) => m.type === 'DOCUMENT');
 
-  return hasPhone && hasLocation && hasProfessionalTitle;
+  return hasPhone && hasLocation && hasProfessionalTitle && hasDocument;
 };
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
@@ -26,7 +27,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] dark:bg-[#0b1220]">
         <Loader2 className="animate-spin text-elite-emerald" size={48} />
       </div>
     );

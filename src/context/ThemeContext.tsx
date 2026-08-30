@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'default' | 'light' | 'dark';
+type Theme = 'light' | 'dark';
 
 interface ThemeContextValue {
   theme: Theme;
@@ -10,28 +10,31 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
+const readInitialTheme = (): Theme => {
+  try {
+    const stored = localStorage.getItem('site-theme');
+    // 'default' était l'ancien état par défaut avant la simplification en clair/sombre.
+    if (stored === 'dark') return 'dark';
+    if (stored === 'light' || stored === 'default') return 'light';
+    if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) return 'dark';
+    return 'light';
+  } catch (e) {
+    return 'light';
+  }
+};
+
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    try {
-      const stored = localStorage.getItem('site-theme');
-      return (stored as Theme) || 'default';
-    } catch (e) {
-      return 'default';
-    }
-  });
+  const [theme, setThemeState] = useState<Theme>(readInitialTheme);
 
   useEffect(() => {
     try {
       localStorage.setItem('site-theme', theme);
     } catch (e) {}
     document.documentElement.setAttribute('data-site-theme', theme);
+    document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
 
-  const toggleTheme = () => setThemeState((t) => {
-    if (t === 'default') return 'light';
-    if (t === 'light') return 'dark';
-    return 'default';
-  });
+  const toggleTheme = () => setThemeState((t) => (t === 'dark' ? 'light' : 'dark'));
   const setTheme = (t: Theme) => setThemeState(t);
 
   return (

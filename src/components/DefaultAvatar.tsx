@@ -29,7 +29,7 @@ const DefaultAvatar: React.FC<DefaultAvatarProps> = ({
       ? 'bg-sky-50 text-sky-500'
       : genre === 'FEMME'
       ? 'bg-rose-50 text-rose-500'
-      : 'bg-slate-100 text-slate-400';
+      : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500';
 
   return (
     <div className={`w-full h-full flex items-center justify-center ${palette} ${className}`}>

@@ -30,7 +30,7 @@ const Wallet = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-sans overflow-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b1220] flex font-sans overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
@@ -45,7 +45,7 @@ const Wallet = () => {
                 Alimenter
               </button>
               {user.role === 'PRESTATAIRE' && (
-                <button className="px-6 py-4 border-2 border-slate-100 bg-white text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:border-elite-gold/30 transition-all shadow-sm">
+                <button className="px-6 py-4 border-2 border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:border-elite-gold/30 transition-all shadow-sm">
                   Demander un retrait
                 </button>
               )}
@@ -57,7 +57,7 @@ const Wallet = () => {
           {isLoading ? (
             <div className="col-span-full py-20 text-center glass-card rounded-[3rem]">
               <Loader2 className="animate-spin text-elite-gold mx-auto mb-4" size={40} />
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Accès à votre coffre-fort...</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Accès à votre coffre-fort...</p>
             </div>
           ) : (
             <>
@@ -94,16 +94,16 @@ const Wallet = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="xl:col-span-2 glass-card p-10 rounded-[3rem] bg-white border-none shadow-premium"
+                className="xl:col-span-2 glass-card p-10 rounded-[3rem] bg-white dark:bg-slate-900 border-none shadow-premium"
               >
                 <div className="flex items-center justify-between mb-10">
-                  <h3 className="text-2xl font-black text-slate-900">Historique des Flux</h3>
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-white">Historique des Flux</h3>
                   <button className="text-elite-emerald font-bold text-sm hover:underline">Voir tout</button>
                 </div>
 
                 <div className="space-y-6">
                   {!wallet?.transactions?.length ? (
-                    <div className="py-10 text-center text-slate-400 text-sm font-bold uppercase tracking-widest">
+                    <div className="py-10 text-center text-slate-400 dark:text-slate-500 text-sm font-bold uppercase tracking-widest">
                       Aucune transaction récente
                     </div>
                   ) : wallet.transactions.map((tx: any) => (
@@ -116,14 +116,14 @@ const Wallet = () => {
                           {tx.type === 'DEPOSIT' || tx.type === 'REFUND' ? <ArrowDownLeft size={24} /> : <ArrowUpRight size={24} />}
                         </div>
                         <div>
-                          <h4 className="font-black text-slate-900 text-sm mb-0.5">{tx.description || tx.type}</h4>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          <h4 className="font-black text-slate-900 dark:text-white text-sm mb-0.5">{tx.description || tx.type}</h4>
+                          <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                             {new Date(tx.createdAt).toLocaleDateString('fr-FR')} • {tx.type}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className={`font-black text-sm mb-1 ${tx.type === 'DEPOSIT' || tx.type === 'REFUND' ? 'text-green-600' : 'text-slate-900'}`}>
+                        <p className={`font-black text-sm mb-1 ${tx.type === 'DEPOSIT' || tx.type === 'REFUND' ? 'text-green-600' : 'text-slate-900 dark:text-white'}`}>
                           {tx.type === 'DEPOSIT' || tx.type === 'REFUND' ? '+' : '-'}{Number(tx.amount).toLocaleString()} F
                         </p>
                         <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${

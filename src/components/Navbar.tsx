@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Globe, Search, ArrowRight, MessageSquare, ChevronDown } from 'lucide-react';
+import { Menu, X, Globe, Search, ArrowRight, MessageSquare, Sun, Moon } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import api from '../services/api';
 import Logo from './Logo';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import NotificationDropdown from './NotificationDropdown';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
-  const [services, setServices] = useState<any[]>([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,19 +20,6 @@ const Navbar = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const response = await api.get('/services');
-        setServices(response.data.data || response.data);
-      } catch (error) {
-        console.error('Erreur lors du chargement des services:', error);
-      }
-    };
-
-    fetchServices();
   }, []);
 
   const handleConceptClick = (e: React.MouseEvent) => {
@@ -57,16 +43,11 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const handleCategoryClick = (serviceName: string) => {
-    navigate(`/services?q=${encodeURIComponent(serviceName)}`);
-    setIsMenuOpen(false);
-  };
-
   return (
     <nav 
       className={`fixed top-0 w-full z-50 transition-all duration-500 ${
-        isScrolled 
-          ? 'bg-white/90 backdrop-blur-md shadow-premium py-3' 
+        isScrolled
+          ? 'bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-premium py-3'
           : 'bg-transparent py-6'
       }`}
     >
@@ -79,12 +60,12 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-10">
-            <Link to="/" className="text-slate-600 hover:text-elite-emerald font-semibold transition-colors text-sm uppercase tracking-wider">Accueil</Link>
-            <Link to="/services" className="text-slate-600 hover:text-elite-emerald font-semibold transition-colors text-sm uppercase tracking-wider">Explorer</Link>
-            
-            <button 
+            <Link to="/" className="text-slate-600 dark:text-slate-300 hover:text-elite-emerald font-semibold transition-colors text-sm uppercase tracking-wider">Accueil</Link>
+            <Link to="/services" className="text-slate-600 dark:text-slate-300 hover:text-elite-emerald font-semibold transition-colors text-sm uppercase tracking-wider">Explorer</Link>
+
+            <button
               onClick={handleConceptClick}
-              className="text-slate-600 hover:text-elite-emerald font-semibold transition-colors text-sm uppercase tracking-wider"
+              className="text-slate-600 dark:text-slate-300 hover:text-elite-emerald font-semibold transition-colors text-sm uppercase tracking-wider"
             >
               Concept
             </button>
@@ -92,34 +73,42 @@ const Navbar = () => {
 
           {/* Actions */}
           <div className="hidden md:flex items-center gap-6">
+            <button
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre'}
+              aria-label={theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre'}
+              className="p-3 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl hover:bg-elite-emerald hover:text-white transition-all shadow-premium"
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
             {isAuthenticated ? (
               <>
                 <div className="flex items-center gap-4">
-                  <Link 
-                    to="/messages" 
-                    className="p-3 bg-slate-50 text-slate-600 rounded-2xl hover:bg-elite-emerald hover:text-white transition-all shadow-premium"
+                  <Link
+                    to="/messages"
+                    className="p-3 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl hover:bg-elite-emerald hover:text-white transition-all shadow-premium"
                     title="Messages"
                   >
                     <MessageSquare size={20} />
                   </Link>
                   <NotificationDropdown />
                 </div>
-                <Link 
+                <Link
                   to="/dashboard"
                   className="px-6 py-3 bg-elite-emerald/10 text-elite-emerald font-bold rounded-xl hover:bg-elite-emerald hover:text-white transition-all"
                 >
                   Dashboard
                 </Link>
-                <button 
+                <button
                   onClick={handleLogout}
-                  className="px-8 py-3 bg-slate-900 text-white font-bold rounded-xl shadow-premium hover:bg-red-600 transition-all"
+                  className="px-8 py-3 bg-slate-900 dark:bg-slate-700 text-white font-bold rounded-xl shadow-premium hover:bg-red-600 transition-all"
                 >
                   Déconnexion
                 </button>
               </>
             ) : (
               <>
-                <Link to="/login" className="text-slate-900 font-bold hover:text-elite-emerald transition-colors">
+                <Link to="/login" className="text-slate-900 dark:text-white font-bold hover:text-elite-emerald transition-colors">
                   Connexion
                 </Link>
                 <Link 
@@ -134,8 +123,15 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
-            <button 
+          <div className="md:hidden flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              aria-label={theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre'}
+              className="p-2 text-elite-emerald"
+            >
+              {theme === 'dark' ? <Sun size={26} /> : <Moon size={26} />}
+            </button>
+            <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="p-2 text-elite-emerald"
             >
@@ -147,54 +143,30 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white/95 backdrop-blur-xl border-t border-slate-100 h-[calc(100vh-80px)] overflow-y-auto animate-in slide-in-from-top duration-500">
+        <div className="md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 h-[calc(100vh-80px)] overflow-y-auto animate-in slide-in-from-top duration-500">
           <div className="px-6 pt-8 pb-10 space-y-5">
-            <Link to="/" onClick={() => setIsMenuOpen(false)} className="block text-2xl font-bold text-slate-800 hover:text-elite-emerald transition-colors">Accueil</Link>
-            <Link to="/services" onClick={() => setIsMenuOpen(false)} className="block text-2xl font-bold text-slate-800 hover:text-elite-emerald transition-colors">Explorer</Link>
-            
-            {/* Mobile Categories */}
-            <div>
-              <button 
-                onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
-                className="block text-2xl font-bold text-slate-800 hover:text-elite-emerald transition-colors flex items-center gap-2"
-              >
-                Catégories
-                <ChevronDown size={20} className={`transition-transform ${isCategoriesOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {isCategoriesOpen && (
-                <div className="mt-4 pl-4 space-y-3 border-l-2 border-elite-emerald">
-                  {services.map(service => (
-                    <button
-                      key={service.id}
-                      onClick={() => handleCategoryClick(service.nom)}
-                      className="block text-lg font-semibold text-slate-700 hover:text-elite-emerald transition-colors"
-                    >
-                      {service.nom}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            <button 
+            <Link to="/" onClick={() => setIsMenuOpen(false)} className="block text-2xl font-bold text-slate-800 dark:text-slate-100 hover:text-elite-emerald transition-colors">Accueil</Link>
+            <Link to="/services" onClick={() => setIsMenuOpen(false)} className="block text-2xl font-bold text-slate-800 dark:text-slate-100 hover:text-elite-emerald transition-colors">Explorer</Link>
+
+            <button
               onClick={handleConceptClick}
-              className="block text-2xl font-bold text-slate-800 hover:text-elite-emerald transition-colors"
+              className="block text-2xl font-bold text-slate-800 dark:text-slate-100 hover:text-elite-emerald transition-colors"
             >
               Concept
             </button>
-            
+
             {isAuthenticated && (
               <Link to="/messages" onClick={() => setIsMenuOpen(false)} className="text-2xl font-bold text-elite-emerald flex items-center gap-3">
                 <MessageSquare size={24} />
                 Messages
               </Link>
             )}
-            
+
             <div className="pt-6 flex flex-col gap-3">
               {isAuthenticated ? (
                 <>
                   <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="w-full py-3.5 text-center bg-elite-emerald/10 text-elite-emerald font-bold text-lg rounded-xl hover:bg-elite-emerald hover:text-white transition-colors">Dashboard</Link>
-                  <button onClick={handleLogout} className="w-full py-3.5 text-center bg-slate-900 text-white font-bold text-lg rounded-xl shadow-premium hover:bg-red-600 transition-colors">Déconnexion</button>
+                  <button onClick={handleLogout} className="w-full py-3.5 text-center bg-slate-900 dark:bg-slate-700 text-white font-bold text-lg rounded-xl shadow-premium hover:bg-red-600 transition-colors">Déconnexion</button>
                 </>
               ) : (
                 <>

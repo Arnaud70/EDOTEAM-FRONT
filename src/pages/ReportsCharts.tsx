@@ -19,8 +19,8 @@ const COLORS = ['#064e3b', '#d4af37', '#10b981', '#3b82f6'];
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-4 rounded-xl shadow-xl border border-slate-100">
-        <p className="font-black text-slate-900 mb-2">{label}</p>
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-xl border border-slate-100 dark:border-slate-800">
+        <p className="font-black text-slate-900 dark:text-white mb-2">{label}</p>
         {payload.map((entry: any, index: number) => (
           <p key={index} className="text-sm font-bold" style={{ color: entry.color }}>
             {entry.name}: {Number(entry.value ?? 0).toLocaleString('fr-FR')} F
@@ -35,8 +35,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const ReportsCharts = ({ role, filteredChartData, chartTitle, serviceDistribution }: any) => {
   return (
     <>
-      <div className="lg:col-span-2 glass-card p-8 rounded-[2.5rem] bg-white">
-        <h3 className="text-lg font-black text-slate-900 mb-8">{chartTitle}</h3>
+      <div className="lg:col-span-2 glass-card p-8 rounded-[2.5rem] bg-white dark:bg-slate-900">
+        <h3 className="text-lg font-black text-slate-900 dark:text-white mb-8">{chartTitle}</h3>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             {role === 'ADMIN' ? (
@@ -80,8 +80,8 @@ const ReportsCharts = ({ role, filteredChartData, chartTitle, serviceDistributio
         </div>
       </div>
 
-      <div className="glass-card p-8 rounded-[2.5rem] bg-white flex flex-col">
-        <h3 className="text-lg font-black text-slate-900 mb-8">Répartition des Services</h3>
+      <div className="glass-card p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 flex flex-col">
+        <h3 className="text-lg font-black text-slate-900 dark:text-white mb-8">Répartition des Services</h3>
         <div className="flex-1 flex flex-col justify-center items-center">
           {serviceDistribution.length > 0 ? (
             <>
@@ -102,15 +102,15 @@ const ReportsCharts = ({ role, filteredChartData, chartTitle, serviceDistributio
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                      <span className="text-xs font-bold text-slate-600">{entry.name}</span>
+                      <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{entry.name}</span>
                     </div>
-                    <span className="text-xs font-black text-slate-900">{entry.value}</span>
+                    <span className="text-xs font-black text-slate-900 dark:text-white">{entry.value}</span>
                   </div>
                 ))}
               </div>
             </>
           ) : (
-            <div className="py-10 text-center text-slate-400">
+            <div className="py-10 text-center text-slate-400 dark:text-slate-500">
               <p className="text-sm font-semibold">Pas encore assez de données pour afficher la répartition des services.</p>
             </div>
           )}

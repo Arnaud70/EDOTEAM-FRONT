@@ -16,7 +16,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative pt-32 pb-20 lg:pt-56 lg:pb-40 overflow-hidden bg-[#F8FAFC]">
+    <section className="relative pt-32 pb-20 lg:pt-56 lg:pb-40 overflow-hidden bg-[#F8FAFC] dark:bg-[#0b1220]">
       {/* Premium Background Elements */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10">
         <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-elite-emerald/5 blur-[120px] rounded-full" />
@@ -31,27 +31,27 @@ const Hero = () => {
               <span>L'Excellence du Service au Togo</span>
             </div>
             
-            <h1 className="text-5xl lg:text-8xl font-black text-slate-900 leading-[1.1] mb-8 tracking-tight">
+            <h1 className="text-5xl lg:text-8xl font-black text-slate-900 dark:text-white leading-[1.1] mb-8 tracking-tight">
               L'Élite des <br />
               <span className="text-elite-emerald">Prestataires</span> <br />
               est ici.
             </h1>
             
-            <p className="text-lg lg:text-xl text-slate-500 mb-12 leading-relaxed max-w-2xl font-medium">
+            <p className="text-lg lg:text-xl text-slate-500 dark:text-slate-400 mb-12 leading-relaxed max-w-2xl font-medium">
               Accédez à un réseau exclusif de professionnels vérifiés.
               De Lomé à Cékenssé, l'assurance d'un service irréprochable pour votre domicile et bureau.
             </p>
 
             {/* Premium Search Bar */}
-            <form onSubmit={handleSearch} className="max-w-2xl p-2 bg-white rounded-[2rem] shadow-premium border border-slate-100 flex flex-col md:flex-row items-center gap-2 group focus-within:ring-4 ring-elite-emerald/5 transition-all">
-              <div className="flex-1 w-full flex items-center px-6 py-4 gap-4 border-b md:border-b-0 md:border-r border-slate-100">
-                <Search className="text-slate-400 group-focus-within:text-elite-emerald transition-colors" size={20} />
+            <form onSubmit={handleSearch} className="max-w-2xl p-2 bg-white dark:bg-slate-900 rounded-[2rem] shadow-premium border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center gap-2 group focus-within:ring-4 ring-elite-emerald/5 transition-all">
+              <div className="flex-1 w-full flex items-center px-6 py-4 gap-4 border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800">
+                <Search className="text-slate-400 dark:text-slate-500 group-focus-within:text-elite-emerald transition-colors" size={20} />
                 <input 
                   type="text" 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Quel service recherchez-vous ?" 
-                  className="w-full bg-transparent border-none outline-none text-slate-900 placeholder:text-slate-400 font-semibold"
+                  className="w-full bg-transparent border-none outline-none text-slate-900 dark:text-white placeholder:text-slate-400 font-semibold"
                 />
               </div>
               <button type="submit" className="w-full md:w-auto px-10 py-4 bg-elite-emerald text-white font-black rounded-2xl shadow-xl shadow-elite-emerald/20 hover:bg-elite-emerald/90 transition-all transform hover:scale-[1.02] active:scale-95">
@@ -59,7 +59,7 @@ const Hero = () => {
               </button>
             </form>
             
-            <div className="mt-8 flex items-center justify-center lg:justify-start gap-6 text-slate-400 font-bold text-sm">
+            <div className="mt-8 flex items-center justify-center lg:justify-start gap-6 text-slate-400 dark:text-slate-500 font-bold text-sm">
               <div className="flex items-center gap-2">
                 <Shield size={16} className="text-elite-gold" />
                 Vérifié
@@ -92,8 +92,8 @@ const Hero = () => {
                     4.9
                   </div>
                   <div>
-                    <p className="font-black text-slate-900">Expert Qualifié</p>
-                    <p className="text-xs text-slate-500 font-bold uppercase">Lomé, Togo</p>
+                    <p className="font-black text-slate-900 dark:text-white">Expert Qualifié</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase">Lomé, Togo</p>
                   </div>
                 </div>
               </div>

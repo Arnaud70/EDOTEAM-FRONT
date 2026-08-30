@@ -143,7 +143,7 @@ const VerifyEmail = () => {
   };
 
   return (
-    <div className="min-h-screen pt-16 sm:pt-24 pb-12 flex flex-col justify-center bg-[#F8FAFC] px-4">
+    <div className="min-h-screen pt-16 sm:pt-24 pb-12 flex flex-col justify-center bg-[#F8FAFC] dark:bg-[#0b1220] px-4">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <div className="flex justify-center mb-8 sm:mb-10">
           <Logo variant="dark" className="scale-110 sm:scale-125" />
@@ -151,10 +151,10 @@ const VerifyEmail = () => {
         <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-elite-emerald/10 flex items-center justify-center text-elite-emerald">
           <MailCheck size={30} />
         </div>
-        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-heading">Vérifiez votre email</h2>
-        <p className="mt-3 text-slate-500 font-medium text-sm sm:text-base">
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight font-heading">Vérifiez votre email</h2>
+        <p className="mt-3 text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base">
           Un code à 6 chiffres a été envoyé à<br />
-          <span className="font-black text-slate-800 break-all">{email}</span>
+          <span className="font-black text-slate-800 dark:text-slate-100 break-all">{email}</span>
         </p>
       </div>
 
@@ -173,7 +173,7 @@ const VerifyEmail = () => {
 
           {locked ? (
             <div className="text-center py-6">
-              <p className="text-sm font-bold text-slate-600 leading-relaxed">
+              <p className="text-sm font-bold text-slate-600 dark:text-slate-300 leading-relaxed">
                 Trop de tentatives incorrectes. Pour votre sécurité, la vérification est bloquée
                 pendant environ 1&nbsp;heure. Réessayez plus tard.
               </p>
@@ -186,7 +186,7 @@ const VerifyEmail = () => {
             </div>
           ) : (
             <>
-              <div className={`flex items-center justify-center gap-2 mb-6 text-sm font-black ${expired ? 'text-red-500' : 'text-slate-700'}`}>
+              <div className={`flex items-center justify-center gap-2 mb-6 text-sm font-black ${expired ? 'text-red-500' : 'text-slate-700 dark:text-slate-200'}`}>
                 <Timer size={16} />
                 {expired ? 'Code expiré' : <>Code valable encore <span className="tabular-nums">{mmss}</span></>}
               </div>
@@ -206,7 +206,7 @@ const VerifyEmail = () => {
                       onChange={(e) => setDigit(i, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(i, e)}
                       onPaste={handlePaste}
-                      className="w-11 h-14 sm:w-14 sm:h-16 text-center text-xl sm:text-2xl font-black bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-elite-emerald focus:bg-white transition-all text-slate-900 disabled:opacity-40"
+                      className="w-11 h-14 sm:w-14 sm:h-16 text-center text-xl sm:text-2xl font-black bg-slate-50 dark:bg-slate-800 border-2 border-transparent rounded-2xl outline-none focus:border-elite-emerald focus:bg-white transition-all text-slate-900 dark:text-white disabled:opacity-40"
                     />
                   ))}
                 </div>
@@ -235,7 +235,7 @@ const VerifyEmail = () => {
           )}
         </div>
 
-        <p className="mt-8 text-center text-slate-500 font-bold text-sm">
+        <p className="mt-8 text-center text-slate-500 dark:text-slate-400 font-bold text-sm">
           Mauvaise adresse ?{' '}
           <Link to="/register" className="text-elite-emerald hover:text-elite-gold underline underline-offset-8 decoration-elite-gold/30">
             Recommencer l'inscription

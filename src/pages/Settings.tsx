@@ -61,7 +61,7 @@ const Settings = () => {
 
   if (!user || isLoading) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex font-sans overflow-hidden">
+      <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b1220] flex font-sans overflow-hidden">
         <Sidebar />
         <main className="flex-1 layout-main min-h-screen flex items-center justify-center">
             <Loader2 className="animate-spin text-elite-gold" size={48} />
@@ -210,7 +210,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-sans overflow-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b1220] flex font-sans overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
@@ -277,10 +277,10 @@ const Settings = () => {
             animate={{ opacity: 1, y: 0 }}
             className="xl:col-span-2 space-y-10"
           >
-            <section className="glass-card p-10 rounded-[3rem] bg-white border-none shadow-premium transition-all">
+            <section className="glass-card p-10 rounded-[3rem] bg-white dark:bg-slate-900 border-none shadow-premium transition-all">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-10 mb-12">
                 <div className="relative group mx-auto sm:mx-0">
-                    <div className="w-32 h-32 bg-slate-100 rounded-[2.5rem] overflow-hidden shadow-inner border-4 border-white transition-transform group-hover:scale-105 flex items-center justify-center">
+                    <div className="w-32 h-32 bg-slate-100 dark:bg-slate-800 rounded-[2.5rem] overflow-hidden shadow-inner border-4 border-white transition-transform group-hover:scale-105 flex items-center justify-center">
                         {isUploading ? <Loader2 className="animate-spin text-elite-emerald" /> : (
                             <DefaultAvatar photoUrl={formData.photoUrl} genre={formData.genre || null} iconClassName="w-1/2 h-1/2" />
                         )}
@@ -301,54 +301,54 @@ const Settings = () => {
                     />
                 </div>
                 <div className="flex-1 text-center sm:text-left">
-                    <h3 className="text-2xl font-black text-slate-900 mb-1">{formData.prenom} {formData.nom}</h3>
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-1">{formData.prenom} {formData.nom}</h3>
                     <p className="text-elite-emerald font-black text-[10px] uppercase tracking-[0.2em]">{user.role}</p>
                 </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Prénom</label>
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Prénom</label>
                     <div className="relative group">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-elite-emerald transition-all" size={18} />
-                    <input name="prenom" required value={formData.prenom} onChange={handleChange} type="text" className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" />
+                    <input name="prenom" required value={formData.prenom} onChange={handleChange} type="text" className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" />
                     </div>
                 </div>
                 <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Nom</label>
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Nom</label>
                     <div className="relative group">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-elite-emerald transition-all" size={18} />
-                    <input name="nom" required value={formData.nom} onChange={handleChange} type="text" className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" />
+                    <input name="nom" required value={formData.nom} onChange={handleChange} type="text" className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" />
                     </div>
                 </div>
                 <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Email</label>
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Email</label>
                     <div className="relative group">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-elite-emerald transition-all" size={18} />
-                    <input type="email" defaultValue={user.email} className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm cursor-not-allowed opacity-60" readOnly />
+                    <input type="email" defaultValue={user.email} className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm cursor-not-allowed opacity-60" readOnly />
                     </div>
                 </div>
                 <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Téléphone</label>
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Téléphone</label>
                     <div className="relative group">
                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-elite-emerald transition-all" size={18} />
-                    <input name="telephone" value={formData.telephone} onChange={handleChange} type="tel" placeholder="+228 90 00 00 00" className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" />
+                    <input name="telephone" value={formData.telephone} onChange={handleChange} type="tel" placeholder="+228 90 00 00 00" className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" />
                     </div>
                 </div>
                 <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Localisation</label>
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Localisation</label>
                     <div className="relative group">
                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-elite-emerald transition-all" size={18} />
-                    <input name="localisation" value={formData.localisation} onChange={handleChange} type="text" placeholder="Lomé, Togo" className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" />
+                    <input name="localisation" value={formData.localisation} onChange={handleChange} type="text" placeholder="Lomé, Togo" className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" />
                     </div>
                 </div>
                 <div className="space-y-3 md:col-span-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Genre (icône de profil par défaut)</label>
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Genre (icône de profil par défaut)</label>
                     <div className="grid grid-cols-2 gap-4">
-                        <button type="button" onClick={() => setFormData(prev => ({ ...prev, genre: 'HOMME' }))} className={`py-4 rounded-2xl flex items-center justify-center gap-3 border-2 font-bold text-sm transition-all ${formData.genre === 'HOMME' ? 'border-elite-emerald bg-elite-emerald/5 text-slate-900' : 'border-slate-100 text-slate-400 hover:border-slate-200'}`}>
+                        <button type="button" onClick={() => setFormData(prev => ({ ...prev, genre: 'HOMME' }))} className={`py-4 rounded-2xl flex items-center justify-center gap-3 border-2 font-bold text-sm transition-all ${formData.genre === 'HOMME' ? 'border-elite-emerald bg-elite-emerald/5 text-slate-900 dark:text-white' : 'border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500 hover:border-slate-200'}`}>
                             <User size={18} className={formData.genre === 'HOMME' ? 'text-elite-emerald' : 'opacity-40'} /> Homme
                         </button>
-                        <button type="button" onClick={() => setFormData(prev => ({ ...prev, genre: 'FEMME' }))} className={`py-4 rounded-2xl flex items-center justify-center gap-3 border-2 font-bold text-sm transition-all ${formData.genre === 'FEMME' ? 'border-elite-gold bg-elite-gold/5 text-slate-900' : 'border-slate-100 text-slate-400 hover:border-slate-200'}`}>
+                        <button type="button" onClick={() => setFormData(prev => ({ ...prev, genre: 'FEMME' }))} className={`py-4 rounded-2xl flex items-center justify-center gap-3 border-2 font-bold text-sm transition-all ${formData.genre === 'FEMME' ? 'border-elite-gold bg-elite-gold/5 text-slate-900 dark:text-white' : 'border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500 hover:border-slate-200'}`}>
                             <User size={18} className={formData.genre === 'FEMME' ? 'text-elite-gold' : 'opacity-40'} /> Femme
                         </button>
                     </div>
@@ -357,17 +357,17 @@ const Settings = () => {
                 {user.role === 'PRESTATAIRE' && (
                     <>
                     <div className="space-y-3 md:col-span-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Titre Professionnel</label>
+                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Titre Professionnel</label>
                         <div className="relative group">
                         <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-elite-emerald transition-all" size={18} />
-                        <input name="titreProfessionnel" value={formData.titreProfessionnel} onChange={handleChange} type="text" placeholder="Ex: Expert Électricien" className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" />
+                        <input name="titreProfessionnel" value={formData.titreProfessionnel} onChange={handleChange} type="text" placeholder="Ex: Expert Électricien" className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" />
                         </div>
                     </div>
                     <div className="md:col-span-2 space-y-3">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Ma Biographie</label>
+                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Ma Biographie</label>
                         <div className="relative group">
                         <FileText className="absolute left-4 top-6 text-slate-300 group-focus-within:text-elite-emerald transition-all" size={18} />
-                        <textarea name="bio" value={formData.bio} onChange={handleChange} rows={4} placeholder="Parlez de votre expertise et de votre approche..." className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-3xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm resize-none" />
+                        <textarea name="bio" value={formData.bio} onChange={handleChange} rows={4} placeholder="Parlez de votre expertise et de votre approche..." className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-3xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm resize-none" />
                         </div>
                     </div>
                     </>
@@ -387,12 +387,12 @@ const Settings = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="glass-card p-10 rounded-[3rem] bg-white border-none shadow-premium"
+                    className="glass-card p-10 rounded-[3rem] bg-white dark:bg-slate-900 border-none shadow-premium"
                 >
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h3 className="text-xl font-black text-slate-900">Portfolio & Réalisations</h3>
-                            <p className="text-xs text-slate-400 font-medium mt-1">Gérez vos meilleures photos de travaux</p>
+                            <h3 className="text-xl font-black text-slate-900 dark:text-white">Portfolio & Réalisations</h3>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Gérez vos meilleures photos de travaux</p>
                         </div>
                         <button 
                             onClick={() => portfolioInputRef.current?.click()}
@@ -428,14 +428,14 @@ const Settings = () => {
                                     >
                                         <Trash2 size={18} />
                                     </button>
-                                    <div className="p-3 bg-white text-slate-900 rounded-xl shadow-lg transform hover:scale-110 active:scale-95 transition-all">
+                                    <div className="p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl shadow-lg transform hover:scale-110 active:scale-95 transition-all">
                                         <Zap size={18} />
                                     </div>
                                 </div>
                             </div>
                         ))}
                         {(!user.media || user.media.filter(m => m.type === 'WORK').length === 0) && (
-                            <div className="col-span-full py-16 text-center border-2 border-dashed border-slate-100 rounded-[2.5rem]">
+                            <div className="col-span-full py-16 text-center border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-[2.5rem]">
                                 <ImageIcon className="mx-auto text-slate-100 mb-4" size={48} />
                                 <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Votre portfolio est vide</p>
                             </div>
@@ -450,9 +450,9 @@ const Settings = () => {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="glass-card p-10 rounded-[3rem] bg-white border-none shadow-premium"
+                className="glass-card p-10 rounded-[3rem] bg-white dark:bg-slate-900 border-none shadow-premium"
               >
-                <h3 className="text-xl font-black text-slate-900 mb-6">Vérification du compte</h3>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-6">Vérification du compte</h3>
 
                 {user.verificationStatus === 'VERIFIED' && (
                   <div className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-sm mb-6">
@@ -473,7 +473,7 @@ const Settings = () => {
                   </div>
                 )}
 
-                <p className="text-xs font-bold text-slate-400 mb-4 leading-relaxed">
+                <p className="text-xs font-bold text-slate-400 dark:text-slate-500 mb-4 leading-relaxed">
                   Importez une attestation de service, carte professionnelle ou tout document prouvant votre qualification.
                 </p>
 
@@ -481,10 +481,10 @@ const Settings = () => {
                   type="button"
                   onClick={() => documentInputRef.current?.click()}
                   disabled={isUploadingDocument}
-                  className="w-full flex items-center gap-4 p-5 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 hover:border-elite-emerald transition-all disabled:opacity-50"
+                  className="w-full flex items-center gap-4 p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-elite-emerald transition-all disabled:opacity-50"
                 >
                   {isUploadingDocument ? <Loader2 size={22} className="animate-spin text-elite-emerald shrink-0" /> : <UploadCloud size={22} className="text-elite-emerald shrink-0" />}
-                  <span className="text-sm font-bold text-slate-600">
+                  <span className="text-sm font-bold text-slate-600 dark:text-slate-300">
                     {user.media?.some(m => m.type === 'DOCUMENT')
                       ? 'Remplacer mon document justificatif'
                       : 'Importer mon document justificatif'}
@@ -504,21 +504,21 @@ const Settings = () => {
                initial={{ opacity: 0, y: 20 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ delay: 0.1 }}
-               className="glass-card p-10 rounded-[3rem] bg-white border-none shadow-premium"
+               className="glass-card p-10 rounded-[3rem] bg-white dark:bg-slate-900 border-none shadow-premium"
             >
-              <h3 className="text-xl font-black text-slate-900 mb-8">Préférences</h3>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white mb-8">Préférences</h3>
               <div className="space-y-6">
                 <div className="flex items-center justify-between pb-6 border-b border-slate-50">
                   <div className="flex items-center gap-4">
-                    <div className="p-3 bg-slate-50 rounded-xl text-slate-400"><Bell size={20} /></div>
-                    <span className="text-xs font-black text-slate-900 uppercase">Notifications</span>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-400 dark:text-slate-500"><Bell size={20} /></div>
+                    <span className="text-xs font-black text-slate-900 dark:text-white uppercase">Notifications</span>
                   </div>
-                  <div className="w-10 h-5 bg-elite-emerald rounded-full relative"><div className="absolute right-1 top-1 w-3 h-3 bg-white rounded-full" /></div>
+                  <div className="w-10 h-5 bg-elite-emerald rounded-full relative"><div className="absolute right-1 top-1 w-3 h-3 bg-white dark:bg-slate-900 rounded-full" /></div>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="p-3 bg-slate-50 rounded-xl text-slate-400"><Globe size={20} /></div>
-                    <span className="text-xs font-black text-slate-900 uppercase">Langue: Français</span>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-400 dark:text-slate-500"><Globe size={20} /></div>
+                    <span className="text-xs font-black text-slate-900 dark:text-white uppercase">Langue: Français</span>
                   </div>
                 </div>
               </div>

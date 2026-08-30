@@ -45,7 +45,7 @@ const AdminLogs = () => {
   if (!user || user.role?.toUpperCase() !== 'ADMIN') return null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-sans overflow-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b1220] flex font-sans overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 layout-main min-h-screen p-6 lg:p-12 overflow-y-auto w-full transition-all duration-300">
@@ -55,13 +55,13 @@ const AdminLogs = () => {
           fixed
           actions={(
             <div className="flex-1 md:flex-none relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elite-emerald transition-colors" size={18} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-elite-emerald transition-colors" size={18} />
               <input 
                 type="text" 
                 placeholder="Rechercher une action ou un membre..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full md:w-80 pl-12 pr-6 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-medium text-sm"
+                className="w-full md:w-80 pl-12 pr-6 py-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-medium text-sm"
               />
             </div>
           )}
@@ -70,17 +70,17 @@ const AdminLogs = () => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-card rounded-[2.5rem] overflow-hidden border-none shadow-premium bg-white/70 backdrop-blur-xl"
+          className="glass-card rounded-[2.5rem] overflow-hidden border-none shadow-premium backdrop-blur-xl"
         >
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-slate-50">
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date & Heure</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Utilisateur</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Détails</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sécurité (IP/OS)</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Date & Heure</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Utilisateur</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Action</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Détails</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Sécurité (IP/OS)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -89,7 +89,7 @@ const AdminLogs = () => {
                     <td colSpan={5} className="px-8 py-20 text-center">
                       <div className="flex flex-col items-center gap-4">
                         <div className="w-10 h-10 border-4 border-elite-gold/20 border-t-elite-gold rounded-full animate-spin" />
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Chargement de l'audit...</p>
+                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Chargement de l'audit...</p>
                       </div>
                     </td>
                   </tr>
@@ -102,7 +102,7 @@ const AdminLogs = () => {
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-3">
                         <Clock size={16} className="text-slate-300" />
-                        <span className="text-sm font-bold text-slate-600">
+                        <span className="text-sm font-bold text-slate-600 dark:text-slate-300">
                           {new Date(log.createdAt).toLocaleString('fr-FR')}
                         </span>
                       </div>
@@ -110,11 +110,11 @@ const AdminLogs = () => {
                     <td className="px-8 py-6">
                       {log.user ? (
                         <div>
-                          <p className="font-bold text-slate-900 text-sm">{log.user.nom} {log.user.prenom}</p>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{log.user.email}</p>
+                          <p className="font-bold text-slate-900 dark:text-white text-sm">{log.user.nom} {log.user.prenom}</p>
+                          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest">{log.user.email}</p>
                         </div>
                       ) : (
-                        <span className="text-sm font-bold text-slate-400 italic">Système / Inconnu</span>
+                        <span className="text-sm font-bold text-slate-400 dark:text-slate-500 italic">Système / Inconnu</span>
                       )}
                     </td>
                     <td className="px-8 py-6">
@@ -126,15 +126,15 @@ const AdminLogs = () => {
                         {log.action}
                       </span>
                     </td>
-                    <td className="px-8 py-6 text-sm text-slate-500 font-medium">
+                    <td className="px-8 py-6 text-sm text-slate-500 dark:text-slate-400 font-medium">
                       {log.details || '-'}
                     </td>
                     <td className="px-8 py-6">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 dark:text-slate-500">
                           <Globe size={12} /> {log.ipAddress || 'Inconnue'}
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 dark:text-slate-500">
                           <Monitor size={12} /> {log.userAgent?.split(' ')[0] || 'Mobile/Unknown'}
                         </div>
                       </div>
@@ -147,7 +147,7 @@ const AdminLogs = () => {
           {logs.length === 0 && !isLoading && (
             <div className="py-20 text-center">
               <Terminal className="mx-auto text-slate-200 mb-4" size={48} />
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aucune activité enregistrée</p>
+              <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Aucune activité enregistrée</p>
             </div>
           )}
         </motion.div>
