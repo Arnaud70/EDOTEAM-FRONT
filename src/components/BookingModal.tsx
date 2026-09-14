@@ -26,6 +26,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busySlots, setBusySlots] = useState<Array<{ startTime: string; endTime: string; status: string }>>([]);
+  const [availability, setAvailability] = useState<Array<{ startTime: string; endTime: string }>>([]);
   const [interventionLocation, setInterventionLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationError, setLocationError] = useState('');
   
@@ -43,8 +44,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
     const fetchBusySlots = async () => {
       try {
         const response = await api.get(`/bookings/provider/${provider.id}?date=${formData.date}`);
-        const data = response.data?.data || response.data || [];
-        setBusySlots(Array.isArray(data) ? data : []);
+        const data = response.data?.data || response.data || {};
+        setBusySlots(Array.isArray(data) ? data : (data.busySlots || []));
+        setAvailability(Array.isArray(data) ? [] : (data.availability || []));
       } catch (err) {
         console.error('Erreur lors du chargement des créneaux occupés:', err);
       }
@@ -67,12 +69,17 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
     if (!formData.date) return [];
 
     const slots: Array<{ label: string; value: string; busy: boolean }> = [];
-    const dayStartHour = 8;
-    const dayEndHour = 20;
+    for (const range of availability) {
+      const rangeStart = new Date(range.startTime);
+      const rangeEnd = new Date(range.endTime);
+      const startMinutes = rangeStart.getHours() * 60 + rangeStart.getMinutes();
+      const endMinutes = rangeEnd.getHours() * 60 + rangeEnd.getMinutes();
 
-    for (let hour = dayStartHour; hour < dayEndHour; hour += 1) {
-      const start = `${String(hour).padStart(2, '0')}:00`;
-      const end = `${String(hour + 1).padStart(2, '0')}:00`;
+      for (let minutes = startMinutes; minutes + 60 <= endMinutes; minutes += 60) {
+        const hour = Math.floor(minutes / 60);
+        const start = `${String(hour).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+        const endMinutesForSlot = minutes + 60;
+        const end = `${String(Math.floor(endMinutesForSlot / 60)).padStart(2, '0')}:${String(endMinutesForSlot % 60).padStart(2, '0')}`;
       const startIso = new Date(`${formData.date}T${start}:00`).toISOString();
       const endIso = new Date(`${formData.date}T${end}:00`).toISOString();
       const busy = isSlotTaken(startIso, endIso);
@@ -82,10 +89,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
         value: start,
         busy,
       });
+      }
     }
 
     return slots;
-  }, [formData.date, busySlots]);
+  }, [formData.date, busySlots, availability]);
 
   const handleSlotSelect = (selectedTime: string) => {
     setFormData((prev) => ({ ...prev, startTime: selectedTime }));
@@ -120,6 +128,21 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
       
       const startDateTime = new Date(`${formData.date}T${formData.startTime}`);
       const endDateTime = new Date(startDateTime.getTime() + parseInt(formData.duration) * 60 * 60 * 1000);
+
+      const isWithinAvailability = availability.some((range) => {
+        const rangeStart = new Date(range.startTime);
+        const rangeEnd = new Date(range.endTime);
+        const startMinutes = startDateTime.getHours() * 60 + startDateTime.getMinutes();
+        const endMinutes = endDateTime.getHours() * 60 + endDateTime.getMinutes();
+        const rangeStartMinutes = rangeStart.getHours() * 60 + rangeStart.getMinutes();
+        const rangeEndMinutes = rangeEnd.getHours() * 60 + rangeEnd.getMinutes();
+        return startMinutes >= rangeStartMinutes && endMinutes <= rangeEndMinutes;
+      });
+
+      if (!isWithinAvailability) {
+        setError('Le créneau choisi est en dehors des disponibilités du prestataire.');
+        return;
+      }
 
       if (isSlotTaken(startDateTime.toISOString(), endDateTime.toISOString())) {
         setError('Ce prestataire est déjà pris sur ce créneau. Veuillez choisir une autre heure.');
