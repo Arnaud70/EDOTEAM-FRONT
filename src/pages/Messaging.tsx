@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { Search, Send, Paperclip, MoreVertical, Phone, Video, Loader2, ArrowLeft, MessageSquare } from 'lucide-react';
+import { io, Socket } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import api, { getApiErrorMessage, unwrapApiData } from '../services/api';
+
+const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const Messaging = () => {
   const { user } = useAuth();
@@ -11,6 +14,7 @@ const Messaging = () => {
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
 
   const fetchConversations = async () => {
     try {
@@ -27,6 +31,29 @@ const Messaging = () => {
   useEffect(() => {
     fetchConversations();
   }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+
+    const socket: Socket = io(`${SOCKET_URL}/messages`, {
+      auth: { token },
+      withCredentials: true,
+    });
+
+    socket.on('new_message', (message) => {
+      if (message.senderId === user?.id || message.receiverId === user?.id) {
+        setMessages((previous) => previous.some((item) => item.id === message.id)
+          ? previous
+          : [...previous, message]);
+      }
+      fetchConversations();
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user?.id]);
 
   const fetchMessages = async (conversationId: string) => {
     try {
@@ -48,23 +75,28 @@ const Messaging = () => {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !activeChat) return;
+    if (!newMessage.trim() || !activeChat || isSending) return;
 
     try {
+      setIsSending(true);
       const partner = activeChat.partner || activeChat.participants?.find((p: any) => p.user.id !== user?.id)?.user;
       if (!partner) return;
 
       const response = await api.post('/messages', {
         receiverId: partner.id,
-        content: newMessage.trim()
+        content: newMessage.trim(),
       });
       const sentMessage = unwrapApiData<any>(response);
-      setMessages((prev) => [...prev, sentMessage]);
+      setMessages((prev) => prev.some((message) => message.id === sentMessage.id)
+        ? prev
+        : [...prev, sentMessage]);
       setNewMessage('');
       await fetchConversations();
     } catch (error) {
       console.error('Error sending message:', error);
       alert(getApiErrorMessage(error, 'Impossible d\'envoyer le message pour le moment.'));
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -100,7 +132,7 @@ const Messaging = () => {
                 const partner = conv.partner || conv.participants?.find((p: any) => p.user.id !== user.id)?.user;
                 return (
                   <div 
-                    key={conv.id}
+                    key={partner?.id || conv.lastMessage?.id}
                     onClick={() => setActiveChat(conv)}
                     className={`flex items-center gap-4 p-5 rounded-[2rem] cursor-pointer transition-all ${
                       activeChat?.id === conv.id ? 'bg-elite-emerald text-white shadow-lg' : 'hover:bg-slate-50'
@@ -179,8 +211,8 @@ const Messaging = () => {
                       placeholder="Votre message elite..." 
                       className="flex-1 bg-transparent border-none outline-none py-4 px-2 text-sm font-bold text-slate-900 dark:text-white"
                     />
-                    <button type="submit" className="p-4 bg-elite-emerald text-white rounded-2xl shadow-lg shadow-elite-emerald/20 hover:scale-105 active:scale-95 transition-all">
-                      <Send size={20} />
+                    <button type="submit" disabled={isSending} className="p-4 bg-elite-emerald text-white rounded-2xl shadow-lg shadow-elite-emerald/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100">
+                      {isSending ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
                     </button>
                   </form>
                 </div>

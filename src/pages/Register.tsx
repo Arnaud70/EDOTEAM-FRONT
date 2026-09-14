@@ -8,6 +8,7 @@ import {
   validateName,
   validatePassword,
   validatePhone,
+  formatTogoPhone,
   getPasswordChecks,
   passwordStrengthScore,
 } from '../utils/validation';
@@ -25,7 +26,7 @@ const Register = () => {
   const [nom, setNom] = useState('');
   const [prenom, setPrenom] = useState('');
   const [email, setEmail] = useState('');
-  const [telephone, setTelephone] = useState('');
+  const [telephone, setTelephone] = useState('+228 ');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [region, setRegion] = useState('');
@@ -263,7 +264,9 @@ const Register = () => {
                     type="tel"
                     required
                     value={telephone}
-                    onChange={(e) => setTelephone(e.target.value)}
+                    onChange={(e) => setTelephone(formatTogoPhone(e.target.value))}
+                    inputMode="numeric"
+                    maxLength={16}
                     className="w-full pl-14 pr-5 py-5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 dark:text-white outline-none placeholder:text-slate-300"
                     placeholder="+228 90 00 00 00"
                   />

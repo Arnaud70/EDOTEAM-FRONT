@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageHeader from '../components/PageHeader';
 import api from '../services/api';
-import { validateName, validatePhone } from '../utils/validation';
+import { formatTogoPhone, validateName, validatePhone } from '../utils/validation';
 
 const Settings = () => {
   const { user, updateUser } = useAuth();
@@ -41,7 +41,7 @@ const Settings = () => {
       setFormData({
         nom: userData.nom || '',
         prenom: userData.prenom || '',
-        telephone: userData.telephone || '',
+        telephone: formatTogoPhone(userData.telephone || ''),
         localisation: userData.localisation || '',
         titreProfessionnel: userData.titreProfessionnel || '',
         bio: userData.bio || '',
@@ -332,7 +332,7 @@ const Settings = () => {
                     <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Téléphone</label>
                     <div className="relative group">
                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-elite-emerald transition-all" size={18} />
-                    <input name="telephone" value={formData.telephone} onChange={handleChange} type="tel" placeholder="+228 90 00 00 00" className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" />
+                    <input name="telephone" value={formData.telephone} onChange={(e) => setFormData((previous) => ({ ...previous, telephone: formatTogoPhone(e.target.value) }))} type="tel" inputMode="numeric" maxLength={16} placeholder="+228 90 00 00 00" className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm" />
                     </div>
                 </div>
                 <div className="space-y-3">

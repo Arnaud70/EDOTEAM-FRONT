@@ -1,7 +1,21 @@
 // Règles de validation partagées côté front (miroir du backend).
 
 export const NAME_REGEX = /^\p{L}[\p{L} .'’-]*$/u;
-export const PHONE_REGEX = /^\+?[0-9 ()-]{6,20}$/;
+export const TOGO_PHONE_PREFIX = '+228';
+export const PHONE_REGEX = /^\+228\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}$/;
+
+export const formatTogoPhone = (value: string): string => {
+  const trimmed = value.trim();
+  if (trimmed.startsWith('+') && !trimmed.startsWith(TOGO_PHONE_PREFIX)) {
+    return trimmed;
+  }
+
+  const digits = value.replace(/\D/g, '');
+  const localDigits = digits.startsWith('228') ? digits.slice(3) : digits;
+  const limited = localDigits.slice(0, 8);
+  const groups = limited.match(/.{1,2}/g) ?? [];
+  return `${TOGO_PHONE_PREFIX} ${groups.join(' ')}`.trimEnd();
+};
 
 export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 72;
@@ -44,7 +58,7 @@ export const validatePassword = (value: string): string | null => {
 export const validatePhone = (value: string): string | null => {
   const v = value.trim();
   if (!v) return null; // optionnel
-  if (!PHONE_REGEX.test(v)) return 'Le numéro de téléphone n’est pas valide.';
+  if (!PHONE_REGEX.test(v)) return 'Le numéro doit être togolais et contenir 8 chiffres après +228.';
   return null;
 };
 

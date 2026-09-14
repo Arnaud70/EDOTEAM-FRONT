@@ -4,7 +4,7 @@ import { User, Mail, Phone, MapPin, Briefcase, ArrowRight, ShieldCheck, ChevronD
 import Logo from '../components/Logo';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { validateName, validatePhone } from '../utils/validation';
+import { formatTogoPhone, validateName, validatePhone } from '../utils/validation';
 import { reverseGeocode, getCurrentPosition } from '../utils/geocode';
 
 const CompleteProfile = () => {
@@ -15,7 +15,7 @@ const CompleteProfile = () => {
   const [role, setRole] = useState<'CLIENT' | 'PRESTATAIRE'>(
     user?.role === 'PRESTATAIRE' ? 'PRESTATAIRE' : 'CLIENT'
   );
-  const [telephone, setTelephone] = useState(user?.telephone ?? '');
+  const [telephone, setTelephone] = useState(formatTogoPhone(user?.telephone ?? ''));
   const [localisation, setLocalisation] = useState(user?.localisation ?? '');
   const [specialite, setSpecialite] = useState(user?.titreProfessionnel ?? '');
   const [isOtherSpecialite, setIsOtherSpecialite] = useState(false);
@@ -244,7 +244,9 @@ const CompleteProfile = () => {
                   <input
                     type="tel"
                     value={telephone}
-                    onChange={(e) => setTelephone(e.target.value)}
+                    onChange={(e) => setTelephone(formatTogoPhone(e.target.value))}
+                    inputMode="numeric"
+                    maxLength={16}
                     className="w-full pl-14 pr-5 py-5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-bold text-slate-900 dark:text-white outline-none placeholder:text-slate-300"
                     placeholder="+228 90 00 00 00"
                   />
