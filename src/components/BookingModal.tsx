@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, Calendar, Clock, MapPin, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
+import { reverseGeocode } from '../utils/geocode';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -36,6 +37,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
     startTime: '',
     duration: '1', // in hours
     address: '',
+    clientNote: '',
   });
 
   useEffect(() => {
@@ -106,11 +108,21 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
+      async ({ coords }) => {
         setInterventionLocation({ latitude: coords.latitude, longitude: coords.longitude });
-        setLocationError('');
+        try {
+          const result = await reverseGeocode(coords.latitude, coords.longitude);
+          setFormData((prev) => ({ ...prev, address: result.label }));
+          setLocationError('');
+        } catch {
+          setLocationError("Position récupérée, mais l'adresse n'a pas pu être déterminée. Saisissez-la manuellement.");
+        }
       },
-      () => setLocationError('Autorisez la localisation pour préciser le lieu d’intervention.'),
+      (geoError) => setLocationError(
+        geoError.code === geoError.PERMISSION_DENIED
+          ? 'Autorisez la localisation ou saisissez l’adresse manuellement.'
+          : 'La position n’a pas pu être récupérée. Saisissez l’adresse manuellement.',
+      ),
       { enableHighAccuracy: true, timeout: 10000 }
     );
   };
@@ -159,6 +171,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
         address: formData.address,
         interventionLatitude: interventionLocation?.latitude,
         interventionLongitude: interventionLocation?.longitude,
+        clientNote: formData.clientNote.trim() || undefined,
       });
 
       setStep(3);
@@ -335,6 +348,18 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                         className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-3xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm resize-none"
                       />
                     </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Note pour le prestataire (facultatif)</label>
+                    <textarea
+                      value={formData.clientNote}
+                      onChange={(e) => setFormData({ ...formData, clientNote: e.target.value })}
+                      rows={3}
+                      maxLength={2000}
+                      placeholder="Précisez éventuellement ce que vous souhaitez faire intervenir."
+                      className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-3xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm resize-none"
+                    />
                   </div>
 
                   {error && (

@@ -11,6 +11,7 @@ const ProviderAvailability = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
   const days = [
     { id: 0, label: 'Lundi', value: 'MONDAY' },
@@ -54,6 +55,29 @@ const ProviderAvailability = () => {
   }, []);
 
   const handleSave = async () => {
+    setError('');
+    for (const slot of availability) {
+      if (!slot.start || !slot.end || slot.end <= slot.start) {
+        setError("L'heure de fin doit être après l'heure de début pour chaque créneau.");
+        return;
+      }
+    }
+
+    for (let index = 0; index < availability.length; index += 1) {
+      for (let otherIndex = index + 1; otherIndex < availability.length; otherIndex += 1) {
+        const current = availability[index];
+        const other = availability[otherIndex];
+        if (
+          current.day === other.day &&
+          current.start < other.end &&
+          current.end > other.start
+        ) {
+          setError('Deux créneaux du même jour se chevauchent.');
+          return;
+        }
+      }
+    }
+
     try {
       setIsSaving(true);
       const slots = availability.map(a => ({
@@ -184,6 +208,7 @@ const ProviderAvailability = () => {
             </AnimatePresence>
 
             <div className="flex items-center justify-between pt-6">
+              {error && <p className="text-sm font-bold text-red-600">{error}</p>}
               {success && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-green-600 font-bold text-sm">
                   <CheckCircle2 size={18} /> Planning mis à jour !

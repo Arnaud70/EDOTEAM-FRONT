@@ -5,11 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import PageHeader from '../components/PageHeader';
 import api from '../services/api';
+import BookingDetailsModal from '../components/BookingDetailsModal';
 
 const Bookings = () => {
   const { user } = useAuth();
   const [bookings, setBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
 
   const fetchBookings = async () => {
     try {
@@ -151,6 +153,12 @@ const Bookings = () => {
                       <button className="p-4 bg-elite-emerald/5 text-elite-emerald rounded-2xl hover:bg-elite-emerald hover:text-white transition-all shadow-sm">
                         <MessageSquare size={20} />
                       </button>
+                      <button
+                        onClick={() => setSelectedBooking(booking)}
+                        className="rounded-2xl bg-slate-50 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 transition-all hover:bg-elite-emerald hover:text-white dark:bg-slate-800"
+                      >
+                        Voir les détails
+                      </button>
                       <button className="p-4 bg-slate-50 dark:bg-slate-800 text-slate-300 hover:text-slate-600 rounded-2xl transition-all">
                         <MoreVertical size={20} />
                       </button>
@@ -162,6 +170,13 @@ const Bookings = () => {
           })}
         </div>
       </main>
+      {selectedBooking && (
+        <BookingDetailsModal
+          booking={selectedBooking}
+          isProvider={user.role === 'PRESTATAIRE'}
+          onClose={() => setSelectedBooking(null)}
+        />
+      )}
     </div>
   );
 };
