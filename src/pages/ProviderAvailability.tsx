@@ -56,22 +56,25 @@ const ProviderAvailability = () => {
 
   const handleSave = async () => {
     setError('');
+    const seen = new Set<string>();
     for (const slot of availability) {
       if (!slot.start || !slot.end || slot.end <= slot.start) {
-        setError("L'heure de fin doit être après l'heure de début pour chaque créneau.");
+        setError('Chaque créneau doit avoir une heure de fin après son heure de début.');
         return;
       }
+      const key = `${slot.day}:${slot.start}:${slot.end}`;
+      if (seen.has(key)) {
+        setError('Deux créneaux identiques ne peuvent pas être enregistrés.');
+        return;
+      }
+      seen.add(key);
     }
 
     for (let index = 0; index < availability.length; index += 1) {
       for (let otherIndex = index + 1; otherIndex < availability.length; otherIndex += 1) {
         const current = availability[index];
         const other = availability[otherIndex];
-        if (
-          current.day === other.day &&
-          current.start < other.end &&
-          current.end > other.start
-        ) {
+        if (current.day === other.day && current.start < other.end && current.end > other.start) {
           setError('Deux créneaux du même jour se chevauchent.');
           return;
         }
@@ -93,7 +96,8 @@ const ProviderAvailability = () => {
       fetchAvailability();
     } catch (error) {
       console.error('Error saving availability:', error);
-      alert('Erreur lors de l\'enregistrement');
+      const message = (error as any)?.response?.data?.message;
+      setError(Array.isArray(message) ? message[0] : message || 'Erreur lors de l’enregistrement des disponibilités.');
     } finally {
       setIsSaving(false);
     }
@@ -208,7 +212,11 @@ const ProviderAvailability = () => {
             </AnimatePresence>
 
             <div className="flex items-center justify-between pt-6">
-              {error && <p className="text-sm font-bold text-red-600">{error}</p>}
+              {error && (
+                <div className="flex items-center gap-2 text-red-600 font-bold text-sm">
+                  <AlertCircle size={18} /> {error}
+                </div>
+              )}
               {success && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-green-600 font-bold text-sm">
                   <CheckCircle2 size={18} /> Planning mis à jour !

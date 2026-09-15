@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, Calendar, Clock, MapPin, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
-import { reverseGeocode } from '../utils/geocode';
+import { getCurrentPosition, reverseGeocode } from '../utils/geocode';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -102,29 +102,17 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
     setError(null);
   };
 
-  const useCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationError('La géolocalisation n’est pas disponible sur cet appareil.');
-      return;
+  const useCurrentLocation = async () => {
+    try {
+      setLocationError('Récupération de votre position...');
+      const { coords } = await getCurrentPosition();
+      setInterventionLocation({ latitude: coords.latitude, longitude: coords.longitude });
+      const geo = await reverseGeocode(coords.latitude, coords.longitude);
+      setFormData((prev) => ({ ...prev, address: geo.label }));
+      setLocationError('Adresse détectée automatiquement. Vous pouvez la modifier.');
+    } catch (locationErrorValue: any) {
+      setLocationError(locationErrorValue?.message || 'Position indisponible. Saisissez votre adresse manuellement.');
     }
-    navigator.geolocation.getCurrentPosition(
-      async ({ coords }) => {
-        setInterventionLocation({ latitude: coords.latitude, longitude: coords.longitude });
-        try {
-          const result = await reverseGeocode(coords.latitude, coords.longitude);
-          setFormData((prev) => ({ ...prev, address: result.label }));
-          setLocationError('');
-        } catch {
-          setLocationError("Position récupérée, mais l'adresse n'a pas pu être déterminée. Saisissez-la manuellement.");
-        }
-      },
-      (geoError) => setLocationError(
-        geoError.code === geoError.PERMISSION_DENIED
-          ? 'Autorisez la localisation ou saisissez l’adresse manuellement.'
-          : 'La position n’a pas pu être récupérée. Saisissez l’adresse manuellement.',
-      ),
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
   };
 
   if (!isOpen) return null;
@@ -169,9 +157,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
         endTime: endDateTime.toISOString(),
         totalAmount: basePrice,
         address: formData.address,
+        clientNote: formData.clientNote.trim() || undefined,
         interventionLatitude: interventionLocation?.latitude,
         interventionLongitude: interventionLocation?.longitude,
-        clientNote: formData.clientNote.trim() || undefined,
       });
 
       setStep(3);
@@ -355,8 +343,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                     <textarea
                       value={formData.clientNote}
                       onChange={(e) => setFormData({ ...formData, clientNote: e.target.value })}
+                      maxLength={1000}
                       rows={3}
-                      maxLength={2000}
                       placeholder="Précisez éventuellement ce que vous souhaitez faire intervenir."
                       className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-3xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm resize-none"
                     />

@@ -93,7 +93,7 @@ const Settings = () => {
     // Filter out empty optional fields to avoid validation errors
     const cleanedData = Object.entries(formData).reduce((acc, [key, value]) => {
       if (key === 'photoUrl' && value === '') {
-        return { ...acc, photoUrl: null };
+        return { ...acc, photoUrl: null, photoPublicId: null };
       }
       if (key === 'genre' && value === '') {
         return acc;
@@ -133,6 +133,7 @@ const Settings = () => {
 
     const uploadData = new FormData();
     uploadData.append('file', file);
+    uploadData.append('type', type);
 
     const setBusy = type === 'DOCUMENT' ? setIsUploadingDocument : setIsUploading;
 
@@ -143,23 +144,25 @@ const Settings = () => {
       const response = await api.post('/upload', uploadData);
 
       const fileUrl = response.data.data?.url || response.data.url;
+      const publicId = response.data.data?.publicId || response.data.publicId;
+      const resourceType = response.data.data?.resourceType || response.data.resourceType;
 
       if (type === 'PROFILE') {
         const updatedFormData = { ...formData, photoUrl: fileUrl };
         setFormData(updatedFormData);
         // Save immediately to persist the change
-        const patchResponse = await api.patch('/users/profile', { photoUrl: fileUrl });
+        const patchResponse = await api.patch('/users/profile', { photoUrl: fileUrl, photoPublicId: publicId });
         const updatedUserData = patchResponse.data.data || patchResponse.data;
         updateUser({ ...user, ...updatedUserData });
         setMessage({ type: 'success', text: 'Photo de profil mise à jour !' });
         setTimeout(() => setMessage(null), 3000);
       } else if (type === 'WORK') {
-        await api.post('/users/media', { url: fileUrl, type: 'WORK' });
+        await api.post('/users/media', { url: fileUrl, type: 'WORK', publicId, resourceType });
         await fetchProfile();
         setMessage({ type: 'success', text: 'Image ajoutée au portfolio !' });
         setTimeout(() => setMessage(null), 3000);
       } else {
-        await api.post('/users/media', { url: fileUrl, type: 'DOCUMENT' });
+        await api.post('/users/media', { url: fileUrl, type: 'DOCUMENT', publicId, resourceType });
         await fetchProfile();
         setMessage({ type: 'success', text: 'Document envoyé ! Il est en attente de vérification par un administrateur.' });
         setTimeout(() => setMessage(null), 4000);

@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar, { MobileMenuButton } from '../components/Sidebar';
-import { Search, Filter, Calendar, MapPin, Clock, MessageSquare, ChevronRight, MoreVertical, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Search, Filter, Calendar, MapPin, Clock, MessageSquare, ChevronRight, MoreVertical, Loader2, CheckCircle2, XCircle, Eye, ExternalLink, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import PageHeader from '../components/PageHeader';
 import api from '../services/api';
-import BookingDetailsModal from '../components/BookingDetailsModal';
 
 const Bookings = () => {
   const { user } = useAuth();
@@ -155,9 +154,10 @@ const Bookings = () => {
                       </button>
                       <button
                         onClick={() => setSelectedBooking(booking)}
-                        className="rounded-2xl bg-slate-50 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 transition-all hover:bg-elite-emerald hover:text-white dark:bg-slate-800"
+                        className="p-4 bg-slate-50 dark:bg-slate-800 text-slate-500 rounded-2xl hover:bg-elite-emerald hover:text-white transition-all"
+                        title="Voir les détails"
                       >
-                        Voir les détails
+                        <Eye size={20} />
                       </button>
                       <button className="p-4 bg-slate-50 dark:bg-slate-800 text-slate-300 hover:text-slate-600 rounded-2xl transition-all">
                         <MoreVertical size={20} />
@@ -169,14 +169,39 @@ const Bookings = () => {
             );
           })}
         </div>
+
+        {selectedBooking && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+            <button className="absolute inset-0 bg-slate-900/60" onClick={() => setSelectedBooking(null)} aria-label="Fermer" />
+            <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-900 p-8 shadow-2xl">
+              <button onClick={() => setSelectedBooking(null)} className="absolute right-5 top-5 p-2 text-slate-400 hover:text-slate-900" aria-label="Fermer">
+                <X size={22} />
+              </button>
+              <h2 className="mb-6 text-2xl font-black text-slate-900 dark:text-white">Détails de la réservation</h2>
+              <div className="space-y-4 text-sm text-slate-600 dark:text-slate-300">
+                <p><strong>Service :</strong> {selectedBooking.service?.nom || 'Non renseigné'}</p>
+                <p><strong>Prestataire :</strong> {selectedBooking.prestataire?.prenom} {selectedBooking.prestataire?.nom}</p>
+                <p><strong>Client :</strong> {selectedBooking.client?.prenom} {selectedBooking.client?.nom}</p>
+                <p><strong>Date :</strong> {new Date(selectedBooking.date).toLocaleDateString('fr-FR')}</p>
+                <p><strong>Horaire :</strong> {new Date(selectedBooking.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} - {new Date(selectedBooking.endTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
+                <p><strong>Statut :</strong> {selectedBooking.status}</p>
+                <p><strong>Adresse :</strong> {selectedBooking.address || 'Non renseignée'}</p>
+                {selectedBooking.clientNote && <p><strong>Note :</strong> {selectedBooking.clientNote}</p>}
+                {selectedBooking.interventionLatitude != null && selectedBooking.interventionLongitude != null && (
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${selectedBooking.interventionLatitude},${selectedBooking.interventionLongitude}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl bg-elite-emerald px-4 py-3 font-black text-white"
+                  >
+                    <ExternalLink size={16} /> Voir la localisation / itinéraire
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </main>
-      {selectedBooking && (
-        <BookingDetailsModal
-          booking={selectedBooking}
-          isProvider={user.role === 'PRESTATAIRE'}
-          onClose={() => setSelectedBooking(null)}
-        />
-      )}
     </div>
   );
 };
