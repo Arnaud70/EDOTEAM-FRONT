@@ -18,7 +18,11 @@ interface UserData {
   verificationStatus?: 'PENDING' | 'VERIFIED' | 'REJECTED';
   rejectionReason?: string | null;
   deletedAt: string | null;
-  media?: { id: string; url: string; mimeType?: string; createdAt: string }[];
+  isActive: boolean;
+  lastLogin: string | null;
+  inactivityDays: number | null;
+  inactivityReason?: 'MANUAL' | 'INACTIVITY' | null;
+  media?: { id: string; url: string; mimeType?: string; createdAt: string; cloudinaryPublicId?: string | null }[];
 }
 
 const AdminUsers = () => {
@@ -27,12 +31,13 @@ const AdminUsers = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
       const response = await api.get('/admin/users', {
-        params: { role: roleFilter || undefined }
+        params: { role: roleFilter || undefined, status: statusFilter || undefined, q: search || undefined }
       });
       setUsers(response.data.data || response.data);
     } catch (error) {
@@ -44,7 +49,7 @@ const AdminUsers = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [roleFilter]);
+  }, [roleFilter, statusFilter, search]);
 
   const handleSuspend = async (userId: string) => {
     if (!confirm('Voulez-vous vraiment suspendre cet utilisateur ?')) return;
@@ -129,6 +134,15 @@ const AdminUsers = () => {
                 <option value="CLIENT">Clients</option>
                 <option value="PRESTATAIRE">Prestataires</option>
               </select>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-slate-500 dark:text-slate-400 font-black text-[10px] uppercase tracking-widest outline-none shadow-sm cursor-pointer"
+              >
+                <option value="">Tous les statuts</option>
+                <option value="ACTIVE">Actifs</option>
+                <option value="INACTIVE">Inactifs</option>
+              </select>
             </>
           )}
         />
@@ -147,6 +161,8 @@ const AdminUsers = () => {
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Utilisateur</th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Rôle</th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Statut</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Dernière connexion</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Inactivité</th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Validation</th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Inscription</th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-right px-12">Actions</th>
@@ -189,7 +205,7 @@ const AdminUsers = () => {
                     </td>
                     <td className="px-8 py-6 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        {item.deletedAt ? (
+                        {!item.isActive || item.deletedAt ? (
                           <>
                             <XCircle size={16} className="text-red-500" />
                             <span className="text-[10px] font-black uppercase tracking-widest text-red-600">SUSPENDU</span>
@@ -202,6 +218,12 @@ const AdminUsers = () => {
                         )}
                       </div>
                     </td>
+                    <td className="px-8 py-6 text-xs text-slate-500 dark:text-slate-400 font-bold">
+                      {item.lastLogin ? new Date(item.lastLogin).toLocaleDateString('fr-FR') : 'Jamais'}
+                    </td>
+                    <td className="px-8 py-6 text-xs text-slate-500 dark:text-slate-400 font-bold">
+                      {item.inactivityDays === null ? 'Jamais connecté' : `${item.inactivityDays} jour${item.inactivityDays > 1 ? 's' : ''}`}
+                    </td>
                     <td className="px-8 py-6 text-center">
                       {item.role === 'PRESTATAIRE' ? (
                         <div className="flex flex-col items-center gap-2">
@@ -211,7 +233,7 @@ const AdminUsers = () => {
                           }`}>
                             {item.verificationStatus || 'PENDING'}
                           </span>
-                          {item.media && item.media.length > 0 ? (
+                          {item.media && item.media.length > 0 && !item.media[0].url.includes('/uploads/') ? (
                             <a
                               href={item.media[0].url}
                               target="_blank"
@@ -221,7 +243,7 @@ const AdminUsers = () => {
                               <FileText size={12} /> Voir le document
                             </a>
                           ) : (
-                            <span className="text-[10px] font-bold text-slate-300">Aucun document</span>
+                            <span className="text-[10px] font-bold text-amber-600">Document à renvoyer</span>
                           )}
                         </div>
                       ) : (
@@ -251,7 +273,7 @@ const AdminUsers = () => {
                             </button>
                           </>
                         )}
-                        {item.deletedAt ? (
+                        {!item.isActive || item.deletedAt ? (
                           <button 
                             onClick={() => handleRestore(item.id)}
                             className="p-2 text-green-500 hover:bg-green-50 rounded-lg transition-all"

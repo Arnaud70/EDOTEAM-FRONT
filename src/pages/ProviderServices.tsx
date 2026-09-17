@@ -10,11 +10,14 @@ interface ServiceData {
   id: string;
   prixIndicatif: number;
   experience: number;
+  description?: string;
+  isActive: boolean;
   service: {
     id: string;
     nom: string;
     icon: string;
     description: string;
+    isActive: boolean;
   };
 }
 
@@ -30,6 +33,7 @@ const ProviderServices = () => {
   const [newService, setNewService] = useState({
     serviceId: '',
     customServiceName: '',
+    customServiceDescription: '',
     prixIndicatif: '',
     experience: '',
   });
@@ -71,6 +75,7 @@ const ProviderServices = () => {
 
         const response = await api.post('/services', {
           nom: newService.customServiceName.trim(),
+          description: newService.customServiceDescription.trim() || undefined,
         });
         serviceId = response.data.data?.id || response.data.id;
       }
@@ -82,7 +87,7 @@ const ProviderServices = () => {
       });
       await fetchMyServices();
       setIsModalOpen(false);
-      setNewService({ serviceId: '', customServiceName: '', prixIndicatif: '', experience: '' });
+      setNewService({ serviceId: '', customServiceName: '', customServiceDescription: '', prixIndicatif: '', experience: '' });
     } catch (error: any) {
       console.error('Error adding service:', error);
       setError(error.response?.data?.message || 'Erreur lors de l\'ajout du service.');
@@ -98,6 +103,15 @@ const ProviderServices = () => {
       fetchMyServices();
     } catch (error) {
       console.error('Error removing service:', error);
+    }
+  };
+
+  const handleToggle = async (item: ServiceData) => {
+    try {
+      await api.patch(`/services/me/${item.id}`, { isActive: !item.isActive });
+      await fetchMyServices();
+    } catch (error) {
+      console.error('Error toggling prestation:', error);
     }
   };
 
@@ -150,7 +164,7 @@ const ProviderServices = () => {
                   <Icon size={24} />
                 </div>
                 <div className="flex gap-2">
-                   <button className="p-2 text-slate-300 hover:text-white hover:bg-elite-emerald rounded-lg transition-all"><Toggle size={20} /></button>
+                   <button onClick={() => handleToggle(item)} className="p-2 text-slate-300 hover:text-white hover:bg-elite-emerald rounded-lg transition-all" title="Activer ou désactiver"><Toggle size={20} /></button>
                    <button 
                     onClick={() => handleRemove(item.service.id)}
                     className="p-2 text-slate-300 hover:text-red-500 transition-colors"
@@ -178,8 +192,8 @@ const ProviderServices = () => {
                   <p className="text-xl font-black text-slate-900 dark:text-white">{item.prixIndicatif || 0} F</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-green-500" />
-                  <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">ACTIF</span>
+                  <span className={`w-2 h-2 rounded-full ${item.isActive && item.service.isActive ? 'bg-green-500' : 'bg-slate-400'}`} />
+                  <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{item.isActive && item.service.isActive ? 'ACTIF' : 'INACTIF'}</span>
                 </div>
               </div>
             </motion.div>
@@ -216,6 +230,7 @@ const ProviderServices = () => {
                     >
                       <option value="">Sélectionner un service</option>
                       {allServices
+                        .filter(s => s.isActive !== false)
                         .filter(s => !myServices.some(ms => ms.service.id === s.id))
                         .map(s => (
                           <option key={s.id} value={s.id}>{s.nom}</option>
@@ -225,14 +240,23 @@ const ProviderServices = () => {
                     </select>
 
                     {newService.serviceId === 'custom' && (
-                      <input
-                        type="text"
-                        required
-                        value={newService.customServiceName}
-                        onChange={(e) => setNewService({...newService, customServiceName: e.target.value})}
-                        placeholder="Ex: Création de mobilier sur mesure"
-                        className="w-full mt-3 px-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
-                      />
+                      <div className="space-y-3 mt-3">
+                        <input
+                          type="text"
+                          required
+                          value={newService.customServiceName}
+                          onChange={(e) => setNewService({...newService, customServiceName: e.target.value})}
+                          placeholder="Ex: Création de mobilier sur mesure"
+                          className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm"
+                        />
+                        <textarea
+                          value={newService.customServiceDescription}
+                          onChange={(e) => setNewService({...newService, customServiceDescription: e.target.value})}
+                          placeholder="Description du service (facultatif)"
+                          className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm resize-none"
+                          rows={3}
+                        />
+                      </div>
                     )}
                   </div>
 

@@ -5,12 +5,14 @@ import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import PageHeader from '../components/PageHeader';
 import api from '../services/api';
+import MessageModal from '../components/MessageModal';
 
 const Bookings = () => {
   const { user } = useAuth();
   const [bookings, setBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
+  const [messageRecipient, setMessageRecipient] = useState<any | null>(null);
 
   const fetchBookings = async () => {
     try {
@@ -149,7 +151,11 @@ const Bookings = () => {
                            </button>
                         </div>
                       )}
-                      <button className="p-4 bg-elite-emerald/5 text-elite-emerald rounded-2xl hover:bg-elite-emerald hover:text-white transition-all shadow-sm">
+                      <button
+                        onClick={() => setMessageRecipient(partner)}
+                        className="p-4 bg-elite-emerald/5 text-elite-emerald rounded-2xl hover:bg-elite-emerald hover:text-white transition-all shadow-sm"
+                        title={`Écrire à ${partnerName}`}
+                      >
                         <MessageSquare size={20} />
                       </button>
                       <button
@@ -200,6 +206,14 @@ const Bookings = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {messageRecipient && (
+          <MessageModal
+            isOpen={true}
+            onClose={() => setMessageRecipient(null)}
+            provider={messageRecipient}
+          />
         )}
       </main>
     </div>

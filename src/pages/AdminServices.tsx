@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
-import { Search, Plus, MoreVertical, CheckCircle2, XCircle, Clock, Zap, Pipette, Brush, Flower, Computer, Wind, Loader2, Settings, ShieldCheck, Scissors, Droplet, Hammer, Baby, Camera, Wrench, Book, ChefHat, Truck, Activity, PenTool, Code } from 'lucide-react';
+import { Search, Plus, MoreVertical, CheckCircle2, XCircle, Clock, Zap, Pipette, Brush, Flower, Computer, Wind, Loader2, Settings, ShieldCheck, Scissors, Droplet, Hammer, Baby, Camera, Wrench, Book, ChefHat, Truck, Activity, PenTool, Code, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -11,6 +11,7 @@ interface Category {
   nom: string;
   description: string;
   icon: string;
+  isActive: boolean;
   status: string;
   _count: {
     providers: number;
@@ -22,12 +23,13 @@ const AdminServices = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newCat, setNewCat] = useState({ nom: '', description: '', icon: 'Zap' });
+  const [editingCat, setEditingCat] = useState<Category | null>(null);
+  const [newCat, setNewCat] = useState({ nom: '', description: '', icon: 'Zap', isActive: true });
 
   const fetchCategories = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get('/services');
+      const response = await api.get('/admin/services');
       setCategories(response.data.data || response.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -43,11 +45,41 @@ const AdminServices = () => {
   const handleAddCat = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/services', newCat);
+      if (editingCat) {
+        await api.patch(`/admin/services/${editingCat.id}`, newCat);
+      } else {
+        await api.post('/admin/services', newCat);
+      }
       setShowAddModal(false);
+      setEditingCat(null);
       fetchCategories();
     } catch (error) {
       console.error('Error adding category:', error);
+    }
+  };
+
+  const openEdit = (category: Category) => {
+    setEditingCat(category);
+    setNewCat({ nom: category.nom, description: category.description || '', icon: category.icon || 'Zap', isActive: category.isActive });
+    setShowAddModal(true);
+  };
+
+  const toggleService = async (category: Category) => {
+    try {
+      await api.patch(`/admin/services/${category.id}`, { isActive: !category.isActive });
+      fetchCategories();
+    } catch (error) {
+      console.error('Error toggling service:', error);
+    }
+  };
+
+  const deleteService = async (category: Category) => {
+    if (!window.confirm(`Supprimer définitivement le service « ${category.nom} » ? Cette action est irréversible.`)) return;
+    try {
+      await api.delete(`/admin/services/${category.id}`);
+      fetchCategories();
+    } catch (error) {
+      console.error('Error deleting service:', error);
     }
   };
 
@@ -99,9 +131,14 @@ const AdminServices = () => {
                   <div className="w-16 h-16 rounded-2xl flex items-center justify-center transition-all bg-elite-emerald/5 text-elite-emerald group-hover:bg-elite-emerald group-hover:text-white">
                     <Icon size={32} />
                   </div>
-                  <button className="p-2 text-slate-300 hover:text-slate-600 transition-colors">
-                    <MoreVertical size={20} />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => openEdit(cat)} className="p-2 text-slate-300 hover:text-slate-600 transition-colors" title="Modifier">
+                      <MoreVertical size={20} />
+                    </button>
+                    <button onClick={() => deleteService(cat)} className="p-2 text-slate-300 hover:text-red-600 transition-colors" title="Supprimer définitivement">
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </div>
 
                 <h3 className="text-xl font-black text-slate-900 dark:text-white mb-3">{cat.nom}</h3>
@@ -111,8 +148,8 @@ const AdminServices = () => {
 
                 <div className="flex items-center justify-between pt-6 border-t border-slate-50">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-green-500" />
-                    <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">ACTIF</span>
+                    <button onClick={() => toggleService(cat)} className={`w-2 h-2 rounded-full ${cat.isActive ? 'bg-green-500' : 'bg-slate-400'}`} title="Activer ou désactiver" />
+                    <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{cat.isActive ? 'ACTIF' : 'INACTIF'}</span>
                   </div>
                   <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
                     {cat._count?.providers || 0} Préstataires
@@ -133,7 +170,7 @@ const AdminServices = () => {
                 exit={{ opacity: 0, scale: 0.9 }}
                 className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 w-full max-w-xl shadow-2xl"
               >
-                <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-8">Nouveau <span className="gold-accent">Service</span></h2>
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-8">{editingCat ? 'Modifier' : 'Nouveau'} <span className="gold-accent">Service</span></h2>
                 <form onSubmit={handleAddCat} className="space-y-6">
                   <div>
                     <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 block ml-2">Nom du service</label>
@@ -158,7 +195,7 @@ const AdminServices = () => {
                   <div className="flex gap-4 pt-4">
                     <button 
                       type="button" 
-                      onClick={() => setShowAddModal(false)}
+                      onClick={() => { setShowAddModal(false); setEditingCat(null); }}
                       className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 hover:text-slate-600 transition-colors"
                     >
                       Annuler
@@ -167,7 +204,7 @@ const AdminServices = () => {
                       type="submit"
                       className="flex-1 py-4 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-elite-emerald transition-all"
                     >
-                      Créer le service
+                      {editingCat ? 'Enregistrer les modifications' : 'Créer le service'}
                     </button>
                   </div>
                 </form>
