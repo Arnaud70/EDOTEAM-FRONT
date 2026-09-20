@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
-import { Search, Plus, MoreVertical, CheckCircle2, XCircle, Clock, Zap, Pipette, Brush, Flower, Computer, Wind, Loader2, Settings, ShieldCheck, Scissors, Droplet, Hammer, Baby, Camera, Wrench, Book, ChefHat, Truck, Activity, PenTool, Code, Trash2 } from 'lucide-react';
+import { Search, Plus, MoreVertical, CheckCircle2, XCircle, Clock, Zap, Pipette, Brush, Flower, Computer, Wind, Loader2, Settings, ShieldCheck, Scissors, Droplet, Hammer, Baby, Camera, Wrench, Book, ChefHat, Truck, Activity, PenTool, Code, Trash2, Power } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -148,7 +148,9 @@ const AdminServices = () => {
 
                 <div className="flex items-center justify-between pt-6 border-t border-slate-50">
                   <div className="flex items-center gap-2">
-                    <button onClick={() => toggleService(cat)} className={`w-2 h-2 rounded-full ${cat.isActive ? 'bg-green-500' : 'bg-slate-400'}`} title="Activer ou désactiver" />
+                    <button onClick={() => toggleService(cat)} className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-widest transition-colors ${cat.isActive ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`} title={cat.isActive ? 'Suspendre ce service sur le site' : 'Réactiver ce service sur le site'}>
+                      <Power size={14} /> {cat.isActive ? 'Suspendre' : 'Réactiver'}
+                    </button>
                     <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{cat.isActive ? 'ACTIF' : 'INACTIF'}</span>
                   </div>
                   <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">

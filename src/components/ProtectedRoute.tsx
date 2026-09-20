@@ -34,7 +34,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    const redirectState = location.pathname === '/login' ? undefined : { from: location };
+    return <Navigate to="/login" state={redirectState} replace />;
   }
 
   const requiresProfileCompletion = !!user &&

@@ -39,6 +39,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
     address: '',
     clientNote: '',
   });
+  const [selectedPhotos, setSelectedPhotos] = useState<Array<{ file: File; name: string; url: string }>>([]);
+
+  useEffect(() => {
+    return () => {
+      selectedPhotos.forEach((photo) => URL.revokeObjectURL(photo.url));
+    };
+  }, [selectedPhotos]);
 
   useEffect(() => {
     if (!isOpen || !provider?.id || !formData.date) return;
@@ -70,7 +77,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
   const timeSlots = React.useMemo(() => {
     if (!formData.date) return [];
 
-    const slots: Array<{ label: string; value: string; busy: boolean }> = [];
+    const today = new Date();
+    const selectedDate = new Date(`${formData.date}T00:00:00`);
+    const isToday = selectedDate.toDateString() === today.toDateString();
+
+    const slots: Array<{ label: string; value: string; busy: boolean; disabled: boolean }> = [];
     for (const range of availability) {
       const rangeStart = new Date(range.startTime);
       const rangeEnd = new Date(range.endTime);
@@ -82,15 +93,19 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
         const start = `${String(hour).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
         const endMinutesForSlot = minutes + 60;
         const end = `${String(Math.floor(endMinutesForSlot / 60)).padStart(2, '0')}:${String(endMinutesForSlot % 60).padStart(2, '0')}`;
-      const startIso = new Date(`${formData.date}T${start}:00`).toISOString();
-      const endIso = new Date(`${formData.date}T${end}:00`).toISOString();
-      const busy = isSlotTaken(startIso, endIso);
+        const startIso = new Date(`${formData.date}T${start}:00`).toISOString();
+        const endIso = new Date(`${formData.date}T${end}:00`).toISOString();
+        const busy = isSlotTaken(startIso, endIso);
 
-      slots.push({
-        label: `${start} - ${end}`,
-        value: start,
-        busy,
-      });
+        const slotDateTime = new Date(`${formData.date}T${start}:00`);
+        const disabled = isToday && slotDateTime <= today;
+
+        slots.push({
+          label: `${start} - ${end}`,
+          value: start,
+          busy,
+          disabled: busy || disabled,
+        });
       }
     }
 
@@ -100,6 +115,24 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
   const handleSlotSelect = (selectedTime: string) => {
     setFormData((prev) => ({ ...prev, startTime: selectedTime }));
     setError(null);
+  };
+
+  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []).slice(0, 5);
+    if (!files.length) return;
+
+    const nextPhotos = files.map((file) => ({
+      file,
+      name: file.name,
+      url: URL.createObjectURL(file),
+    }));
+
+    setSelectedPhotos((prev) => [...prev, ...nextPhotos].slice(0, 5));
+    event.target.value = '';
+  };
+
+  const removePhoto = (fileName: string) => {
+    setSelectedPhotos((prev) => prev.filter((photo) => photo.name !== fileName));
   };
 
   const useCurrentLocation = async () => {
@@ -117,17 +150,26 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
 
   if (!isOpen) return null;
 
+  const selectedService = provider.services.find(s => s.service.id === formData.serviceId);
+  const indicativePrice = selectedService ? Number(parseFloat(selectedService.prixIndicatif || '0')) : 0;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
     try {
-      const selectedService = provider.services.find(s => s.service.id === formData.serviceId);
-      const basePrice = parseFloat(selectedService?.prixIndicatif || '0');
+      const basePrice = indicativePrice;
       
       const startDateTime = new Date(`${formData.date}T${formData.startTime}`);
       const endDateTime = new Date(startDateTime.getTime() + parseInt(formData.duration) * 60 * 60 * 1000);
+      const now = new Date();
+      const selectedDateLocal = new Date(`${formData.date}T00:00:00`);
+
+      if (selectedDateLocal.toDateString() === now.toDateString() && startDateTime <= now) {
+        setError('Ce créneau est déjà passé. Veuillez sélectionner un autre horaire.');
+        return;
+      }
 
       const isWithinAvailability = availability.some((range) => {
         const rangeStart = new Date(range.startTime);
@@ -149,7 +191,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
         return;
       }
 
-      await api.post('/bookings', {
+      const bookingResponse = await api.post('/bookings', {
         prestataireId: provider.id,
         serviceId: formData.serviceId,
         date: startDateTime.toISOString(),
@@ -161,6 +203,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
         interventionLatitude: interventionLocation?.latitude,
         interventionLongitude: interventionLocation?.longitude,
       });
+
+      const booking = bookingResponse.data?.data || bookingResponse.data;
+      if (selectedPhotos.length > 0 && booking?.id) {
+        const photoData = new FormData();
+        selectedPhotos.forEach((photo) => photoData.append('photos', photo.file));
+        await api.post(`/bookings/${booking.id}/photos`, photoData);
+      }
 
       setStep(3);
     } catch (err: any) {
@@ -269,15 +318,16 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                               <button
                                 key={slot.label}
                                 type="button"
-                                onClick={() => !slot.busy && handleSlotSelect(slot.value)}
-                                disabled={slot.busy}
+                                onClick={() => !slot.disabled && handleSlotSelect(slot.value)}
+                                disabled={slot.disabled}
                                 className={`rounded-2xl border px-3 py-2 text-xs font-black transition-all ${
-                                  slot.busy
-                                    ? 'bg-red-100 text-red-600 border-red-200 cursor-not-allowed'
+                                  slot.disabled
+                                    ? 'bg-slate-200 text-slate-500 border-slate-300 cursor-not-allowed opacity-70'
                                     : isSelected
                                       ? 'bg-elite-emerald text-white border-elite-emerald shadow-md'
                                       : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-elite-emerald/30 hover:text-elite-emerald'
                                 }`}
+                                title={slot.disabled ? 'Ce créneau est passé pour aujourd\'hui.' : slot.label}
                               >
                                 {slot.label}
                               </button>
@@ -338,16 +388,49 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
                     </div>
                   </div>
 
+                  <div className="rounded-3xl border border-elite-emerald/20 bg-emerald-50 dark:bg-emerald-950/30 p-4">
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-elite-emerald mb-2">Tarif indicatif</p>
+                    <p className="text-2xl font-black text-slate-900 dark:text-white">À partir de {indicativePrice.toLocaleString('fr-FR')} F CFA</p>
+                    <p className="mt-2 text-xs font-bold text-slate-600 dark:text-slate-300">Le prix final est à convenir avec le prestataire selon la prestation demandée.</p>
+                  </div>
+
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Note pour le prestataire (facultatif)</label>
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Description du problème</label>
                     <textarea
                       value={formData.clientNote}
                       onChange={(e) => setFormData({ ...formData, clientNote: e.target.value })}
                       maxLength={1000}
-                      rows={3}
-                      placeholder="Précisez éventuellement ce que vous souhaitez faire intervenir."
+                      rows={4}
+                      placeholder="Décrivez précisément le problème à résoudre, les symptômes et les contraintes éventuelles."
                       className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-3xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm resize-none"
                     />
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Photos du problème (max. 5)</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handlePhotoChange}
+                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-4 file:rounded-2xl file:border-0 file:bg-elite-emerald file:text-white file:text-[10px] file:font-black file:uppercase file:tracking-widest"
+                    />
+                    {selectedPhotos.length > 0 && (
+                      <div className="grid grid-cols-2 gap-3">
+                        {selectedPhotos.map((photo) => (
+                          <div key={photo.name} className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:bg-slate-800">
+                            <img src={photo.url} alt={photo.name} className="h-24 w-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => removePhoto(photo.name)}
+                              className="absolute top-2 right-2 rounded-full bg-slate-900 text-white p-1 text-[10px] font-black"
+                            >
+                              X
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {error && (

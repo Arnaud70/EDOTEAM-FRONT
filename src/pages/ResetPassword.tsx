@@ -13,6 +13,7 @@ const ResetPassword = () => {
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [step, setStep] = useState<1 | 2>(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
@@ -35,10 +36,8 @@ const ResetPassword = () => {
 
   const checks = getPasswordChecks(password);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const verifyCode = async () => {
     setError(null);
-
     if (expired) {
       setError('Le code a expiré. Cliquez sur « Renvoyer le code ».');
       return;
@@ -47,6 +46,27 @@ const ResetPassword = () => {
       setError('Le code doit contenir 6 chiffres.');
       return;
     }
+
+    setIsLoading(true);
+    try {
+      await authService.verifyResetCode(email.trim(), code.trim());
+      setStep(2);
+    } catch (err: any) {
+      if (err?.response?.status === 429 || err?.response?.data?.error?.code === 'TOO_MANY_ATTEMPTS') {
+        setError(getApiErrorMessage(err, 'Trop de tentatives. Réessayez plus tard.'));
+        setExpiresAt(Date.now());
+      } else {
+        setError(getApiErrorMessage(err, 'Code invalide ou expiré.'));
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
     const pwdError = validatePassword(password);
     if (pwdError) { setError(pwdError); return; }
     if (password !== confirm) { setError('Les mots de passe ne correspondent pas.'); return; }
@@ -91,9 +111,13 @@ const ResetPassword = () => {
         <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-elite-emerald/10 flex items-center justify-center text-elite-emerald">
           <KeyRound size={30} />
         </div>
-        <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight font-heading">Nouveau mot de passe</h2>
+        <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight font-heading">
+          {step === 1 ? 'Vérifier le code' : 'Nouveau mot de passe'}
+        </h2>
         <p className="mt-3 text-slate-500 dark:text-slate-400 font-medium">
-          Saisissez le code reçu par email et choisissez un nouveau mot de passe robuste.
+          {step === 1
+            ? 'Saisissez le code à 6 chiffres reçu par email pour continuer.'
+            : 'Choisissez maintenant un nouveau mot de passe robuste.'}
         </p>
       </div>
 
@@ -110,9 +134,10 @@ const ResetPassword = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest">Email</label>
+          {step === 1 ? (
+            <form onSubmit={(e) => { e.preventDefault(); void verifyCode(); }} className="space-y-6">
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest">Email</label>
               <div className="relative group">
                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
                 <input
@@ -124,9 +149,9 @@ const ResetPassword = () => {
                   placeholder="votre@email.com"
                 />
               </div>
-            </div>
+              </div>
 
-            <div>
+              <div>
               <div className="flex items-center justify-between mb-3">
                 <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Code à 6 chiffres</label>
                 <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${expired ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}`}>
@@ -145,10 +170,24 @@ const ResetPassword = () => {
                 className="w-full px-5 py-5 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-elite-emerald/10 font-black text-slate-900 dark:text-white outline-none tracking-[0.5em] text-center text-xl disabled:opacity-40"
                 placeholder="______"
               />
-            </div>
+              </div>
 
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest">Nouveau mot de passe</label>
+              <button
+                type="submit"
+                disabled={isLoading || expired}
+                className="w-full py-5 bg-slate-900 text-white text-sm font-black rounded-3xl hover:bg-elite-emerald shadow-xl transition-all uppercase tracking-[0.2em] flex items-center justify-center gap-3 disabled:opacity-60"
+              >
+                {isLoading ? <Loader2 className="animate-spin" size={20} /> : <>Vérifier le code <ArrowRight size={18} className="text-elite-gold" /></>}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-widest rounded-2xl flex items-center gap-2">
+                <CheckCircle2 size={16} /> Code vérifié
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest">Nouveau mot de passe</label>
               <div className="relative group">
                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
                 <input
@@ -160,9 +199,9 @@ const ResetPassword = () => {
                   placeholder="••••••••"
                 />
               </div>
-            </div>
+              </div>
 
-            <div>
+              <div>
               <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-widest">Confirmer</label>
               <div className="relative group">
                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
@@ -175,9 +214,9 @@ const ResetPassword = () => {
                   placeholder="••••••••"
                 />
               </div>
-            </div>
+              </div>
 
-            {password.length > 0 && (
+              {password.length > 0 && (
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 px-1">
                 {checks.map((c) => (
                   <li key={c.label} className={`flex items-center gap-2 text-[11px] font-bold ${c.valid ? 'text-elite-emerald' : 'text-slate-400 dark:text-slate-500'}`}>
@@ -188,16 +227,17 @@ const ResetPassword = () => {
               </ul>
             )}
 
-            <button
+              <button
               type="submit"
               disabled={isLoading}
               className="w-full py-5 bg-slate-900 text-white text-sm font-black rounded-3xl hover:bg-elite-emerald shadow-xl transition-all uppercase tracking-[0.2em] flex items-center justify-center gap-3 disabled:opacity-60"
             >
               {isLoading ? <Loader2 className="animate-spin" size={20} /> : <>Réinitialiser <ArrowRight size={18} className="text-elite-gold" /></>}
-            </button>
-          </form>
+              </button>
+            </form>
+          )}
 
-          <div className="mt-6 text-center">
+          {step === 1 && <div className="mt-6 text-center">
             <button
               type="button"
               onClick={resend}
@@ -207,7 +247,7 @@ const ResetPassword = () => {
               <RefreshCw size={14} />
               {expired ? 'Renvoyer le code' : 'Renvoyer (à l’expiration)'}
             </button>
-          </div>
+          </div>}
         </div>
         <p className="mt-8 text-center text-slate-500 dark:text-slate-400 font-bold text-sm">
           <Link to="/login" className="text-elite-emerald hover:text-elite-gold underline underline-offset-8 decoration-elite-gold/30">

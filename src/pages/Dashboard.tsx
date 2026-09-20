@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, MessageSquare, Bell, Search, ChevronRight, ShieldCheck, CreditCard, Users, Star, TrendingUp, AlertCircle, Settings, Loader2 } from 'lucide-react';
+import { Calendar, MessageSquare, Bell, Search, ChevronRight, ShieldCheck, CreditCard, Users, Star, TrendingUp, AlertCircle, Settings, Loader2, FileText, XCircle, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Sidebar, { MobileMenuButton } from '../components/Sidebar';
 import DefaultAvatar from '../components/DefaultAvatar';
@@ -39,7 +39,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-12">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-6">
         <div className="glass-card p-8 rounded-[2rem] flex items-center gap-6 group hover:-translate-y-1 transition-all">
           <div className="w-14 h-14 bg-elite-emerald/5 rounded-2xl flex items-center justify-center text-elite-emerald group-hover:bg-elite-emerald group-hover:text-white transition-all">
             <Users size={28} />
@@ -79,6 +79,9 @@ const AdminDashboard = () => {
             <h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.signalements?.enAttente ?? stats?.pendingReports ?? 0}</h3>
           </div>
         </div>
+
+        <div className="glass-card p-8 rounded-[2rem]"><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Réservations</p><h3 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">{stats?.reservations?.total ?? 0}</h3><p className="mt-1 text-[10px] font-bold text-slate-400">{stats?.reservations?.confirmees ?? 0} confirmées</p></div>
+        <div className="glass-card p-8 rounded-[2rem]"><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Devis</p><h3 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">{stats?.devis?.total ?? 0}</h3><p className="mt-1 text-[10px] font-bold text-slate-400">{stats?.devis?.enNegociation ?? 0} en négociation</p></div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
@@ -113,13 +116,8 @@ const ProviderDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await api.get('/users/profile');
-        const profile = response.data.data || response.data;
-        setStats({
-          totalServices: profile.services?.length ?? 0,
-          totalReviews: profile.receivedReviews?.length ?? 0,
-          totalAvailabilities: profile.availability?.length ?? 0,
-        });
+        const response = await api.get('/stats/provider');
+        setStats(response.data.data || response.data);
       } catch (error) {
         console.error('Error fetching provider stats:', error);
       } finally {
@@ -137,14 +135,14 @@ const ProviderDashboard = () => {
 
   return (
     <div className="space-y-12">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-6">
         <div className="glass-card p-8 rounded-[2rem] flex items-center gap-6 group hover:-translate-y-1 transition-all">
           <div className="w-14 h-14 bg-elite-emerald/5 rounded-2xl flex items-center justify-center text-elite-emerald group-hover:bg-elite-emerald group-hover:text-white transition-all">
             <TrendingUp size={28} />
           </div>
           <div>
             <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Services Proposés</p>
-            <h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.totalServices ?? 0}</h3>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.activeServices ?? 0}<span className="ml-1 text-sm text-slate-400">/ {stats?.totalServices ?? 0}</span></h3>
           </div>
         </div>
 
@@ -153,10 +151,16 @@ const ProviderDashboard = () => {
             <Calendar size={28} />
           </div>
           <div>
-            <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Disponibilités</p>
-            <h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.totalAvailabilities ?? 0}</h3>
+            <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Réservations totales</p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.totalBookings ?? 0}</h3>
+            <p className="mt-1 text-[10px] font-bold text-slate-400">{stats?.bookingStatus?.pending ?? 0} en attente</p>
           </div>
         </div>
+
+        <div className="glass-card p-8 rounded-[2rem] flex items-center gap-6"><Calendar className="text-elite-emerald" size={28} /><div><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Confirmées</p><h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.bookingStatus?.confirmed ?? 0}</h3></div></div>
+        <div className="glass-card p-8 rounded-[2rem] flex items-center gap-6"><XCircle className="text-red-500" size={28} /><div><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Annulées</p><h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.bookingStatus?.cancelled ?? 0}</h3></div></div>
+        <div className="glass-card p-8 rounded-[2rem] flex items-center gap-6"><FileText className="text-elite-gold" size={28} /><div><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Devis en négociation</p><h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.devisStatus?.negotiation ?? 0}</h3></div></div>
+        <div className="glass-card p-8 rounded-[2rem] flex items-center gap-6"><TrendingUp className="text-elite-emerald" size={28} /><div><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Revenus confirmés</p><h3 className="text-2xl font-black text-slate-900 dark:text-white">{Number(stats?.totalRevenue ?? 0).toLocaleString('fr-FR')} F</h3></div></div>
 
         <div className="bg-elite-emerald p-8 rounded-[2rem] text-white flex items-center gap-6 shadow-premium hover:-translate-y-1 transition-all">
           <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-elite-gold">
@@ -200,9 +204,10 @@ const ClientDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [bookingsRes, walletRes] = await Promise.allSettled([
+        const [bookingsRes, walletRes, devisRes] = await Promise.allSettled([
           api.get('/bookings'),
           api.get('/wallet'),
+          api.get('/devis'),
         ]);
 
         const bookings = bookingsRes.status === 'fulfilled'
@@ -211,9 +216,20 @@ const ClientDashboard = () => {
         const wallet = walletRes.status === 'fulfilled'
           ? (walletRes.value.data?.data || walletRes.value.data)
           : null;
+        const devis = devisRes.status === 'fulfilled'
+          ? (devisRes.value.data?.data || devisRes.value.data || [])
+          : [];
+        const countStatus = (items: any[], status: string) => items.filter((item) => item.status === status || item.statut === status).length;
 
         setStats({
           totalBookings: Array.isArray(bookings) ? bookings.length : 0,
+          pendingBookings: countStatus(bookings, 'PENDING'),
+          confirmedBookings: countStatus(bookings, 'CONFIRMED'),
+          cancelledBookings: countStatus(bookings, 'CANCELLED'),
+          totalDevis: Array.isArray(devis) ? devis.length : 0,
+          pendingDevis: countStatus(devis, 'EN_ATTENTE'),
+          negotiationDevis: countStatus(devis, 'EN_NEGOCIATION'),
+          acceptedDevis: countStatus(devis, 'ACCEPTE'),
           balance: wallet?.balance ?? 0,
         });
       } catch (error) {
@@ -233,7 +249,7 @@ const ClientDashboard = () => {
 
   return (
     <div className="space-y-12">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-6">
         <div className="glass-card p-8 rounded-[2rem] flex items-center gap-6 group hover:-translate-y-1 transition-all">
           <div className="w-14 h-14 bg-elite-emerald/5 rounded-2xl flex items-center justify-center text-elite-emerald group-hover:bg-elite-emerald group-hover:text-white transition-all">
             <Calendar size={28} />
@@ -243,6 +259,10 @@ const ClientDashboard = () => {
             <h3 className="text-3xl font-black text-slate-900 dark:text-white">{stats?.totalBookings ?? 0}</h3>
           </div>
         </div>
+
+        <div className="glass-card p-8 rounded-[2rem]"><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Confirmées</p><h3 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">{stats?.confirmedBookings ?? 0}</h3></div>
+        <div className="glass-card p-8 rounded-[2rem]"><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Annulées</p><h3 className="mt-2 text-3xl font-black text-red-500">{stats?.cancelledBookings ?? 0}</h3></div>
+        <div className="glass-card p-8 rounded-[2rem]"><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Mes devis</p><h3 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">{stats?.totalDevis ?? 0}</h3><p className="mt-1 text-[10px] font-bold text-slate-400">{stats?.negotiationDevis ?? 0} en négociation</p></div>
 
         <div className="glass-card p-8 rounded-[2rem] flex items-center gap-6 group hover:-translate-y-1 transition-all">
           <div className="w-14 h-14 bg-elite-gold/10 rounded-2xl flex items-center justify-center text-elite-gold group-hover:bg-elite-gold group-hover:text-white transition-all">

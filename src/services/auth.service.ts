@@ -73,6 +73,11 @@ class AuthService {
     return unwrapApiData(response);
   }
 
+  async verifyResetCode(email: string, code: string): Promise<{ message: string }> {
+    const response = await api.post<any>('/auth/verify-reset-code', { email, code });
+    return unwrapApiData(response);
+  }
+
   async getProfile(): Promise<User> {
     const response = await api.get<any>('/auth/profile');
     const user = unwrapApiData<User>(response);

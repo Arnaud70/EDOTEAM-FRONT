@@ -7,6 +7,7 @@ import { Suspense, lazy } from 'react';
 const ReportsCharts = lazy(() => import('./ReportsCharts'));
 import { Download, Filter, TrendingUp, Calendar, ArrowUpRight, Loader2 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import { downloadBrandedPdf } from '../utils/exportPdf';
 
 const COLORS = ['#064e3b', '#d4af37', '#10b981', '#3b82f6'];
 
@@ -30,6 +31,13 @@ const groupByMonth = (items: any[], dateKey: string, valueKey: string) => {
 };
 
 const unwrapResponse = (response: any) => response?.data?.data ?? response?.data ?? response;
+
+const StatusCard = ({ label, value }: { label: string; value?: number }) => (
+  <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">{label}</p>
+    <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">{value ?? 0}</p>
+  </div>
+);
 
 const Reports = () => {
   const { user } = useAuth();
@@ -71,9 +79,11 @@ const Reports = () => {
             ? [{ name: 'Services', value: data.totalServices }]
             : []);
         } else {
-          const [bookingsRes, walletRes] = await Promise.all([api.get('/bookings'), api.get('/wallet')]);
+          const [bookingsRes, walletRes, devisRes] = await Promise.all([api.get('/bookings'), api.get('/wallet'), api.get('/devis')]);
           const bookings = unwrapResponse(bookingsRes) || [];
           const wallet = unwrapResponse(walletRes) || { balance: 0, transactions: [] };
+          const devis = unwrapResponse(devisRes) || [];
+          const countStatus = (items: any[], status: string) => items.filter((item) => item.status === status || item.statut === status).length;
 
           const distributionMap = bookings.reduce((acc: Record<string, number>, booking: any) => {
             const name = booking?.service?.nom ?? 'Autres';
@@ -85,6 +95,17 @@ const Reports = () => {
           setChartData(groupByMonth(bookings, 'date', 'totalAmount'));
           setStats({
             totalBookings: Array.isArray(bookings) ? bookings.length : 0,
+            bookingStatus: {
+              pending: countStatus(bookings, 'PENDING'),
+              confirmed: countStatus(bookings, 'CONFIRMED'),
+              cancelled: countStatus(bookings, 'CANCELLED'),
+            },
+            totalDevis: Array.isArray(devis) ? devis.length : 0,
+            devisStatus: {
+              pending: countStatus(devis, 'EN_ATTENTE'),
+              negotiation: countStatus(devis, 'EN_NEGOCIATION'),
+              accepted: countStatus(devis, 'ACCEPTE'),
+            },
             balance: Number(wallet?.balance ?? 0),
             transactionCount: Array.isArray(wallet?.transactions) ? wallet.transactions.length : 0,
           });
@@ -141,6 +162,26 @@ const Reports = () => {
 
   const chartDataKey = role === 'CLIENT' ? 'value' : 'revenue';
 
+  const exportReport = async () => {
+    const generatedAt = new Date();
+    const summaryRows = [
+      [mainLabel, mainValue],
+      [secondaryLabel, String(secondaryValue)],
+      [tertiaryLabel, String(tertiaryValue)],
+      ...(role === 'ADMIN' ? [['Réservations confirmées', String(stats?.reservations?.confirmees ?? 0)], ['Devis en négociation', String(stats?.devis?.enNegociation ?? 0)], ['Services actifs', String(stats?.servicesActifs ?? 0)]] : []),
+      ...(role === 'PRESTATAIRE' ? [['Réservations confirmées', String(stats?.bookingStatus?.confirmed ?? 0)], ['Réservations annulées', String(stats?.bookingStatus?.cancelled ?? 0)], ['Devis en négociation', String(stats?.devisStatus?.negotiation ?? 0)], ['Services actifs', String(stats?.activeServices ?? 0)]] : []),
+      ...(role === 'CLIENT' ? [['Réservations en attente', String(stats?.bookingStatus?.pending ?? 0)], ['Réservations confirmées', String(stats?.bookingStatus?.confirmed ?? 0)], ['Devis en négociation', String(stats?.devisStatus?.negotiation ?? 0)]] : []),
+    ];
+    await downloadBrandedPdf({
+      title: "Rapport d'activité",
+      subtitle: 'Synthèse personnalisée de votre espace EDOTEAM',
+      badge: `Rapport ${role}`,
+      rows: summaryRows.map(([label, value]) => ({ label, value })),
+      qrText: `EDOTEAM|RAPPORT|${role}|${generatedAt.toISOString()}|${JSON.stringify(stats)}`,
+      filename: `edoteam-rapport-${role.toLowerCase()}-${generatedAt.toISOString().slice(0, 10)}.pdf`,
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b1220] flex font-sans overflow-hidden">
@@ -179,7 +220,7 @@ const Reports = () => {
                   30 Jours
                 </button>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all shadow-sm">
+              <button onClick={exportReport} className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all shadow-sm">
                 <Download size={16} />
                 <span className="hidden sm:inline">Exporter</span>
               </button>
@@ -226,6 +267,31 @@ const Reports = () => {
             <p className="text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">{tertiaryLabel}</p>
             <h3 className="text-3xl font-black text-white">{tertiaryValue}</h3>
           </div>
+        </div>
+
+        <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-6">
+          {role === 'ADMIN' && <>
+            <StatusCard label="Réservations" value={stats?.reservations?.total} />
+            <StatusCard label="Réservations confirmées" value={stats?.reservations?.confirmees} />
+            <StatusCard label="Réservations annulées" value={stats?.reservations?.annulees} />
+            <StatusCard label="Devis" value={stats?.devis?.total} />
+            <StatusCard label="Services actifs" value={stats?.servicesActifs} />
+          </>}
+          {role === 'PRESTATAIRE' && <>
+            <StatusCard label="Réservations" value={stats?.totalBookings} />
+            <StatusCard label="Confirmées" value={stats?.bookingStatus?.confirmed} />
+            <StatusCard label="Annulées" value={stats?.bookingStatus?.cancelled} />
+            <StatusCard label="Devis" value={stats?.totalDevis} />
+            <StatusCard label="En négociation" value={stats?.devisStatus?.negotiation} />
+            <StatusCard label="Services actifs" value={stats?.activeServices} />
+          </>}
+          {role === 'CLIENT' && <>
+            <StatusCard label="Réservations" value={stats?.totalBookings} />
+            <StatusCard label="En attente" value={stats?.bookingStatus?.pending} />
+            <StatusCard label="Confirmées" value={stats?.bookingStatus?.confirmed} />
+            <StatusCard label="Devis" value={stats?.totalDevis} />
+            <StatusCard label="En négociation" value={stats?.devisStatus?.negotiation} />
+          </>}
         </div>
 
         {/* Charts Section (lazy-loaded to reduce initial bundle) */}

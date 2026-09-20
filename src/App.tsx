@@ -37,10 +37,12 @@ const CompleteProfile = lazy(() => import('./pages/CompleteProfile'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const Devis = lazy(() => import('./pages/Devis'));
+const FAQ = lazy(() => import('./pages/FAQ'));
 
 const DASHBOARD_PATHS = [
   '/dashboard', '/messages', '/admin', '/provider',
-  '/bookings', '/wallet', '/security', '/favorites', '/settings', '/reports'
+  '/bookings', '/devis', '/wallet', '/security', '/favorites', '/settings', '/reports'
 ];
 
 // Pages "seules" : ni navbar ni footer (comme l'inscription).
@@ -222,6 +224,7 @@ const AppRouter = ({ user }: { user: any }) => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/services" element={<ServiceList />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
@@ -242,6 +245,7 @@ const AppRouter = ({ user }: { user: any }) => {
 
             {/* Shared Routes */}
             <Route path="/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
+            <Route path="/devis" element={<ProtectedRoute><Devis /></ProtectedRoute>} />
             <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
             <Route path="/security" element={<ProtectedRoute><Security /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />

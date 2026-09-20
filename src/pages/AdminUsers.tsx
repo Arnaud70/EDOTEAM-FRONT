@@ -51,6 +51,19 @@ const AdminUsers = () => {
     fetchUsers();
   }, [roleFilter, statusFilter, search]);
 
+  useEffect(() => {
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') fetchUsers();
+    };
+
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+    window.addEventListener('focus', refreshWhenVisible);
+    return () => {
+      document.removeEventListener('visibilitychange', refreshWhenVisible);
+      window.removeEventListener('focus', refreshWhenVisible);
+    };
+  }, [roleFilter, statusFilter, search]);
+
   const handleSuspend = async (userId: string) => {
     if (!confirm('Voulez-vous vraiment suspendre cet utilisateur ?')) return;
     try {

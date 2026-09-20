@@ -69,6 +69,7 @@ const Navbar = () => {
             >
               Concept
             </button>
+            <Link to="/faq" className="text-slate-600 dark:text-slate-300 hover:text-elite-emerald font-semibold transition-colors text-sm uppercase tracking-wider">FAQ</Link>
           </div>
 
           {/* Actions */}
@@ -154,6 +155,7 @@ const Navbar = () => {
             >
               Concept
             </button>
+            <Link to="/faq" onClick={() => setIsMenuOpen(false)} className="block text-2xl font-bold text-slate-800 dark:text-slate-100 hover:text-elite-emerald transition-colors">FAQ</Link>
 
             {isAuthenticated && (
               <Link to="/messages" onClick={() => setIsMenuOpen(false)} className="text-2xl font-bold text-elite-emerald flex items-center gap-3">

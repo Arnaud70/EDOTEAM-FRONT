@@ -22,7 +22,15 @@ const Login = () => {
 
     try {
       await login({ email: email.trim(), motDePasse: password });
-      navigate('/');
+
+      const rawFrom = (location.state as any)?.from;
+      const redirectTarget = typeof rawFrom === 'string' ? rawFrom : rawFrom?.pathname || '/';
+      const finalTarget = redirectTarget === '/login' ? '/' : redirectTarget;
+      const nextLocation = (location.state as any)?.bookingRequested
+        ? `${finalTarget}${finalTarget.includes('?') ? '&' : '?'}booking=1`
+        : finalTarget;
+
+      navigate(nextLocation || '/', { replace: true });
     } catch (err: any) {
       console.error('Login error:', err);
       const data = err.response?.data;

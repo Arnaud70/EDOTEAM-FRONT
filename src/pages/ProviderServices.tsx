@@ -27,6 +27,7 @@ const ProviderServices = () => {
   const [allServices, setAllServices] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingService, setEditingService] = useState<ServiceData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -66,6 +67,19 @@ const ProviderServices = () => {
       setIsSubmitting(true);
       setError(null);
 
+      if (editingService) {
+        await api.patch(`/services/me/${editingService.id}`, {
+          prixIndicatif: parseFloat(newService.prixIndicatif) || 0,
+          experience: parseInt(newService.experience) || 0,
+          description: newService.customServiceDescription.trim() || undefined,
+        });
+        await fetchMyServices();
+        setIsModalOpen(false);
+        setEditingService(null);
+        setNewService({ serviceId: '', customServiceName: '', customServiceDescription: '', prixIndicatif: '', experience: '' });
+        return;
+      }
+
       let serviceId = newService.serviceId;
       if (newService.serviceId === 'custom') {
         if (!newService.customServiceName.trim()) {
@@ -94,6 +108,19 @@ const ProviderServices = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const openEdit = (item: ServiceData) => {
+    setEditingService(item);
+    setNewService({
+      serviceId: item.service.id,
+      customServiceName: item.service.nom,
+      customServiceDescription: item.description || item.service.description || '',
+      prixIndicatif: String(item.prixIndicatif ?? ''),
+      experience: String(item.experience ?? ''),
+    });
+    setError(null);
+    setIsModalOpen(true);
   };
 
   const handleRemove = async (serviceId: string) => {
@@ -164,6 +191,7 @@ const ProviderServices = () => {
                   <Icon size={24} />
                 </div>
                 <div className="flex gap-2">
+                   <button onClick={() => openEdit(item)} className="p-2 text-slate-300 hover:text-elite-emerald transition-colors" title="Modifier"><MoreVertical size={20} /></button>
                    <button onClick={() => handleToggle(item)} className="p-2 text-slate-300 hover:text-white hover:bg-elite-emerald rounded-lg transition-all" title="Activer ou désactiver"><Toggle size={20} /></button>
                    <button 
                     onClick={() => handleRemove(item.service.id)}
@@ -183,7 +211,7 @@ const ProviderServices = () => {
                   <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{item.experience || 0} ans d'exp.</span>
                 </div>
                 <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">{item.service.nom}</h3>
-                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest italic truncate">{item.service.description || 'Pas de description'}</p>
+                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest italic truncate">{item.description || item.service.description || 'Pas de description'}</p>
               </div>
 
               <div className="flex items-center justify-between pt-6 border-t border-slate-50">
@@ -217,12 +245,16 @@ const ProviderServices = () => {
               </button>
 
               <div className="p-12">
-                <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-8">Ajouter une prestation</h2>
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-8">{editingService ? 'Modifier la prestation' : 'Ajouter une prestation'}</h2>
                 
                 <form onSubmit={handleAddService} className="space-y-6">
                   <div className="space-y-3">
                     <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-2">Service à proposer</label>
-                    <select 
+                    {editingService ? (
+                      <div className="w-full px-6 py-4 bg-slate-100 dark:bg-slate-800 rounded-2xl font-bold text-sm text-slate-600 dark:text-slate-300">
+                        {editingService.service.nom}
+                      </div>
+                    ) : <select 
                       required
                       value={newService.serviceId}
                       onChange={(e) => setNewService({...newService, serviceId: e.target.value, customServiceName: e.target.value === 'custom' ? newService.customServiceName : ''})}
@@ -237,9 +269,9 @@ const ProviderServices = () => {
                         ))
                       }
                       <option value="custom">Autre service...</option>
-                    </select>
+                    </select>}
 
-                    {newService.serviceId === 'custom' && (
+                    {(newService.serviceId === 'custom' || editingService) && (
                       <div className="space-y-3 mt-3">
                         <input
                           type="text"
@@ -252,7 +284,7 @@ const ProviderServices = () => {
                         <textarea
                           value={newService.customServiceDescription}
                           onChange={(e) => setNewService({...newService, customServiceDescription: e.target.value})}
-                          placeholder="Description du service (facultatif)"
+                          placeholder="Description de votre prestation (facultatif)"
                           className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-elite-emerald/10 transition-all font-bold text-sm resize-none"
                           rows={3}
                         />
@@ -298,7 +330,7 @@ const ProviderServices = () => {
                     className="w-full py-5 bg-slate-900 text-white font-black rounded-2xl hover:bg-elite-emerald transition-all shadow-xl shadow-slate-900/10 uppercase tracking-widest text-sm flex items-center justify-center gap-3"
                   >
                     {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} className="text-elite-gold" />}
-                    {isSubmitting ? 'Ajout en cours...' : 'Enregistrer le service'}
+                    {isSubmitting ? 'Enregistrement...' : editingService ? 'Enregistrer les modifications' : 'Enregistrer le service'}
                   </button>
                 </form>
               </div>

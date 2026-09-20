@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar, { MobileMenuButton } from '../components/Sidebar';
-import { Search, Filter, Calendar, MapPin, Clock, MessageSquare, ChevronRight, MoreVertical, Loader2, CheckCircle2, XCircle, Eye, ExternalLink, X } from 'lucide-react';
+import { Search, Filter, Calendar, MapPin, Clock, MessageSquare, ChevronRight, MoreVertical, Loader2, CheckCircle2, XCircle, Eye, ExternalLink, Edit3, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import PageHeader from '../components/PageHeader';
@@ -13,6 +13,8 @@ const Bookings = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
   const [messageRecipient, setMessageRecipient] = useState<any | null>(null);
+  const [editingBooking, setEditingBooking] = useState<any | null>(null);
+  const [editBookingForm, setEditBookingForm] = useState({ date: '', startTime: '', endTime: '', address: '', clientNote: '' });
 
   const fetchBookings = async () => {
     try {
@@ -29,9 +31,46 @@ const Bookings = () => {
   const updateStatus = async (id: string, status: string) => {
     try {
       await api.patch(`/bookings/${id}/status`, { status });
-      fetchBookings();
+      await fetchBookings();
     } catch (error) {
       console.error('Error updating status:', error);
+    }
+  };
+
+  const openBookingEditor = (booking: any) => {
+    const toDate = (value: string) => new Date(value).toISOString().slice(0, 10);
+    const toTime = (value: string) => new Date(value).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    setEditingBooking(booking);
+    setSelectedBooking(null);
+    setEditBookingForm({
+      date: toDate(booking.date),
+      startTime: toTime(booking.startTime),
+      endTime: toTime(booking.endTime),
+      address: booking.address || '',
+      clientNote: booking.clientNote || '',
+    });
+  };
+
+  const updateBooking = async () => {
+    if (!editingBooking) return;
+    try {
+      const startTime = new Date(`${editBookingForm.date}T${editBookingForm.startTime}`).toISOString();
+      const endTime = new Date(`${editBookingForm.date}T${editBookingForm.endTime}`).toISOString();
+      await api.patch(`/bookings/${editingBooking.id}`, {
+        date: startTime,
+        startTime,
+        endTime,
+        totalAmount: Number(editingBooking.totalAmount || 0),
+        address: editBookingForm.address,
+        clientNote: editBookingForm.clientNote || undefined,
+        interventionLatitude: editingBooking.interventionLatitude ?? undefined,
+        interventionLongitude: editingBooking.interventionLongitude ?? undefined,
+      });
+      setEditingBooking(null);
+      await fetchBookings();
+    } catch (error: any) {
+      console.error('Error updating booking:', error);
+      window.alert(error.response?.data?.message || error.response?.data?.error?.message || 'Impossible de modifier le rendez-vous.');
     }
   };
 
@@ -126,17 +165,17 @@ const Bookings = () => {
                     </div>
                   </div>
   
-                  <div className="xl:pl-8 xl:border-l border-slate-50 flex items-center justify-between xl:justify-end gap-6">
-                     <div className="text-right">
-                      <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Montant</p>
-                      <p className="text-xl font-black text-slate-900 dark:text-white">{Number(booking.totalAmount).toLocaleString()} F</p>
+                  <div className="xl:pl-8 xl:border-l border-slate-50 flex flex-col sm:flex-row sm:items-center justify-between xl:justify-end gap-4 sm:gap-6">
+                    <div className="text-left sm:text-right">
+                      <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Tarif indicatif</p>
+                      <p className="text-xl font-black text-slate-900 dark:text-white">À partir de {Number(booking.totalAmount || 0).toLocaleString('fr-FR')} F CFA</p>
                      </div>
-                     <div className="flex items-center gap-3">
+                     <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
                       {user.role === 'PRESTATAIRE' && booking.status === 'PENDING' && (
                         <div className="flex gap-2">
                            <button 
                             onClick={() => updateStatus(booking.id, 'CONFIRMED')}
-                            className="p-4 bg-elite-emerald text-white rounded-2xl hover:bg-elite-emerald/90 transition-all shadow-lg flex items-center justify-center gap-2 group"
+                            className="p-3 sm:p-4 bg-elite-emerald text-white rounded-2xl hover:bg-elite-emerald/90 transition-all shadow-lg flex items-center justify-center gap-2 group"
                             title="Confirmer"
                            >
                             <CheckCircle2 size={20} />
@@ -144,7 +183,7 @@ const Bookings = () => {
                            </button>
                            <button 
                             onClick={() => updateStatus(booking.id, 'CANCELLED')}
-                            className="p-4 bg-red-50 text-red-500 rounded-2xl hover:bg-red-100 transition-all"
+                            className="p-3 sm:p-4 bg-red-50 text-red-500 rounded-2xl hover:bg-red-100 transition-all"
                             title="Annuler"
                            >
                             <XCircle size={20} />
@@ -153,19 +192,24 @@ const Bookings = () => {
                       )}
                       <button
                         onClick={() => setMessageRecipient(partner)}
-                        className="p-4 bg-elite-emerald/5 text-elite-emerald rounded-2xl hover:bg-elite-emerald hover:text-white transition-all shadow-sm"
+                        className="p-3 sm:p-4 bg-elite-emerald/5 text-elite-emerald rounded-2xl hover:bg-elite-emerald hover:text-white transition-all shadow-sm"
                         title={`Écrire à ${partnerName}`}
                       >
                         <MessageSquare size={20} />
                       </button>
                       <button
                         onClick={() => setSelectedBooking(booking)}
-                        className="p-4 bg-slate-50 dark:bg-slate-800 text-slate-500 rounded-2xl hover:bg-elite-emerald hover:text-white transition-all"
+                        className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-800 text-slate-500 rounded-2xl hover:bg-elite-emerald hover:text-white transition-all"
                         title="Voir les détails"
                       >
                         <Eye size={20} />
                       </button>
-                      <button className="p-4 bg-slate-50 dark:bg-slate-800 text-slate-300 hover:text-slate-600 rounded-2xl transition-all">
+                      {user.role === 'CLIENT' && booking.status === 'PENDING' && (
+                        <button onClick={() => openBookingEditor(booking)} className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-800 text-slate-500 rounded-2xl hover:bg-elite-emerald hover:text-white transition-all" title="Modifier le rendez-vous">
+                          <Edit3 size={20} />
+                        </button>
+                      )}
+                      <button className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-800 text-slate-300 hover:text-slate-600 rounded-2xl transition-all">
                         <MoreVertical size={20} />
                       </button>
                      </div>
@@ -188,14 +232,31 @@ const Bookings = () => {
                 <p><strong>Service :</strong> {selectedBooking.service?.nom || 'Non renseigné'}</p>
                 <p><strong>Prestataire :</strong> {selectedBooking.prestataire?.prenom} {selectedBooking.prestataire?.nom}</p>
                 <p><strong>Client :</strong> {selectedBooking.client?.prenom} {selectedBooking.client?.nom}</p>
+                <p><strong>Tarif indicatif :</strong> À partir de {Number(selectedBooking.totalAmount || 0).toLocaleString('fr-FR')} F CFA</p>
+                <p><strong>Prix final :</strong> À convenir avec le prestataire</p>
                 <p><strong>Date :</strong> {new Date(selectedBooking.date).toLocaleDateString('fr-FR')}</p>
                 <p><strong>Horaire :</strong> {new Date(selectedBooking.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} - {new Date(selectedBooking.endTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
                 <p><strong>Statut :</strong> {selectedBooking.status}</p>
                 <p><strong>Adresse :</strong> {selectedBooking.address || 'Non renseignée'}</p>
-                {selectedBooking.clientNote && <p><strong>Note :</strong> {selectedBooking.clientNote}</p>}
-                {selectedBooking.interventionLatitude != null && selectedBooking.interventionLongitude != null && (
+                {selectedBooking.clientNote && <p><strong>Description du problème :</strong> {selectedBooking.clientNote}</p>}
+                {selectedBooking.photos?.length > 0 && (
+                  <div>
+                    <p className="mb-2"><strong>Photos du problème :</strong></p>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {selectedBooking.photos.map((photo: { id: string; url: string; name: string }) => (
+                        <a key={photo.id} href={photo.url.startsWith('http') ? photo.url : `http://localhost:3000${photo.url}`} target="_blank" rel="noreferrer" className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+                          <img src={photo.url.startsWith('http') ? photo.url : `http://localhost:3000${photo.url}`} alt={photo.name} className="h-28 w-full object-cover" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <p className="italic text-slate-500 dark:text-slate-400">Le tarif affiché est indicatif. Le prix final peut varier selon la prestation demandée.</p>
+                {selectedBooking.address && (
                   <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${selectedBooking.interventionLatitude},${selectedBooking.interventionLongitude}`}
+                    href={selectedBooking.interventionLatitude != null && selectedBooking.interventionLongitude != null
+                      ? `https://www.google.com/maps/dir/?api=1&destination=${selectedBooking.interventionLatitude},${selectedBooking.interventionLongitude}`
+                      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedBooking.address)}`}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-2 rounded-xl bg-elite-emerald px-4 py-3 font-black text-white"
@@ -203,6 +264,44 @@ const Bookings = () => {
                     <ExternalLink size={16} /> Voir la localisation / itinéraire
                   </a>
                 )}
+                {user.role === 'CLIENT' && selectedBooking.status === 'PENDING' && (
+                  <button type="button" onClick={() => openBookingEditor(selectedBooking)} className="inline-flex items-center gap-2 rounded-xl bg-elite-emerald px-4 py-3 font-black text-white">
+                    <Edit3 size={16} /> Modifier le rendez-vous
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {editingBooking && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+            <button className="absolute inset-0 bg-slate-900/60" onClick={() => setEditingBooking(null)} aria-label="Fermer" />
+            <div className="relative w-full max-w-xl rounded-3xl bg-white p-8 shadow-2xl dark:bg-slate-900">
+              <button onClick={() => setEditingBooking(null)} className="absolute right-5 top-5 p-2 text-slate-400" aria-label="Fermer"><X size={22} /></button>
+              <h2 className="mb-6 text-2xl font-black text-slate-900 dark:text-white">Modifier mon rendez-vous</h2>
+              <div className="space-y-4">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">Date
+                  <input type="date" min={new Date().toISOString().slice(0, 10)} value={editBookingForm.date} onChange={(event) => setEditBookingForm((previous) => ({ ...previous, date: event.target.value }))} className="mt-2 w-full rounded-xl border border-slate-200 p-3 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">Début
+                    <input type="time" value={editBookingForm.startTime} onChange={(event) => setEditBookingForm((previous) => ({ ...previous, startTime: event.target.value }))} className="mt-2 w-full rounded-xl border border-slate-200 p-3 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                  </label>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">Fin
+                    <input type="time" value={editBookingForm.endTime} onChange={(event) => setEditBookingForm((previous) => ({ ...previous, endTime: event.target.value }))} className="mt-2 w-full rounded-xl border border-slate-200 p-3 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                  </label>
+                </div>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">Adresse
+                  <input value={editBookingForm.address} onChange={(event) => setEditBookingForm((previous) => ({ ...previous, address: event.target.value }))} className="mt-2 w-full rounded-xl border border-slate-200 p-3 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                </label>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">Note
+                  <textarea value={editBookingForm.clientNote} onChange={(event) => setEditBookingForm((previous) => ({ ...previous, clientNote: event.target.value }))} rows={3} className="mt-2 w-full rounded-xl border border-slate-200 p-3 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                </label>
+                <div className="flex justify-end gap-3 pt-2">
+                  <button type="button" onClick={() => setEditingBooking(null)} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-black text-slate-600 dark:border-slate-700 dark:text-slate-300">Annuler</button>
+                  <button type="button" onClick={updateBooking} className="rounded-xl bg-elite-emerald px-5 py-3 text-sm font-black text-white">Enregistrer</button>
+                </div>
               </div>
             </div>
           </div>

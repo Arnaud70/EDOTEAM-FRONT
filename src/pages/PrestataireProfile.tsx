@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { MapPin, Star, ShieldCheck, Clock, MessageSquare, Calendar, Phone, Share2, Heart, CheckCircle2, Award, Zap, Shield, Loader2, Flag, X, ArrowLeft } from 'lucide-react';
-import { useParams, Link } from 'react-router-dom';
+import { MapPin, Star, ShieldCheck, Clock, MessageSquare, Calendar, Phone, Share2, Heart, CheckCircle2, Award, Zap, Shield, Loader2, Flag, X, ArrowLeft, FileText } from 'lucide-react';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import BookingModal from '../components/BookingModal';
 import { useAuth } from '../context/AuthContext';
@@ -48,6 +48,7 @@ const PrestataireProfile = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [provider, setProvider] = useState<ProviderData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,6 +93,13 @@ const PrestataireProfile = () => {
       setIsFavorite(favorites.some((favorite: any) => (favorite.providerId || favorite.provider?.id) === id));
     }).catch(() => undefined);
   }, [id, user]);
+
+  useEffect(() => {
+    const shouldOpenBooking = new URLSearchParams(location.search).get('booking') === '1';
+    if (shouldOpenBooking && user) {
+      setIsBookingModalOpen(true);
+    }
+  }, [location.search, user]);
 
   const toggleFavorite = async () => {
     if (!provider) return;
@@ -250,18 +258,31 @@ const PrestataireProfile = () => {
                   </div>
                 </div>
               </div>
-              <div className="pb-4 w-full lg:w-auto">
-                <button 
+              <div className="flex w-full flex-col gap-3 pb-4 lg:w-auto lg:flex-row">
+                <button
                   onClick={() => {
                     if (!user) {
-                      navigate('/login', { state: { from: `/profile/${id}` } });
+                      navigate('/login', { state: { from: `/profile/${id}`, bookingRequested: true } });
                       return;
                     }
                     setIsBookingModalOpen(true);
                   }}
-                  className="w-full lg:w-auto px-12 py-5 bg-elite-emerald text-white font-black rounded-3xl shadow-xl shadow-elite-emerald/20 hover:bg-elite-emerald/90 transition-all transform hover:-translate-y-1 active:scale-95 uppercase tracking-widest text-sm"
+                  className="w-full px-8 py-5 bg-elite-emerald text-white font-black rounded-3xl shadow-xl shadow-elite-emerald/20 hover:bg-elite-emerald/90 transition-all transform hover:-translate-y-1 active:scale-95 uppercase tracking-widest text-sm lg:w-auto"
                 >
                   Prendre RDV
+                </button>
+                <button
+                  onClick={() => {
+                    if (!user) {
+                      navigate('/login', { state: { from: `/devis?prestataireId=${id}` } });
+                      return;
+                    }
+                    navigate(`/devis?prestataireId=${id}`);
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-3xl border-2 border-elite-emerald px-8 py-5 text-sm font-black uppercase tracking-widest text-elite-emerald transition-all hover:bg-elite-emerald/10 active:scale-95 lg:w-auto"
+                >
+                  <FileText size={18} />
+                  Demander un devis
                 </button>
               </div>
             </div>
@@ -480,9 +501,12 @@ const PrestataireProfile = () => {
                 ))}
               </ul>
               <div className="mt-10 pt-10 border-t border-slate-50 text-center">
-                <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mb-3">Honoraires Premium</p>
+                <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mb-3">Tarification</p>
                 <p className="text-4xl font-black text-elite-emerald tracking-tight">
-                  {minPrice > 0 ? `À partir de ${minPrice.toLocaleString()} F` : "Prix sur devis"}
+                  {minPrice > 0 ? `À partir de ${minPrice.toLocaleString('fr-FR')} F CFA` : "À convenir"}
+                </p>
+                <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 font-bold italic">
+                  Le tarif final est déterminé selon les besoins de la prestation.
                 </p>
               </div>
             </div>

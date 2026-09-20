@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   LayoutDashboard,
   Calendar,
@@ -16,6 +16,7 @@ import {
   Terminal,
   Clock,
   Home,
+  ImageIcon,
   ChevronLeft,
   ChevronRight,
   Menu,
@@ -29,6 +30,7 @@ import DefaultAvatar from './DefaultAvatar';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useSidebar } from '../context/SidebarContext';
+import api from '../services/api';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -36,6 +38,9 @@ const Sidebar = () => {
   const { user, logout } = useAuth();
   const { isCollapsed, toggle, isMobileOpen, closeMobile } = useSidebar();
   const { theme, toggleTheme } = useTheme();
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [pendingBookings, setPendingBookings] = useState(0);
   const navRef = useRef<HTMLElement>(null);
   const activeRef = useRef<HTMLAnchorElement>(null);
 
@@ -43,6 +48,42 @@ const Sidebar = () => {
   useEffect(() => {
     closeMobile();
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!user) return undefined;
+
+    let cancelled = false;
+    const fetchBadgeCounts = async () => {
+      try {
+        const [messagesResponse, notificationsResponse, bookingsResponse] = await Promise.all([
+          api.get('/messages/unread/count'),
+          api.get('/notifications/unread-count'),
+          api.get('/bookings'),
+        ]);
+        const messagesCount = messagesResponse.data?.data ?? messagesResponse.data ?? 0;
+        const notificationsCount = notificationsResponse.data?.data ?? notificationsResponse.data ?? 0;
+        const bookings = bookingsResponse.data?.data ?? bookingsResponse.data ?? [];
+        if (!cancelled) {
+          setUnreadMessages(Number(messagesCount) || 0);
+          setUnreadNotifications(Number(notificationsCount) || 0);
+          setPendingBookings(Array.isArray(bookings) ? bookings.filter((booking) => booking.status === 'PENDING').length : 0);
+        }
+      } catch {
+        if (!cancelled) {
+          setUnreadMessages(0);
+          setUnreadNotifications(0);
+          setPendingBookings(0);
+        }
+      }
+    };
+
+    fetchBadgeCounts();
+    const interval = window.setInterval(fetchBadgeCounts, 30_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [user?.id]);
 
   // Auto-scroll vers le lien actif
   useEffect(() => {
@@ -81,6 +122,7 @@ const Sidebar = () => {
           { icon: Briefcase, label: 'Mes Services', path: '/provider/services' },
           { icon: Clock, label: 'Disponibilités', path: '/provider/availability' },
           { icon: Calendar, label: 'Réservations', path: '/bookings' },
+          { icon: ImageIcon, label: 'Devis', path: '/devis' },
           { icon: MessageSquare, label: 'Messages', path: '/messages' },
           { icon: CreditCard, label: 'Portefeuille', path: '/wallet' },
           { icon: Settings, label: 'Paramètres', path: '/settings' },
@@ -92,6 +134,7 @@ const Sidebar = () => {
           { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
           { icon: PieChart, label: 'Rapports', path: '/reports' },
           { icon: Calendar, label: 'Mes Réservations', path: '/bookings' },
+          { icon: ImageIcon, label: 'Devis', path: '/devis' },
           { icon: MessageSquare, label: 'Messages', path: '/messages' },
           { icon: Heart, label: 'Favoris', path: '/favorites' },
           { icon: CreditCard, label: 'Portefeuille', path: '/wallet' },
@@ -102,6 +145,13 @@ const Sidebar = () => {
   };
 
   const menuItems = getMenuItems();
+
+  const getBadgeCount = (path: string) => {
+    if (path === '/messages') return unreadMessages;
+    if (path === '/bookings') return pendingBookings;
+    if (path === '/dashboard' || path === '/admin/alerts') return unreadNotifications;
+    return 0;
+  };
 
   // ─── Contenu partagé (desktop + mobile) ───────────────────────────────────
   const SidebarContent = ({ mobile = false }: { mobile?: boolean }) => (
@@ -160,7 +210,19 @@ const Sidebar = () => {
                 className={`flex-shrink-0 ${isActive ? 'text-elite-gold' : 'group-hover:text-elite-gold'}`}
               />
               {!collapsed && (
-                <span className="text-sm whitespace-nowrap">{item.label}</span>
+                <span className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                  <span className="text-sm whitespace-nowrap">{item.label}</span>
+                  {getBadgeCount(item.path) > 0 && (
+                    <span className="min-w-5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-black leading-4 text-white shadow-lg shadow-red-500/20">
+                      {getBadgeCount(item.path) > 99 ? '99+' : getBadgeCount(item.path)}
+                    </span>
+                  )}
+                </span>
+              )}
+              {collapsed && getBadgeCount(item.path) > 0 && (
+                <span className="absolute right-0 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[8px] font-black text-white">
+                  {getBadgeCount(item.path) > 9 ? '9+' : getBadgeCount(item.path)}
+                </span>
               )}
               {isActive && collapsed && (
                 <span className="absolute right-1 top-1/2 -translate-y-1/2 w-1 h-6 bg-elite-gold rounded-full" />
