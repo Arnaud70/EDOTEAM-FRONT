@@ -32,6 +32,10 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// Toutes les requêtes qui expirent au même moment partagent le même refresh.
+// Cela évite que la rotation du refresh token invalide les requêtes concurrentes.
+let refreshPromise: Promise<any> | null = null;
+
 // Intercepteur pour ajouter le token de session si présent
 api.interceptors.request.use(
   (config) => {
@@ -57,11 +61,15 @@ api.interceptors.response.use(
                        originalRequest.url?.includes('/auth/register') || 
                        originalRequest.url?.includes('/auth/refresh');
 
-    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
+    if (error.response?.status === 401 && !originalRequest?._retry && !isAuthRoute) {
       originalRequest._retry = true;
       
       try {
-        const { access_token } = await authService.refresh();
+        refreshPromise ??= authService.refresh().finally(() => {
+          refreshPromise = null;
+        });
+        const { access_token } = await refreshPromise;
+        originalRequest.headers = originalRequest.headers || {};
         originalRequest.headers.Authorization = `Bearer ${access_token}`;
         return api(originalRequest);
       } catch (refreshError) {
