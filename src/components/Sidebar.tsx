@@ -78,10 +78,8 @@ const Sidebar = () => {
     };
 
     fetchBadgeCounts();
-    const interval = window.setInterval(fetchBadgeCounts, 30_000);
     return () => {
       cancelled = true;
-      window.clearInterval(interval);
     };
   }, [user?.id]);
 

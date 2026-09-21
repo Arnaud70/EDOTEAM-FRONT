@@ -21,6 +21,7 @@ interface Category {
 const AdminServices = () => {
   const { user } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [serviceRequests, setServiceRequests] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCat, setEditingCat] = useState<Category | null>(null);
@@ -29,8 +30,9 @@ const AdminServices = () => {
   const fetchCategories = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get('/admin/services');
+      const [response, requestsResponse] = await Promise.all([api.get('/admin/services'), api.get('/admin/service-requests')]);
       setCategories(response.data.data || response.data);
+      setServiceRequests(requestsResponse.data.data || requestsResponse.data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
     } finally {
@@ -46,13 +48,16 @@ const AdminServices = () => {
     e.preventDefault();
     try {
       if (editingCat) {
-        await api.patch(`/admin/services/${editingCat.id}`, newCat);
+        const response = await api.patch(`/admin/services/${editingCat.id}`, newCat);
+        const updated = response.data?.data || response.data;
+        setCategories((current) => current.map((category) => category.id === editingCat.id ? { ...category, ...updated } : category));
       } else {
-        await api.post('/admin/services', newCat);
+        const response = await api.post('/admin/services', newCat);
+        const created = response.data?.data || response.data;
+        setCategories((current) => [...current, created]);
       }
       setShowAddModal(false);
       setEditingCat(null);
-      fetchCategories();
     } catch (error) {
       console.error('Error adding category:', error);
     }
@@ -66,8 +71,9 @@ const AdminServices = () => {
 
   const toggleService = async (category: Category) => {
     try {
-      await api.patch(`/admin/services/${category.id}`, { isActive: !category.isActive });
-      fetchCategories();
+      const response = await api.patch(`/admin/services/${category.id}`, { isActive: !category.isActive });
+      const updated = response.data?.data || response.data;
+      setCategories((current) => current.map((item) => item.id === category.id ? { ...item, ...updated } : item));
     } catch (error) {
       console.error('Error toggling service:', error);
     }
@@ -77,9 +83,19 @@ const AdminServices = () => {
     if (!window.confirm(`Supprimer définitivement le service « ${category.nom} » ? Cette action est irréversible.`)) return;
     try {
       await api.delete(`/admin/services/${category.id}`);
-      fetchCategories();
+      setCategories((current) => current.filter((item) => item.id !== category.id));
     } catch (error) {
       console.error('Error deleting service:', error);
+    }
+  };
+
+  const reviewRequest = async (id: string, approved: boolean) => {
+    try {
+      if (approved) await api.patch(`/admin/service-requests/${id}/approve`);
+      else await api.patch(`/admin/service-requests/${id}/reject`, { reason: 'Document justificatif non conforme.' });
+      setServiceRequests((current) => current.filter((request) => request.id !== id));
+    } catch (error) {
+      console.error('Error reviewing service request:', error);
     }
   };
 
@@ -161,6 +177,23 @@ const AdminServices = () => {
             );
           })}
         </div>
+
+        {serviceRequests.length > 0 && (
+          <section className="mt-12 rounded-[2rem] bg-white p-8 shadow-premium dark:bg-slate-900">
+            <div className="mb-6 flex items-center justify-between">
+              <div><p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600">Validation obligatoire</p><h2 className="mt-2 text-2xl font-black text-slate-900 dark:text-white">Demandes de services à vérifier</h2></div>
+              <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-700">{serviceRequests.length}</span>
+            </div>
+            <div className="space-y-4">
+              {serviceRequests.map((request) => (
+                <div key={request.id} className="flex flex-col gap-4 rounded-2xl border border-slate-100 p-5 md:flex-row md:items-center md:justify-between dark:border-slate-800">
+                  <div><p className="font-black text-slate-900 dark:text-white">{request.service?.nom || request.customName}</p><p className="text-sm text-slate-500">{request.prestataire?.prenom} {request.prestataire?.nom} · {request.prestataire?.email}</p><a href={request.documentUrl} target="_blank" rel="noreferrer" className="text-xs font-bold text-elite-emerald hover:underline">Voir le justificatif</a></div>
+                  <div className="flex gap-2"><button onClick={() => reviewRequest(request.id, true)} className="rounded-xl bg-elite-emerald px-4 py-2 text-xs font-black text-white">Approuver</button><button onClick={() => reviewRequest(request.id, false)} className="rounded-xl bg-red-50 px-4 py-2 text-xs font-black text-red-600">Rejeter</button></div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Simple Add Modal */}
         <AnimatePresence>

@@ -30,6 +30,7 @@ const ProviderServices = () => {
   const [editingService, setEditingService] = useState<ServiceData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [proofDocument, setProofDocument] = useState<File | null>(null);
   
   const [newService, setNewService] = useState({
     serviceId: '',
@@ -68,40 +69,34 @@ const ProviderServices = () => {
       setError(null);
 
       if (editingService) {
-        await api.patch(`/services/me/${editingService.id}`, {
+        const response = await api.patch(`/services/me/${editingService.id}`, {
           prixIndicatif: parseFloat(newService.prixIndicatif) || 0,
           experience: parseInt(newService.experience) || 0,
           description: newService.customServiceDescription.trim() || undefined,
         });
-        await fetchMyServices();
+        const updated = response.data?.data || response.data;
+        setMyServices((current) => current.map((item) => item.id === editingService.id ? { ...item, ...updated } : item));
         setIsModalOpen(false);
         setEditingService(null);
         setNewService({ serviceId: '', customServiceName: '', customServiceDescription: '', prixIndicatif: '', experience: '' });
         return;
       }
 
-      let serviceId = newService.serviceId;
-      if (newService.serviceId === 'custom') {
-        if (!newService.customServiceName.trim()) {
-          setError('Veuillez entrer le nom du service à ajouter.');
-          return;
-        }
-
-        const response = await api.post('/services', {
-          nom: newService.customServiceName.trim(),
-          description: newService.customServiceDescription.trim() || undefined,
-        });
-        serviceId = response.data.data?.id || response.data.id;
+      if (!proofDocument) {
+        setError('Un document justificatif est obligatoire pour chaque nouveau service.');
+        return;
       }
-
-      await api.post('/services/me', {
-        serviceId,
-        prixIndicatif: parseFloat(newService.prixIndicatif) || 0,
-        experience: parseInt(newService.experience) || 0,
-      });
-      await fetchMyServices();
+      const requestData = new FormData();
+      requestData.append('document', proofDocument);
+      requestData.append('serviceId', newService.serviceId);
+      requestData.append('customServiceName', newService.customServiceName);
+      requestData.append('customServiceDescription', newService.customServiceDescription);
+      requestData.append('prixIndicatif', String(parseFloat(newService.prixIndicatif) || 0));
+      requestData.append('experience', String(parseInt(newService.experience) || 0));
+      await api.post('/services/me/requests', requestData);
       setIsModalOpen(false);
       setNewService({ serviceId: '', customServiceName: '', customServiceDescription: '', prixIndicatif: '', experience: '' });
+      setProofDocument(null);
     } catch (error: any) {
       console.error('Error adding service:', error);
       setError(error.response?.data?.message || 'Erreur lors de l\'ajout du service.');
@@ -120,6 +115,7 @@ const ProviderServices = () => {
       experience: String(item.experience ?? ''),
     });
     setError(null);
+    setProofDocument(null);
     setIsModalOpen(true);
   };
 
@@ -127,7 +123,7 @@ const ProviderServices = () => {
     if (!window.confirm('Voulez-vous vraiment retirer ce service ?')) return;
     try {
       await api.delete(`/services/me/${serviceId}`);
-      fetchMyServices();
+      setMyServices((current) => current.filter((item) => item.service.id !== serviceId));
     } catch (error) {
       console.error('Error removing service:', error);
     }
@@ -135,8 +131,9 @@ const ProviderServices = () => {
 
   const handleToggle = async (item: ServiceData) => {
     try {
-      await api.patch(`/services/me/${item.id}`, { isActive: !item.isActive });
-      await fetchMyServices();
+      const response = await api.patch(`/services/me/${item.id}`, { isActive: !item.isActive });
+      const updated = response.data?.data || response.data;
+      setMyServices((current) => current.map((service) => service.id === item.id ? { ...service, ...updated } : service));
     } catch (error) {
       console.error('Error toggling prestation:', error);
     }
@@ -316,6 +313,15 @@ const ProviderServices = () => {
                       />
                     </div>
                   </div>
+
+                  {!editingService && (
+                    <div className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                      <label className="text-[10px] font-black text-amber-700 uppercase tracking-widest">Document justificatif obligatoire</label>
+                      <p className="text-xs leading-5 text-amber-800">Attestation, diplôme, certification ou preuve d’expérience. L’administrateur devra valider ce document avant l’activation du service.</p>
+                      <input required type="file" accept="image/*,.pdf" onChange={(event) => setProofDocument(event.target.files?.[0] || null)} className="w-full text-sm text-slate-600 file:mr-3 file:rounded-xl file:border-0 file:bg-elite-emerald file:px-4 file:py-2 file:font-bold file:text-white" />
+                      {proofDocument && <p className="text-xs font-bold text-amber-900">{proofDocument.name}</p>}
+                    </div>
+                  )}
 
                   {error && (
                     <div className="p-4 bg-red-50 text-red-600 rounded-2xl flex items-center gap-3 text-sm font-bold">

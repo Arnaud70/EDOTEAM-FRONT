@@ -30,8 +30,9 @@ const Bookings = () => {
 
   const updateStatus = async (id: string, status: string) => {
     try {
-      await api.patch(`/bookings/${id}/status`, { status });
-      await fetchBookings();
+      const response = await api.patch(`/bookings/${id}/status`, { status });
+      const updated = response.data?.data || response.data;
+      setBookings((current) => current.map((booking) => booking.id === id ? { ...booking, ...updated } : booking));
     } catch (error) {
       console.error('Error updating status:', error);
     }
@@ -56,7 +57,7 @@ const Bookings = () => {
     try {
       const startTime = new Date(`${editBookingForm.date}T${editBookingForm.startTime}`).toISOString();
       const endTime = new Date(`${editBookingForm.date}T${editBookingForm.endTime}`).toISOString();
-      await api.patch(`/bookings/${editingBooking.id}`, {
+      const response = await api.patch(`/bookings/${editingBooking.id}`, {
         date: startTime,
         startTime,
         endTime,
@@ -66,8 +67,9 @@ const Bookings = () => {
         interventionLatitude: editingBooking.interventionLatitude ?? undefined,
         interventionLongitude: editingBooking.interventionLongitude ?? undefined,
       });
+      const updated = response.data?.data || response.data;
+      setBookings((current) => current.map((booking) => booking.id === editingBooking.id ? { ...booking, ...updated } : booking));
       setEditingBooking(null);
-      await fetchBookings();
     } catch (error: any) {
       console.error('Error updating booking:', error);
       window.alert(error.response?.data?.message || error.response?.data?.error?.message || 'Impossible de modifier le rendez-vous.');

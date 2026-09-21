@@ -212,8 +212,8 @@ const Devis = () => {
         startTime: '',
       });
       setLocationCoords(null);
+      setDevis((current) => [created, ...current]);
       navigate('/devis');
-      await fetchDevis();
     } catch (err: any) {
       setError(getApiErrorMessage(err, 'Erreur lors de la création du devis.'));
     } finally {
@@ -256,8 +256,9 @@ const Devis = () => {
     try {
       setSubmitting(true);
       setError(null);
-      await api.patch(`/devis/${id}/soumettre`, { prixPropose: cleaned, note });
-      await fetchDevis();
+      const response = await api.patch(`/devis/${id}/soumettre`, { prixPropose: cleaned, note });
+      const updated = response.data?.data || response.data;
+      setDevis((current) => current.map((item) => item.id === id ? { ...item, ...updated } : item));
     } catch (err: any) {
       setError(err.response?.data?.message || 'Erreur lors de la soumission du devis.');
     } finally {
@@ -275,9 +276,10 @@ const Devis = () => {
     try {
       setSubmitting(true);
       setError(null);
-      await api.patch(`/devis/${editingDevis.id}`, editDevisForm);
+      const response = await api.patch(`/devis/${editingDevis.id}`, editDevisForm);
+      const updated = response.data?.data || response.data;
+      setDevis((current) => current.map((item) => item.id === editingDevis.id ? { ...item, ...updated } : item));
       setEditingDevis(null);
-      await fetchDevis();
     } catch (err: any) {
       setError(getApiErrorMessage(err, 'Impossible de modifier la demande de devis.'));
     } finally {
@@ -297,12 +299,13 @@ const Devis = () => {
     try {
       setSubmitting(true);
       setError(null);
-      await api.patch(`/devis/${id}/decision-client`, {
+      const response = await api.patch(`/devis/${id}/decision-client`, {
         acceptationClient: accept,
         motifRefusClient: accept ? undefined : 'PRIX_TROP_ELEVE',
         motifRefusClientLibre: undefined,
       });
-      await fetchDevis();
+      const updated = response.data?.data || response.data;
+      setDevis((current) => current.map((item) => item.id === id ? { ...item, ...updated } : item));
     } catch (err: any) {
       setError(getApiErrorMessage(err, 'Erreur lors de la décision client.'));
     } finally {
@@ -326,11 +329,12 @@ const Devis = () => {
     try {
       setSubmitting(true);
       setError(null);
-      await api.patch(`/devis/${refusalForm.devisId}/decision-client`, {
+      const response = await api.patch(`/devis/${refusalForm.devisId}/decision-client`, {
         acceptationClient: false,
         motifRefusClient: refusalForm.reason,
         motifRefusClientLibre: refusalForm.message.trim() || undefined,
       });
+      const updated = response.data?.data || response.data;
 
       const isPriceReason = ['BUDGET_INSUFFISANT', 'PRIX_TROP_ELEVE'].includes(refusalForm.reason);
       if (isPriceReason && refusalForm.message.trim()) {
@@ -341,7 +345,7 @@ const Devis = () => {
       }
 
       setRefusalForm(null);
-      await fetchDevis();
+      setDevis((current) => current.map((item) => item.id === refusalForm.devisId ? { ...item, ...updated } : item));
       if (isPriceReason && refusalForm.message.trim()) {
         navigate('/messages');
       }
@@ -356,8 +360,9 @@ const Devis = () => {
     try {
       setSubmitting(true);
       setError(null);
-      await api.patch(`/devis/${id}/dernier-ok`);
-      await fetchDevis();
+      const response = await api.patch(`/devis/${id}/dernier-ok`);
+      const updated = response.data?.data || response.data;
+      setDevis((current) => current.map((item) => item.id === id ? { ...item, ...updated } : item));
     } catch (err: any) {
       setError(getApiErrorMessage(err, 'Impossible de confirmer le rendez-vous.'));
     } finally {

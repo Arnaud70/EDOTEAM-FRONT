@@ -90,6 +90,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     handleAuthCallback();
   }, []);
 
+  // Renouvelle la session avant l'expiration du token d'accès, notamment
+  // lorsque l'utilisateur reste longtemps sur un dashboard.
+  useEffect(() => {
+    if (!user) return undefined;
+
+    const refreshSession = () => {
+      authService.refresh().catch((error) => {
+        console.warn('Renouvellement de session différé:', error?.message || error);
+      });
+    };
+    const interval = window.setInterval(refreshSession, 10 * 60 * 1000);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') refreshSession();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [user?.id]);
+
   const login = async (credentials: any) => {
     const response = await authService.login(credentials);
     setUser(response.user);
