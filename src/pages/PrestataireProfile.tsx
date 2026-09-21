@@ -262,7 +262,9 @@ const PrestataireProfile = () => {
                 <button
                   onClick={() => {
                     if (!user) {
-                      navigate('/login', { state: { from: `/profile/${id}`, bookingRequested: true } });
+                      const destination = `/profile/${id}?booking=1`;
+                      sessionStorage.setItem('edoteam-pending-redirect', destination);
+                      navigate('/login', { state: { from: destination } });
                       return;
                     }
                     setIsBookingModalOpen(true);

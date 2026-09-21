@@ -213,7 +213,7 @@ const AppRouter = ({ user }: { user: any }) => {
   const isProfileIncomplete = !!user && !isUserProfileComplete(user);
 
   if (isProfileIncomplete && location.pathname !== '/complete-profile') {
-    return <Navigate to="/complete-profile" replace />;
+    return <Navigate to="/complete-profile" state={{ from: location }} replace />;
   }
 
   return (

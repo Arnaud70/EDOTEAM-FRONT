@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, MapPin, Briefcase, ArrowRight, ShieldCheck, ChevronDown, Zap, ListPlus, Lock, LocateFixed, Loader2, FileText, UploadCloud, CheckCircle2 } from 'lucide-react';
 import Logo from '../components/Logo';
 import { useAuth } from '../context/AuthContext';
@@ -9,6 +9,7 @@ import { reverseGeocode, getCurrentPosition } from '../utils/geocode';
 
 const CompleteProfile = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, updateUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -107,7 +108,14 @@ const CompleteProfile = () => {
       const response = await api.patch('/users/profile', payload);
       const updatedUser = response.data?.data ?? response.data;
       updateUser(updatedUser);
-      navigate('/');
+      const rawFrom = (location.state as any)?.from;
+      const destination = typeof rawFrom === 'string'
+        ? rawFrom
+        : rawFrom
+          ? `${rawFrom.pathname || ''}${rawFrom.search || ''}${rawFrom.hash || ''}`
+          : sessionStorage.getItem('edoteam-pending-redirect') || '/';
+      sessionStorage.removeItem('edoteam-pending-redirect');
+      navigate(destination || '/', { replace: true });
     } catch (err: any) {
       console.error('Error completing profile:', err);
       const backendError = err.response?.data?.error?.message || err.response?.data?.message || 'Erreur lors de la mise à jour du profil.';

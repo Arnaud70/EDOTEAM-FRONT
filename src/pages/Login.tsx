@@ -24,12 +24,17 @@ const Login = () => {
       await login({ email: email.trim(), motDePasse: password });
 
       const rawFrom = (location.state as any)?.from;
-      const redirectTarget = typeof rawFrom === 'string' ? rawFrom : rawFrom?.pathname || '/';
+      const redirectTarget = typeof rawFrom === 'string'
+        ? rawFrom
+        : rawFrom
+          ? `${rawFrom.pathname || ''}${rawFrom.search || ''}${rawFrom.hash || ''}`
+          : sessionStorage.getItem('edoteam-pending-redirect') || '/';
       const finalTarget = redirectTarget === '/login' ? '/' : redirectTarget;
       const nextLocation = (location.state as any)?.bookingRequested
         ? `${finalTarget}${finalTarget.includes('?') ? '&' : '?'}booking=1`
         : finalTarget;
 
+      sessionStorage.removeItem('edoteam-pending-redirect');
       navigate(nextLocation || '/', { replace: true });
     } catch (err: any) {
       console.error('Login error:', err);
@@ -50,9 +55,19 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    // Rediriger vers l'endpoint Google du backend
     const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-    window.location.href = `${backendUrl}/auth/google`;
+    const rawFrom = (location.state as any)?.from;
+    const stateTarget = typeof rawFrom === 'string'
+      ? rawFrom
+      : rawFrom
+        ? `${rawFrom.pathname || ''}${rawFrom.search || ''}${rawFrom.hash || ''}`
+        : null;
+    const redirectTarget = stateTarget || sessionStorage.getItem('edoteam-pending-redirect');
+    const googleUrl = new URL(`${backendUrl}/auth/google`);
+    if (redirectTarget?.startsWith('/') && !redirectTarget.startsWith('//')) {
+      googleUrl.searchParams.set('redirect', redirectTarget);
+    }
+    window.location.href = googleUrl.toString();
   };
 
   return (

@@ -34,6 +34,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
   }
 
   if (!isAuthenticated) {
+    sessionStorage.setItem(
+      'edoteam-pending-redirect',
+      `${location.pathname}${location.search}${location.hash}`,
+    );
     const redirectState = location.pathname === '/login' ? undefined : { from: location };
     return <Navigate to="/login" state={redirectState} replace />;
   }

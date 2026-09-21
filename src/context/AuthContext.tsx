@@ -71,10 +71,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         try {
           const userData = await authService.getProfile();
           setUser(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
 
-          if (onboarding === '1') {
-            window.location.href = '/complete-profile';
-            return;
+          const pendingRedirect = sessionStorage.getItem('edoteam-pending-redirect');
+          if (pendingRedirect) {
+            sessionStorage.removeItem('edoteam-pending-redirect');
+            window.history.replaceState({}, document.title, pendingRedirect);
+          } else if (onboarding === '1') {
+            window.history.replaceState({}, document.title, '/complete-profile');
           }
         } catch (error) {
           console.error("Erreur lors de la récupération du profil après Google Login", error);
