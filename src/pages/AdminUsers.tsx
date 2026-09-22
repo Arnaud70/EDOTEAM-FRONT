@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
-import { Search, Filter, MoreVertical, CheckCircle2, XCircle, Clock, Mail, ShieldAlert, ShieldCheck, Trash2, FileText } from 'lucide-react';
+import { Search, Filter, MoreVertical, CheckCircle2, XCircle, Clock, Mail, ShieldAlert, ShieldCheck, Trash2, FileText, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import api from '../services/api';
@@ -32,6 +32,7 @@ const AdminUsers = () => {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [processingAction, setProcessingAction] = useState<{ userId: string; action: 'verify' | 'reject' } | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -71,24 +72,32 @@ const AdminUsers = () => {
   };
 
   const handleVerify = async (userId: string) => {
+    if (processingAction) return;
+    setProcessingAction({ userId, action: 'verify' });
     try {
       await api.patch(`/admin/users/${userId}/verify`);
-      fetchUsers();
+      await fetchUsers();
     } catch (error: any) {
       console.error('Error verifying user:', error);
       const msg = error?.response?.data?.error?.message || error?.response?.data?.message || 'Impossible de valider ce profil.';
       alert(Array.isArray(msg) ? msg[0] : msg);
+    } finally {
+      setProcessingAction(null);
     }
   };
 
   const handleReject = async (userId: string) => {
     const reason = window.prompt('Raison du refus du profil ?', 'Profil non conforme aux exigences de la plateforme.');
     if (!reason) return;
+    if (processingAction) return;
+    setProcessingAction({ userId, action: 'reject' });
     try {
       await api.patch(`/admin/users/${userId}/reject`, { reason });
-      fetchUsers();
+      await fetchUsers();
     } catch (error) {
       console.error('Error rejecting user:', error);
+    } finally {
+      setProcessingAction(null);
     }
   };
 
@@ -233,7 +242,7 @@ const AdminUsers = () => {
                           }`}>
                             {item.verificationStatus || 'PENDING'}
                           </span>
-                          {item.media && item.media.length > 0 && !item.media[0].url.includes('/uploads/') ? (
+                          {item.media && item.media.length > 0 && item.media[0].url ? (
                             <a
                               href={item.media[0].url}
                               target="_blank"
@@ -259,17 +268,19 @@ const AdminUsers = () => {
                           <>
                             <button 
                               onClick={() => handleVerify(item.id)}
-                              className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                              disabled={!!processingAction}
+                              className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all disabled:opacity-50 disabled:cursor-wait"
                               title="Valider le profil"
                             >
-                              <CheckCircle2 size={18} />
+                              {processingAction?.userId === item.id && processingAction.action === 'verify' ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
                             </button>
                             <button 
                               onClick={() => handleReject(item.id)}
-                              className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                              disabled={!!processingAction}
+                              className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all disabled:opacity-50 disabled:cursor-wait"
                               title="Refuser le profil"
                             >
-                              <XCircle size={18} />
+                              {processingAction?.userId === item.id && processingAction.action === 'reject' ? <Loader2 size={18} className="animate-spin" /> : <XCircle size={18} />}
                             </button>
                           </>
                         )}

@@ -133,6 +133,7 @@ const Settings = () => {
 
     const uploadData = new FormData();
     uploadData.append('file', file);
+    uploadData.append('type', type);
 
     const setBusy = type === 'DOCUMENT' ? setIsUploadingDocument : setIsUploading;
 
@@ -142,7 +143,8 @@ const Settings = () => {
 
       const response = await api.post('/upload', uploadData);
 
-      const fileUrl = response.data.data?.url || response.data.url;
+      const uploaded = response.data.data || response.data;
+      const fileUrl = uploaded.url;
 
       if (type === 'PROFILE') {
         const updatedFormData = { ...formData, photoUrl: fileUrl };
@@ -154,12 +156,22 @@ const Settings = () => {
         setMessage({ type: 'success', text: 'Photo de profil mise à jour !' });
         setTimeout(() => setMessage(null), 3000);
       } else if (type === 'WORK') {
-        await api.post('/users/media', { url: fileUrl, type: 'WORK' });
+        await api.post('/users/media', {
+          url: fileUrl,
+          type: 'WORK',
+          publicId: uploaded.publicId,
+          resourceType: uploaded.resourceType,
+        });
         await fetchProfile();
         setMessage({ type: 'success', text: 'Image ajoutée au portfolio !' });
         setTimeout(() => setMessage(null), 3000);
       } else {
-        await api.post('/users/media', { url: fileUrl, type: 'DOCUMENT' });
+        await api.post('/users/media', {
+          url: fileUrl,
+          type: 'DOCUMENT',
+          publicId: uploaded.publicId,
+          resourceType: uploaded.resourceType,
+        });
         await fetchProfile();
         setMessage({ type: 'success', text: 'Document envoyé ! Il est en attente de vérification par un administrateur.' });
         setTimeout(() => setMessage(null), 4000);

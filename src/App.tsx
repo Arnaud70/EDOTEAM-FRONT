@@ -39,10 +39,11 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Devis = lazy(() => import('./pages/Devis'));
 const FAQ = lazy(() => import('./pages/FAQ'));
+const ContactAdmin = lazy(() => import('./pages/ContactAdmin'));
 
 const DASHBOARD_PATHS = [
   '/dashboard', '/messages', '/admin', '/provider',
-  '/bookings', '/devis', '/wallet', '/security', '/favorites', '/settings', '/reports'
+  '/bookings', '/devis', '/wallet', '/security', '/favorites', '/settings', '/reports', '/contact-admin'
 ];
 
 // Pages "seules" : ni navbar ni footer (comme l'inscription).
@@ -235,6 +236,7 @@ const AppRouter = ({ user }: { user: any }) => {
 
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><Messaging /></ProtectedRoute>} />
+            <Route path="/contact-admin" element={<ProtectedRoute allowedRoles={['CLIENT', 'PRESTATAIRE']}><ContactAdmin /></ProtectedRoute>} />
 
             {/* Admin Routes */}
             <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminUsers /></ProtectedRoute>} />

@@ -81,14 +81,21 @@ const CompleteProfile = () => {
         setIsUploadingDocument(true);
         const formData = new FormData();
         formData.append('file', documentFile);
+        formData.append('type', 'DOCUMENT');
         const uploadRes = await api.post('/upload', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
-        const fileUrl = uploadRes.data?.data?.url ?? uploadRes.data?.url;
+        const uploadData = uploadRes.data?.data ?? uploadRes.data;
+        const fileUrl = uploadData?.url;
         if (!fileUrl) {
           throw new Error("Le fichier n'a pas pu être téléversé (URL manquante dans la réponse du serveur).");
         }
-        await api.post('/users/media', { url: fileUrl, type: 'DOCUMENT' });
+        await api.post('/users/media', {
+          url: fileUrl,
+          type: 'DOCUMENT',
+          publicId: uploadData.publicId,
+          resourceType: uploadData.resourceType,
+        });
         setDocumentUploaded(true);
         setIsUploadingDocument(false);
       }
